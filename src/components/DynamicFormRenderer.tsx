@@ -23,7 +23,7 @@ import {
   ImageUpload,
   Autocomplete,
 } from './form-fields';
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Send } from 'lucide-react';
 
 interface DynamicFormRendererProps {
   schema: FormSchema;
@@ -187,13 +187,13 @@ export default function DynamicFormRenderer({
 
     // Min length
     const minLength = validation.minLength ?? (validators.includes('minLength') ? validation.minLength : undefined);
-    if (minLength !== undefined && typeof value === 'string' && value.length < minLength) {
+    if (minLength != null && typeof value === 'string' && value.length < minLength) {
       return `Minimum length is ${minLength} characters`;
     }
 
     // Max length
     const maxLength = validation.maxLength ?? field.maxLength;
-    if (maxLength !== undefined && typeof value === 'string' && value.length > maxLength) {
+    if (maxLength != null && typeof value === 'string' && value.length > maxLength) {
       return `Maximum length is ${maxLength} characters`;
     }
 
@@ -490,17 +490,21 @@ export default function DynamicFormRenderer({
   const progressPercent = totalPages > 1 ? ((currentPage + 1) / totalPages) * 100 : 100;
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-8">
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
       {/* Progress bar for multi-page forms */}
       {totalPages > 1 && (
-        <div className="mb-8">
-          <div className="flex justify-between text-sm text-gray-500 mb-2">
-            <span>Page {currentPage + 1} of {totalPages}</span>
-            <span>{Math.round(progressPercent)}% complete</span>
+        <div className="px-8 pt-6">
+          <div className="flex justify-between items-center text-sm mb-3">
+            <span className="font-medium text-gray-700">
+              Step {currentPage + 1} of {totalPages}
+            </span>
+            <span className="text-gray-500">
+              {Math.round(progressPercent)}% complete
+            </span>
           </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className="h-2 bg-blue-600 rounded-full transition-all duration-300"
+              className="h-2 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -508,12 +512,12 @@ export default function DynamicFormRenderer({
       )}
 
       {/* Form fields */}
-      <div className="space-y-2">
+      <div className="p-8 space-y-1">
         {currentPageFields.map(renderField)}
       </div>
 
       {/* Navigation and submit buttons */}
-      <div className="mt-8 pt-6 border-t border-gray-200">
+      <div className="px-8 pb-8 pt-4 border-t border-gray-100 bg-gray-50/50">
         <div className="flex justify-between gap-4">
           {/* Previous button */}
           {totalPages > 1 && currentPage > 0 ? (
@@ -521,9 +525,9 @@ export default function DynamicFormRenderer({
               type="button"
               onClick={goToPrevPage}
               disabled={submitting}
-              className="flex items-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
-              <ChevronLeft className="h-5 w-5 mr-1" />
+              <ChevronLeft className="h-5 w-5" />
               Previous
             </button>
           ) : (
@@ -536,24 +540,27 @@ export default function DynamicFormRenderer({
               type="button"
               onClick={goToNextPage}
               disabled={submitting}
-              className="flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-3 bg-primary-600 rounded-xl text-white font-semibold hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
             >
               Next
-              <ChevronRight className="h-5 w-5 ml-1" />
+              <ChevronRight className="h-5 w-5" />
             </button>
           ) : (
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px]"
+              className="flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white font-semibold text-base hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg min-w-[140px]"
             >
               {submitting ? (
                 <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  <Loader2 className="h-5 w-5 animate-spin" />
                   Submitting...
                 </>
               ) : (
-                submitLabel
+                <>
+                  <Send className="h-5 w-5" />
+                  {submitLabel}
+                </>
               )}
             </button>
           )}
