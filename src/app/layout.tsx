@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Montserrat } from 'next/font/google';
 import Link from 'next/link';
 import Image from 'next/image';
 import Script from 'next/script';
@@ -7,8 +6,6 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
 import { MobileMenu } from '@/components/MobileMenu';
 import './globals.css';
-
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] });
 
 export const metadata: Metadata = {
   title: 'Forms - Missouri Young Democrats',
@@ -48,6 +45,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Load Montserrat font via CSS */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         {/* Google tag (gtag.js) */}
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-WBYHCGZF50" />
         <Script id="gtag-init" strategy="afterInteractive">
@@ -60,7 +61,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className={montserrat.className} style={{ backgroundColor: '#273351' }}>
+      <body className="font-sans antialiased" style={{ backgroundColor: '#273351' }}>
         {/* Background */}
         <div
           className="fixed inset-0 z-0"

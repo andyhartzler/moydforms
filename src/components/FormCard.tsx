@@ -1,7 +1,8 @@
 import Link from 'next/link';
+import { FormRecord } from '@/types/forms';
 
 interface FormCardProps {
-  form: any;
+  form: FormRecord;
 }
 
 export default function FormCard({ form }: FormCardProps) {
@@ -19,8 +20,11 @@ export default function FormCard({ form }: FormCardProps) {
     vote: 'bg-red-100 text-red-800'
   };
 
+  // Use slug-based URL if available, otherwise fall back to ID
+  const formUrl = form.slug ? `/f/${form.slug}` : `/${form.id}`;
+
   return (
-    <Link href={`/${form.id}`}>
+    <Link href={formUrl}>
       <div className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6 cursor-pointer h-full flex flex-col">
         <div className="flex items-start justify-between mb-3">
           <span className="text-3xl">
