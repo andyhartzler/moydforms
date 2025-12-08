@@ -1,20 +1,19 @@
 import { createClient } from '@/lib/supabase/server';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import FormRenderer from './FormRenderer';
 import { checkFormAvailability, FormRecord } from '@/types/forms';
 
 interface FormPageProps {
-  params: { formId: string };
+  params: { slug: string };
 }
 
 export async function generateMetadata({ params }: FormPageProps) {
   const supabase = createClient();
 
-  // Try to find form by ID
   const { data: form } = await supabase
     .from('form_schemas')
     .select('title, description')
-    .eq('id', params.formId)
+    .eq('slug', params.slug)
     .single();
 
   if (!form) {
@@ -32,20 +31,15 @@ export async function generateMetadata({ params }: FormPageProps) {
 export default async function FormPage({ params }: FormPageProps) {
   const supabase = createClient();
 
-  // Get form by ID
+  // Get form by slug
   const { data: form, error } = await supabase
     .from('form_schemas')
     .select('*')
-    .eq('id', params.formId)
+    .eq('slug', params.slug)
     .single();
 
   if (error || !form) {
     notFound();
-  }
-
-  // If form has a slug, redirect to the slug-based URL
-  if (form.slug) {
-    redirect(`/f/${form.slug}`);
   }
 
   // Check form availability

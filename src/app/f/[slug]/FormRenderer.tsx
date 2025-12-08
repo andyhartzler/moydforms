@@ -23,6 +23,12 @@ export default function FormRenderer({ form }: FormRendererProps) {
       hasTrackedView.current = true;
       trackAnalytics('view');
     }
+
+    // Track abandonment on page leave
+    return () => {
+      // Only track if they started but didn't submit
+      // This is handled by beforeunload event instead
+    };
   }, [form.id]);
 
   // Track page abandonment
@@ -35,9 +41,10 @@ export default function FormRenderer({ form }: FormRendererProps) {
 
     const handleBeforeUnload = () => {
       if (hasStarted && !submitting) {
+        // Use sendBeacon for reliability
         const data = JSON.stringify({ event_type: 'abandon' });
         navigator.sendBeacon(
-          `/api/forms/${form.id}/analytics`,
+          `/api/forms/${form.slug || form.id}/analytics`,
           new Blob([data], { type: 'application/json' })
         );
       }
@@ -50,7 +57,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('form-started', handleFormStart);
     };
-  }, [form.id, submitting]);
+  }, [form.id, form.slug, submitting]);
 
   const trackAnalytics = useCallback(async (
     eventType: string,
@@ -59,7 +66,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
     fieldType?: string
   ) => {
     try {
-      await fetch(`/api/forms/${form.id}/analytics`, {
+      await fetch(`/api/forms/${form.slug || form.id}/analytics`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -72,7 +79,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
     } catch (err) {
       console.error('Analytics tracking error:', err);
     }
-  }, [form.id]);
+  }, [form.id, form.slug]);
 
   const handleFormStart = useCallback(() => {
     trackAnalytics('start');
@@ -96,7 +103,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
     formData.append('file', file);
     formData.append('fieldId', fieldId);
 
-    const response = await fetch(`/api/forms/${form.id}/upload`, {
+    const response = await fetch(`/api/forms/${form.slug || form.id}/upload`, {
       method: 'POST',
       body: formData,
     });
@@ -108,7 +115,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
 
     const data = await response.json();
     return data.url;
-  }, [form.id]);
+  }, [form.id, form.slug]);
 
   async function handleSubmit(formData: Record<string, any>) {
     setSubmitting(true);
@@ -135,7 +142,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
       });
 
       // Submit via API
-      const response = await fetch(`/api/forms/${form.id}/submit`, {
+      const response = await fetch(`/api/forms/${form.slug || form.id}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -152,13 +159,17 @@ export default function FormRenderer({ form }: FormRendererProps) {
       }
 
       // Redirect to success page
-      router.push(`/${form.id}/success`);
+      router.push(`/f/${form.slug}/success`);
     } catch (err: any) {
       console.error('Error submitting form:', err);
       setError(err.message || 'Failed to submit form');
       setSubmitting(false);
     }
   }
+
+  // Apply custom styling from form schema
+  const styling = form.schema?.styling || {};
+  const primaryColor = styling.primaryColor || '#3b82f6';
 
   return (
     <div className="min-h-screen py-8 relative z-10">
