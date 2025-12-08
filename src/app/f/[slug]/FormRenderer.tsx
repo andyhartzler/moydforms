@@ -178,9 +178,6 @@ export default function FormRenderer({ form }: FormRendererProps) {
 
   return (
     <div className="min-h-screen py-8 md:py-12 relative z-10">
-      {/* Background gradient */}
-      <div className="fixed inset-0 bg-gradient-to-br from-gray-50 via-white to-primary-50/30 -z-10" />
-
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
         {/* Form Header Card */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-6 relative overflow-hidden">
@@ -251,8 +248,8 @@ export default function FormRenderer({ form }: FormRendererProps) {
         />
 
         {/* Footer Note */}
-        <p className="mt-8 text-sm text-gray-500 text-center">
-          Powered by <span className="font-semibold text-primary-600">Missouri Young Democrats</span>
+        <p className="mt-8 text-sm text-blue-100 text-center">
+          Powered by <span className="font-semibold text-white">Missouri Young Democrats</span>
         </p>
       </div>
     </div>
