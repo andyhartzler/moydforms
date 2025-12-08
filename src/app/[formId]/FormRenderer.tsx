@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import DynamicFormRenderer from '@/components/DynamicFormRenderer';
 import { FormRecord } from '@/types/forms';
+import { toTitleCase } from '@/lib/utils';
+import { FileText, AlertCircle } from 'lucide-react';
 
 interface FormRendererProps {
   form: FormRecord;
@@ -160,40 +162,65 @@ export default function FormRenderer({ form }: FormRendererProps) {
     }
   }
 
+  // Properly capitalize the form title
+  const formTitle = toTitleCase(form.title);
+
   return (
-    <div className="min-h-screen py-8 relative z-10">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Form Header */}
-        <div className="bg-white rounded-lg shadow p-8 mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 normal-case" style={{
-            fontFamily: 'Montserrat',
-            letterSpacing: '-0.04em'
-          }}>
-            {form.title}
-          </h1>
+    <div className="min-h-screen py-8 md:py-12 relative z-10">
+      {/* Background gradient */}
+      <div className="fixed inset-0 bg-gradient-to-br from-gray-50 via-white to-primary-50/30 -z-10" />
+
+      <div className="max-w-2xl mx-auto px-4 sm:px-6">
+        {/* Form Header Card */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-6 relative overflow-hidden">
+          {/* Decorative accent */}
+          <div
+            className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700"
+          />
+
+          {/* Form icon */}
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center">
+              <FileText className="w-6 h-6 text-primary-600" />
+            </div>
+            <div className="flex-1">
+              <h1
+                className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight"
+                style={{ fontFamily: 'Montserrat, sans-serif' }}
+              >
+                {formTitle}
+              </h1>
+            </div>
+          </div>
+
           {form.description && (
-            <p className="text-gray-600 normal-case">
+            <p className="text-gray-600 text-base leading-relaxed">
               {form.description}
             </p>
           )}
+
           {form.page_count > 1 && (
-            <p className="mt-2 text-sm text-gray-500">
-              This form has {form.page_count} pages
-            </p>
+            <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-full text-sm font-medium">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              {form.page_count} pages
+            </div>
           )}
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <div className="flex">
+          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6 animate-fade-in">
+            <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
+                <AlertCircle className="h-5 w-5 text-red-500" />
               </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-800">{error}</p>
+              <div>
+                <h3 className="text-sm font-semibold text-red-800">
+                  Submission Error
+                </h3>
+                <p className="text-sm text-red-700 mt-0.5">{error}</p>
               </div>
             </div>
           </div>
@@ -213,8 +240,8 @@ export default function FormRenderer({ form }: FormRendererProps) {
         />
 
         {/* Footer Note */}
-        <p className="mt-6 text-sm text-blue-100 text-center normal-case">
-          This form is provided by Missouri Young Democrats
+        <p className="mt-8 text-sm text-gray-500 text-center">
+          Powered by <span className="font-semibold text-primary-600">Missouri Young Democrats</span>
         </p>
       </div>
     </div>
