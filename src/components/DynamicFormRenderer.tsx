@@ -198,7 +198,7 @@ export default function DynamicFormRenderer({
     }
 
     // Min words
-    if (validation.minWordsCount !== undefined && typeof value === 'string') {
+    if (validation.minWordsCount != null && typeof value === 'string') {
       const wordCount = value.trim().split(/\s+/).filter(Boolean).length;
       if (wordCount < validation.minWordsCount) {
         return `Minimum ${validation.minWordsCount} words required`;
@@ -206,7 +206,7 @@ export default function DynamicFormRenderer({
     }
 
     // Max words
-    if (validation.maxWordsCount !== undefined && typeof value === 'string') {
+    if (validation.maxWordsCount != null && typeof value === 'string') {
       const wordCount = value.trim().split(/\s+/).filter(Boolean).length;
       if (wordCount > validation.maxWordsCount) {
         return `Maximum ${validation.maxWordsCount} words allowed`;
@@ -225,13 +225,13 @@ export default function DynamicFormRenderer({
 
     // Min value
     const minValue = validation.min ?? field.minValue;
-    if (minValue !== undefined && Number(value) < minValue) {
+    if (minValue != null && Number(value) < minValue) {
       return `Minimum value is ${minValue}`;
     }
 
     // Max value
     const maxValue = validation.max ?? field.maxValue;
-    if (maxValue !== undefined && Number(value) > maxValue) {
+    if (maxValue != null && Number(value) > maxValue) {
       return `Maximum value is ${maxValue}`;
     }
 
