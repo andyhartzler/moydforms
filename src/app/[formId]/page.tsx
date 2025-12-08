@@ -1,0 +1,48 @@
+import { createClient } from '@/lib/supabase/server';
+import { notFound } from 'next/navigation';
+import FormRenderer from './FormRenderer';
+
+export default async function FormPage({ params }: { params: { formId: string } }) {
+  const supabase = createClient();
+
+  // Get form
+  const { data: form, error } = await supabase
+    .from('form_schemas')
+    .select('*')
+    .eq('id', params.formId)
+    .eq('status', 'active')
+    .single();
+
+  if (error || !form) {
+    notFound();
+  }
+
+  // Voting forms should not be accessible here (only in member portal)
+  if (form.form_type === 'vote') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+            <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2 normal-case">
+            Members Only
+          </h2>
+          <p className="text-gray-600 mb-6 normal-case">
+            This vote is only accessible to MOYD members through the member portal.
+          </p>
+          <a
+            href="https://members.moyoungdemocrats.org"
+            className="block w-full bg-blue-600 text-white px-4 py-3 rounded-md hover:bg-blue-700 font-medium"
+          >
+            Go to Member Portal
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  return <FormRenderer form={form} />;
+}
