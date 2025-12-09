@@ -69,14 +69,6 @@ export function MobileMenu() {
               EVENTS
             </Link>
             <Link
-              href="/"
-              className="text-white hover:text-white/80 transition-colors uppercase"
-              style={{ ...navLinkStyle, textDecoration: 'underline' }}
-              onClick={() => setIsOpen(false)}
-            >
-              FORMS
-            </Link>
-            <Link
               href="https://moyoungdemocrats.org/about"
               className="text-white hover:text-white/80 transition-colors uppercase"
               style={navLinkStyle}
