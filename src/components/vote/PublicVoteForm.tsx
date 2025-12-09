@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import type { VoteSchema, VoteField } from '@/lib/vote-types';
+import type { VoteSchema, VoteOption } from '@/lib/vote-types';
 
 interface PublicVoteFormProps {
   schema: VoteSchema;
@@ -10,149 +10,126 @@ interface PublicVoteFormProps {
   disabled?: boolean;
 }
 
+// Determine button color based on label
+function getButtonColor(label: string): 'green' | 'red' | 'yellow' | 'default' {
+  const lowerLabel = label.toLowerCase().trim();
+
+  // Green: affirmative votes
+  const greenKeywords = ['yes', 'aye', 'agree', 'affirm', 'approve', 'accept', 'support', 'for', 'in favor'];
+  if (greenKeywords.some(keyword => lowerLabel === keyword || lowerLabel.includes(keyword))) {
+    return 'green';
+  }
+
+  // Red: negative votes
+  const redKeywords = ['no', 'nay', 'negative', 'deny', 'reject', 'oppose', 'against', 'disapprove', 'decline'];
+  if (redKeywords.some(keyword => lowerLabel === keyword || lowerLabel.includes(keyword))) {
+    return 'red';
+  }
+
+  // Yellow: neutral votes
+  const yellowKeywords = ['present', 'abstain', 'neutral', 'pass', 'skip', 'none', 'undecided'];
+  if (yellowKeywords.some(keyword => lowerLabel === keyword || lowerLabel.includes(keyword))) {
+    return 'yellow';
+  }
+
+  return 'default';
+}
+
+// Get button styles based on color and selected state
+function getButtonStyles(color: 'green' | 'red' | 'yellow' | 'default', isSelected: boolean): string {
+  const baseStyles = 'w-48 py-3 px-6 rounded-lg font-semibold text-center transition-all duration-200 cursor-pointer border-2';
+
+  if (isSelected) {
+    switch (color) {
+      case 'green':
+        return `${baseStyles} bg-green-600 border-green-600 text-white shadow-lg scale-105`;
+      case 'red':
+        return `${baseStyles} bg-red-600 border-red-600 text-white shadow-lg scale-105`;
+      case 'yellow':
+        return `${baseStyles} bg-yellow-500 border-yellow-500 text-gray-900 shadow-lg scale-105`;
+      default:
+        return `${baseStyles} bg-primary border-primary text-white shadow-lg scale-105`;
+    }
+  } else {
+    switch (color) {
+      case 'green':
+        return `${baseStyles} bg-green-50 border-green-300 text-green-700 hover:bg-green-100 hover:border-green-400`;
+      case 'red':
+        return `${baseStyles} bg-red-50 border-red-300 text-red-700 hover:bg-red-100 hover:border-red-400`;
+      case 'yellow':
+        return `${baseStyles} bg-yellow-50 border-yellow-300 text-yellow-700 hover:bg-yellow-100 hover:border-yellow-400`;
+      default:
+        return `${baseStyles} bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400`;
+    }
+  }
+}
+
 export function PublicVoteForm({ schema, onSubmit, disabled }: PublicVoteFormProps) {
-  const [formData, setFormData] = useState<Record<string, unknown>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [error, setError] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
 
-  const handleFieldChange = (fieldId: string, value: unknown) => {
-    setFormData({ ...formData, [fieldId]: value });
-    if (errors[fieldId]) {
-      setErrors({ ...errors, [fieldId]: '' });
-    }
-  };
-
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    let isValid = true;
-
-    schema.fields.forEach((field) => {
-      if (field.required) {
-        const value = formData[field.id];
-        if (!value || (Array.isArray(value) && value.length === 0)) {
-          newErrors[field.id] = 'This field is required';
-          isValid = false;
-        }
-      }
-    });
-
-    setErrors(newErrors);
-    return isValid;
+  const handleOptionSelect = (optionId: string) => {
+    if (disabled) return;
+    setSelectedOption(optionId);
+    setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+
+    if (!selectedOption) {
+      setError('Please select an option to vote');
+      return;
+    }
 
     setSubmitting(true);
     try {
-      await onSubmit(formData);
+      // Submit with the selected option ID
+      await onSubmit({ selected_option: selectedOption });
     } finally {
       setSubmitting(false);
     }
   };
 
-  const renderField = (field: VoteField) => {
-    const value = formData[field.id];
-    const error = errors[field.id];
+  const renderVoteOption = (option: VoteOption) => {
+    const isSelected = selectedOption === option.id;
+    const buttonColor = getButtonColor(option.label);
+    const buttonStyles = getButtonStyles(buttonColor, isSelected);
 
     return (
-      <div key={field.id} className="bg-white rounded-xl shadow-soft p-6">
-        <label className="block text-lg font-semibold text-gray-900 mb-2">
-          {field.label}
-          {field.required && <span className="text-red-500 ml-1">*</span>}
-        </label>
-
-        {field.description && (
-          <p className="text-gray-600 mb-4">{field.description}</p>
-        )}
-
-        <div className="space-y-3">
-          {field.type === 'single_choice' || field.type === 'yes_no' ? (
-            field.options?.map((option) => (
-              <label
-                key={option.id}
-                className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                  value === option.id
-                    ? 'border-primary bg-primary/5'
-                    : 'border-gray-200 hover:border-gray-300'
-                } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
-              >
-                <input
-                  type="radio"
-                  name={field.id}
-                  value={option.id}
-                  checked={value === option.id}
-                  onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                  disabled={disabled}
-                  className="mt-1 w-4 h-4 text-primary focus:ring-primary"
-                />
-                <div>
-                  <span className="font-medium text-gray-900">{option.label}</span>
-                  {option.description && (
-                    <p className="text-sm text-gray-500 mt-1">{option.description}</p>
-                  )}
-                </div>
-              </label>
-            ))
-          ) : field.type === 'multiple_choice' ? (
-            field.options?.map((option) => {
-              const currentValues = (value as string[] | undefined) || [];
-              return (
-                <label
-                  key={option.id}
-                  className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                    currentValues.includes(option.id)
-                      ? 'border-primary bg-primary/5'
-                      : 'border-gray-200 hover:border-gray-300'
-                  } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
-                >
-                  <input
-                    type="checkbox"
-                    value={option.id}
-                    checked={currentValues.includes(option.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        handleFieldChange(field.id, [...currentValues, option.id]);
-                      } else {
-                        handleFieldChange(
-                          field.id,
-                          currentValues.filter((v: string) => v !== option.id)
-                        );
-                      }
-                    }}
-                    disabled={disabled}
-                    className="mt-1 w-4 h-4 text-primary focus:ring-primary rounded"
-                  />
-                  <div>
-                    <span className="font-medium text-gray-900">{option.label}</span>
-                    {option.description && (
-                      <p className="text-sm text-gray-500 mt-1">{option.description}</p>
-                    )}
-                  </div>
-                </label>
-              );
-            })
-          ) : null}
-        </div>
-
-        {error && (
-          <div className="mt-3 flex items-center gap-2 text-red-600">
-            <AlertCircle className="w-4 h-4" />
-            <span className="text-sm">{error}</span>
-          </div>
-        )}
-      </div>
+      <button
+        key={option.id}
+        type="button"
+        onClick={() => handleOptionSelect(option.id)}
+        disabled={disabled}
+        className={`${buttonStyles} ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
+      >
+        {option.label}
+      </button>
     );
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {schema.fields.map(renderField)}
+      {/* Vote Options */}
+      <div className="bg-white rounded-xl shadow-soft p-6">
+        <div className="flex flex-col items-center gap-4">
+          {schema.fields.map(renderVoteOption)}
+        </div>
 
+        {error && (
+          <div className="mt-4 flex items-center justify-center gap-2 text-red-600">
+            <AlertCircle className="w-4 h-4" />
+            <span className="text-sm">{error}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Submit Button */}
       <button
         type="submit"
-        disabled={submitting || disabled}
+        disabled={submitting || disabled || !selectedOption}
         className="w-full btn-primary py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50"
       >
         {submitting ? (
