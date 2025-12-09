@@ -72,7 +72,7 @@ export default function FormCard({ form }: FormCardProps) {
             </div>
 
             {/* Title */}
-            <h3 className="text-xl font-bold text-white mb-3 normal-case leading-tight group-hover:text-blue-100 transition-colors">
+            <h3 className="text-xl font-bold text-white mb-3 normal-case leading-tight group-hover:text-white transition-colors">
               {form.title}
             </h3>
 
