@@ -143,21 +143,6 @@ export default function RootLayout({
                 EVENTS
               </Link>
               <Link
-                href="/"
-                className="text-white hover:text-white/80 transition-colors uppercase"
-                style={{
-                  fontFamily: 'Montserrat',
-                  fontStyle: 'normal',
-                  fontWeight: 800,
-                  fontSize: '1.1rem',
-                  height: '1.8vw',
-                  letterSpacing: '-0.07em',
-                  textDecoration: 'underline'
-                }}
-              >
-                FORMS
-              </Link>
-              <Link
                 href="https://moyoungdemocrats.org/about"
                 className="text-white hover:text-white/80 transition-colors uppercase"
                 style={{
