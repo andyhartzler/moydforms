@@ -167,11 +167,23 @@ export interface FormConfirmation {
   redirectUrl?: string;
 }
 
+// Supporting document configuration
+export interface SupportingDocument {
+  id: string;
+  url: string;
+  name: string;
+  path: string;
+  size: number;
+  uploaded_at: string;
+  content_type: string;
+}
+
 // Form schema structure (stored in form_schemas.schema)
 export interface FormSchema {
   fields: FormFieldConfig[];
   styling?: FormStyling;
   confirmation?: FormConfirmation;
+  supporting_documents?: SupportingDocument[];
 }
 
 // Form settings structure (stored in form_schemas.settings)
