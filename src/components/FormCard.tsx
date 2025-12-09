@@ -5,6 +5,18 @@ interface FormCardProps {
   form: FormRecord;
 }
 
+// Helper function to extract text from HTML
+function stripHtmlTags(html: string): string {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return div.textContent || div.innerText || '';
+}
+
+// Helper function to clean and format description text
+function cleanDescription(text: string): string {
+  return text.replace(/\s+/g, ' ').trim();
+}
+
 export default function FormCard({ form }: FormCardProps) {
   const typeConfig: Record<string, { accentColor: string; textColor: string; icon: React.ReactNode; label: string }> = {
     survey: {
@@ -79,8 +91,31 @@ export default function FormCard({ form }: FormCardProps) {
             {/* Description */}
             {form.description && (
               <p className="text-gray-300 text-sm mb-6 flex-grow line-clamp-3 normal-case leading-relaxed">
-                {form.description}
+                {cleanDescription(stripHtmlTags(form.description))}
               </p>
+            )}
+
+            {/* Supporting Documents */}
+            {form.schema?.supporting_documents && Array.isArray(form.schema.supporting_documents) && form.schema.supporting_documents.length > 0 && (
+              <div className="mb-4 space-y-2">
+                <p className="text-xs font-semibold text-white/60 uppercase tracking-wide">Supporting Documents</p>
+                <div className="space-y-1">
+                  {form.schema.supporting_documents.map((doc: any, index: number) => (
+                    <a
+                      key={doc.id || index}
+                      href={doc.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-xs text-white hover:text-blue-300 transition-colors break-all"
+                    >
+                      <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M4 4a2 2 0 012-2h6a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+                      </svg>
+                      <span className="truncate">{doc.name}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
             )}
 
             {/* CTA Button */}
