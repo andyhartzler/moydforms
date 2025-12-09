@@ -176,89 +176,110 @@ function ShortAnswerQuestion({ question, value, onChange }: { question: VoteQues
   );
 }
 
-// Ranked Choice Question
+// Ranked Choice Question with Drag and Drop
 function RankedChoiceQuestion({ question, value, onChange }: { question: VoteQuestion; value: string[]; onChange: (v: string[]) => void }) {
-  const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const rankedItems = value.length > 0 ? value : [];
   const unrankedItems = question.options?.filter((opt) => !value.includes(opt.id)) || [];
+  const [draggedItem, setDraggedItem] = useState<string | null>(null);
 
-  const moveItem = (itemId: string, direction: 'up' | 'down') => {
-    const index = rankedItems.indexOf(itemId);
-    if ((direction === 'up' && index > 0) || (direction === 'down' && index < rankedItems.length - 1)) {
-      const newRanked = [...rankedItems];
-      const targetIndex = direction === 'up' ? index - 1 : index + 1;
-      [newRanked[index], newRanked[targetIndex]] = [newRanked[targetIndex], newRanked[index]];
-      onChange(newRanked);
+  const handleDragStart = (e: React.DragEvent, itemId: string) => {
+    setDraggedItem(itemId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDropOnRow = (e: React.DragEvent, position: number) => {
+    e.preventDefault();
+    if (!draggedItem) return;
+
+    const newRanked = [...rankedItems];
+
+    // Remove item from current position if it's already ranked
+    const currentIndex = newRanked.indexOf(draggedItem);
+    if (currentIndex > -1) {
+      newRanked.splice(currentIndex, 1);
     }
+
+    // Insert at the target position
+    newRanked.splice(position, 0, draggedItem);
+    onChange(newRanked);
+    setDraggedItem(null);
   };
 
-  const addToRanked = (itemId: string) => {
-    onChange([...rankedItems, itemId]);
+  const handleDragEnd = () => {
+    setDraggedItem(null);
   };
 
-  const removeFromRanked = (itemId: string) => {
+  const removeItem = (itemId: string) => {
     onChange(rankedItems.filter((id) => id !== itemId));
   };
 
-  return (
-    <div className="space-y-4">
-      {/* Ranked Items */}
-      <div className="bg-blue-50 rounded-lg p-4 space-y-2 border-2 border-blue-200">
-        <p className="text-sm font-semibold text-blue-900 mb-3">Your Ranking:</p>
-        {rankedItems.length === 0 ? (
-          <p className="text-sm text-gray-500 italic">Drag items here to rank them</p>
-        ) : (
-          rankedItems.map((itemId, index) => {
-            const item = question.options?.find((opt) => opt.id === itemId);
-            return (
-              <div key={itemId} className="flex items-center gap-2 bg-white rounded-lg p-3 border border-blue-200">
-                <span className="font-bold text-blue-600 w-6">{index + 1}.</span>
-                <span className="flex-grow">{item?.label}</span>
-                <div className="flex gap-1">
-                  <button
-                    type="button"
-                    onClick={() => moveItem(itemId, 'up')}
-                    disabled={index === 0}
-                    className="px-2 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-                  >
-                    ↑
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => moveItem(itemId, 'down')}
-                    disabled={index === rankedItems.length - 1}
-                    className="px-2 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-                  >
-                    ↓
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removeFromRanked(itemId)}
-                    className="px-2 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
+  const numRows = question.options?.length || 0;
+  const rows = Array.from({ length: numRows }, (_, i) => i);
 
-      {/* Available Items */}
+  return (
+    <div className="space-y-3">
+      {rows.map((rowIndex) => {
+        const item = rankedItems[rowIndex];
+        const isActive = draggedItem !== null;
+
+        return (
+          <div
+            key={rowIndex}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDropOnRow(e, rowIndex)}
+            className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${
+              item
+                ? 'bg-blue-50 border-blue-300'
+                : isActive
+                ? 'bg-blue-100 border-dashed border-blue-400'
+                : 'bg-gray-50 border-gray-300'
+            }`}
+          >
+            <span className="font-bold text-lg text-blue-600 w-8">{rowIndex + 1}.</span>
+            {item ? (
+              <>
+                <span className="flex-grow font-medium text-gray-900">
+                  {question.options?.find((opt) => opt.id === item)?.label}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeItem(item)}
+                  className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                >
+                  Remove
+                </button>
+              </>
+            ) : (
+              <span className="text-gray-400 italic flex-grow">Drop here to rank</span>
+            )}
+          </div>
+        );
+      })}
+
+      {/* Draggable Items */}
       {unrankedItems.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-sm font-semibold text-gray-700">Available Items:</p>
+        <div className="mt-6 pt-4 border-t-2 border-gray-200">
+          <p className="text-sm font-semibold text-gray-700 mb-3">Drag items to rank them:</p>
           <div className="space-y-2">
             {unrankedItems.map((option) => (
-              <button
+              <div
                 key={option.id}
-                type="button"
-                onClick={() => addToRanked(option.id)}
-                className="w-full py-2 px-3 rounded-lg bg-gray-50 border-2 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all text-left"
+                draggable
+                onDragStart={(e) => handleDragStart(e, option.id)}
+                onDragEnd={handleDragEnd}
+                className={`p-3 rounded-lg border-2 cursor-move transition-all ${
+                  draggedItem === option.id
+                    ? 'bg-blue-200 border-blue-400 opacity-50'
+                    : 'bg-white border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                }`}
               >
-                {option.label}
-              </button>
+                <span className="text-gray-700 font-medium">{option.label}</span>
+              </div>
             ))}
           </div>
         </div>
@@ -414,7 +435,7 @@ export function PublicVoteForm({ schema, voteTitle, memberName, voteDescription,
   return (
     <form onSubmit={handleSubmit}>
       {/* Header Card */}
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-6 max-w-2xl mx-auto">
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-6 max-w-3xl mx-auto">
         {/* Welcome */}
         <div className="flex items-center justify-center gap-2 text-sm text-green-700 mb-4">
           <CheckCircle className="w-4 h-4" />
@@ -458,7 +479,7 @@ export function PublicVoteForm({ schema, voteTitle, memberName, voteDescription,
       </div>
 
       {/* Questions */}
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         {questions.map(renderQuestion)}
 
         {/* Submit Button */}
