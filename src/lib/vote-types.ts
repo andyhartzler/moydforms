@@ -6,6 +6,7 @@ export interface VoteInfo {
   voting_starts_at: string | null;
   voting_ends_at: string | null;
   executive_only?: boolean;
+  supporting_documents?: SupportingDocument[] | null;
   session_token: string;
 }
 
@@ -24,20 +25,26 @@ export interface MemberVerification {
   voting_ends_at: string | null;
   is_eligible: boolean;
   eligibility_reason: string | null;
+  supporting_documents?: SupportingDocument[] | null;
   session_token: string;
   error?: string;
 }
 
-// The actual schema structure from the database
-// fields array contains the vote options directly (e.g., Aye, Nay, Present)
-export interface VoteSchema {
-  fields: VoteOption[];
-  settings?: {
-    showDescriptions?: boolean;
-  };
+// Supporting document
+export interface SupportingDocument {
+  id: string;
+  url: string;
+  name: string;
+  path: string;
+  size: number;
+  uploaded_at: string;
+  content_type: string;
 }
 
-// Vote option - represents a single voting choice
+// Vote question types
+export type QuestionType = 'multiple_choice' | 'rating_scale' | 'multiple_select' | 'short_answer' | 'ranked_choice' | 'yes_no';
+
+// Vote option - represents a single option in a question
 export interface VoteOption {
   id: string;
   label: string;
@@ -45,6 +52,30 @@ export interface VoteOption {
   votes?: number;
   image_url?: string;
 }
+
+// Vote question - represents a single question in a vote
+export interface VoteQuestion {
+  id: string;
+  text: string;
+  question_type: QuestionType;
+  required: boolean;
+  options?: VoteOption[];
+  min_rating?: number;
+  max_rating?: number;
+}
+
+// The actual schema structure from the database
+// Updated to support both old (fields array) and new (questions array) structures
+export interface VoteSchema {
+  fields?: VoteOption[]; // Legacy: single main question
+  questions?: VoteQuestion[]; // New: multiple questions
+  settings?: {
+    showDescriptions?: boolean;
+  };
+}
+
+// Vote submission data
+export type VoteSubmissionData = Record<string, unknown>;
 
 export interface VoteSubmissionResult {
   success: boolean;
