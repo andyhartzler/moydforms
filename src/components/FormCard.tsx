@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FormRecord } from '@/types/forms';
+import { FormRecord, SupportingDocument } from '@/types/forms';
 
 interface FormCardProps {
   form: FormRecord;
@@ -100,7 +100,7 @@ export default function FormCard({ form }: FormCardProps) {
               <div className="mb-4 space-y-2">
                 <p className="text-xs font-semibold text-white/60 uppercase tracking-wide">Supporting Documents</p>
                 <div className="space-y-1">
-                  {form.schema.supporting_documents.map((doc: any, index: number) => (
+                  {form.schema.supporting_documents.map((doc: SupportingDocument, index: number) => (
                     <a
                       key={doc.id || index}
                       href={doc.url}
