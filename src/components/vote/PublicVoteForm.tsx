@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, CheckCircle, AlertCircle, Star } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle, Star, GripVertical, ChevronUp, ChevronDown, Check } from 'lucide-react';
 import type { VoteSchema, VoteQuestion, VoteOption, SupportingDocument, QuestionType } from '@/lib/vote-types';
 
 // Helper function to extract text from HTML
@@ -44,29 +44,34 @@ function getButtonColor(label: string): 'green' | 'red' | 'yellow' | 'default' {
   return 'default';
 }
 
-function getButtonStyles(color: 'green' | 'red' | 'yellow' | 'default', isSelected: boolean): string {
-  const baseStyles = 'w-full py-3 px-4 rounded-lg font-semibold text-center transition-all duration-200 cursor-pointer border-2';
+function getButtonStyles(color: 'green' | 'red' | 'yellow' | 'default', isSelected: boolean, isDisabled?: boolean): string {
+  const baseStyles = 'px-6 py-3 rounded-lg font-semibold text-center transition-all border-2 min-w-[100px] flex items-center justify-center gap-2';
+
+  if (isDisabled && !isSelected) {
+    return `${baseStyles} cursor-not-allowed opacity-60 bg-gray-100 border-gray-200 text-gray-500`;
+  }
+
   if (isSelected) {
     switch (color) {
       case 'green':
-        return `${baseStyles} bg-green-600 border-green-600 text-white shadow-lg scale-105`;
+        return `${baseStyles} bg-green-600 border-green-600 text-white shadow-lg`;
       case 'red':
-        return `${baseStyles} bg-red-600 border-red-600 text-white shadow-lg scale-105`;
+        return `${baseStyles} bg-red-600 border-red-600 text-white shadow-lg`;
       case 'yellow':
-        return `${baseStyles} bg-yellow-500 border-yellow-500 text-gray-900 shadow-lg scale-105`;
+        return `${baseStyles} bg-yellow-500 border-yellow-500 text-white shadow-lg`;
       default:
-        return `${baseStyles} bg-blue-600 border-blue-600 text-white shadow-lg scale-105`;
+        return `${baseStyles} bg-blue-600 border-blue-600 text-white shadow-lg`;
     }
   } else {
     switch (color) {
       case 'green':
-        return `${baseStyles} bg-green-50 border-green-300 text-green-700 hover:bg-green-100 hover:border-green-400`;
+        return `${baseStyles} bg-green-50 border-green-300 text-green-700 hover:bg-green-100 hover:border-green-400 cursor-pointer`;
       case 'red':
-        return `${baseStyles} bg-red-50 border-red-300 text-red-700 hover:bg-red-100 hover:border-red-400`;
+        return `${baseStyles} bg-red-50 border-red-300 text-red-700 hover:bg-red-100 hover:border-red-400 cursor-pointer`;
       case 'yellow':
-        return `${baseStyles} bg-yellow-50 border-yellow-300 text-yellow-700 hover:bg-yellow-100 hover:border-yellow-400`;
+        return `${baseStyles} bg-yellow-50 border-yellow-300 text-yellow-700 hover:bg-yellow-100 hover:border-yellow-400 cursor-pointer`;
       default:
-        return `${baseStyles} bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400`;
+        return `${baseStyles} bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 cursor-pointer`;
     }
   }
 }
@@ -74,7 +79,7 @@ function getButtonStyles(color: 'green' | 'red' | 'yellow' | 'default', isSelect
 // Multiple Choice Question
 function MultipleChoiceQuestion({ question, value, onChange }: { question: VoteQuestion; value: string | null; onChange: (v: string) => void }) {
   return (
-    <div className="space-y-3">
+    <div className="flex flex-wrap justify-center gap-4">
       {question.options?.map((option) => {
         const isSelected = value === option.id;
         const buttonColor = getButtonColor(option.label);
@@ -85,7 +90,8 @@ function MultipleChoiceQuestion({ question, value, onChange }: { question: VoteQ
             onClick={() => onChange(option.id)}
             className={getButtonStyles(buttonColor, isSelected)}
           >
-            {option.label}
+            {isSelected && <Check className="w-5 h-5" />}
+            <span>{option.label}</span>
           </button>
         );
       })}
@@ -100,25 +106,31 @@ function RatingScaleQuestion({ question, value, onChange }: { question: VoteQues
   const range = Array.from({ length: maxRating - minRating + 1 }, (_, i) => minRating + i);
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2 flex-wrap justify-center">
+    <div className="flex justify-center">
+      <div className="flex gap-2">
         {range.map((rating) => (
           <button
             key={rating}
             type="button"
             onClick={() => onChange(rating)}
-            className={`w-12 h-12 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-1 border-2 ${
-              value === rating
-                ? 'bg-blue-600 border-blue-600 text-white shadow-lg scale-110'
-                : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400'
-            }`}
+            className={`p-2 transition-all ${value === rating ? 'cursor-pointer hover:scale-110' : 'cursor-pointer hover:scale-110'}`}
+            aria-label={`Rate ${rating} out of ${maxRating}`}
           >
-            <Star className="w-4 h-4" fill={value === rating ? 'currentColor' : 'none'} />
-            {rating}
+            <Star
+              className={`w-10 h-10 transition-colors ${
+                value && rating <= value
+                  ? 'fill-yellow-400 text-yellow-400'
+                  : 'fill-gray-200 text-gray-200'
+              }`}
+            />
           </button>
         ))}
       </div>
-      {value && <p className="text-center text-sm text-gray-600">You selected: {value} / {maxRating}</p>}
+      {value && (
+        <span className="ml-4 text-lg font-medium text-gray-700 self-center">
+          {value}/{maxRating}
+        </span>
+      )}
     </div>
   );
 }
@@ -169,121 +181,148 @@ function ShortAnswerQuestion({ question, value, onChange }: { question: VoteQues
     <textarea
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      placeholder="Type your answer here..."
-      className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-blue-600 focus:outline-none transition-colors resize-none"
+      placeholder="Enter your response..."
       rows={4}
+      className={`w-full p-4 border-2 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all outline-none`}
     />
   );
 }
 
 // Ranked Choice Question with Drag and Drop
 function RankedChoiceQuestion({ question, value, onChange }: { question: VoteQuestion; value: string[]; onChange: (v: string[]) => void }) {
-  const rankedItems = value.length > 0 ? value : [];
-  const unrankedItems = question.options?.filter((opt) => !value.includes(opt.id)) || [];
-  const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const options = question.options || [];
 
-  const handleDragStart = (e: React.DragEvent, itemId: string) => {
-    setDraggedItem(itemId);
+  // Initialize with current order or default order
+  const rankedIds = value && value.length > 0
+    ? value
+    : options.map(o => o.id);
+
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const moveUp = (index: number) => {
+    if (index === 0) return;
+    const newOrder = [...rankedIds];
+    [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
+    onChange(newOrder);
+  };
+
+  const moveDown = (index: number) => {
+    if (index === rankedIds.length - 1) return;
+    const newOrder = [...rankedIds];
+    [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+    onChange(newOrder);
+  };
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+    const target = e.currentTarget as HTMLElement;
+    setTimeout(() => {
+      target.style.opacity = '0.5';
+    }, 0);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+  const handleDragEnd = (e: React.DragEvent) => {
+    const target = e.currentTarget as HTMLElement;
+    target.style.opacity = '1';
+    setDraggedIndex(null);
+    setDragOverIndex(null);
   };
 
-  const handleDropOnRow = (e: React.DragEvent, position: number) => {
+  const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
-    if (!draggedItem) return;
+    if (draggedIndex === null) return;
+    setDragOverIndex(index);
+  };
 
-    const newRanked = [...rankedItems];
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
 
-    // Remove item from current position if it's already ranked
-    const currentIndex = newRanked.indexOf(draggedItem);
-    if (currentIndex > -1) {
-      newRanked.splice(currentIndex, 1);
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === dropIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
     }
 
-    // Insert at the target position
-    newRanked.splice(position, 0, draggedItem);
-    onChange(newRanked);
-    setDraggedItem(null);
+    const newOrder = [...rankedIds];
+    const [draggedItem] = newOrder.splice(draggedIndex, 1);
+    newOrder.splice(dropIndex, 0, draggedItem);
+    onChange(newOrder);
+
+    setDraggedIndex(null);
+    setDragOverIndex(null);
   };
 
-  const handleDragEnd = () => {
-    setDraggedItem(null);
-  };
-
-  const removeItem = (itemId: string) => {
-    onChange(rankedItems.filter((id) => id !== itemId));
-  };
-
-  const numRows = question.options?.length || 0;
-  const rows = Array.from({ length: numRows }, (_, i) => i);
+  const getOptionById = (id: string) => options.find(o => o.id === id);
 
   return (
-    <div className="space-y-3">
-      {rows.map((rowIndex) => {
-        const item = rankedItems[rowIndex];
-        const isActive = draggedItem !== null;
+    <div className="space-y-2">
+      <p className="text-sm text-gray-500 text-center mb-4">
+        Drag items or use arrows to rank from most preferred (1) to least preferred
+      </p>
+      {rankedIds.map((optionId, index) => {
+        const option = getOptionById(optionId);
+        if (!option) return null;
+
+        const isDragging = draggedIndex === index;
+        const isDragOver = dragOverIndex === index && draggedIndex !== index;
 
         return (
           <div
-            key={rowIndex}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDropOnRow(e, rowIndex)}
-            className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${
-              item
-                ? 'bg-blue-50 border-blue-300'
-                : isActive
-                ? 'bg-blue-100 border-dashed border-blue-400'
-                : 'bg-gray-50 border-gray-300'
-            }`}
+            key={optionId}
+            draggable
+            onDragStart={(e) => handleDragStart(e, index)}
+            onDragEnd={handleDragEnd}
+            onDragOver={(e) => handleDragOver(e, index)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, index)}
+            className={`flex items-center gap-3 p-4 rounded-lg border-2 bg-white transition-all ${
+              isDragging ? 'opacity-50 border-dashed' : ''
+            } ${
+              isDragOver ? 'border-blue-600 bg-blue-50 transform scale-[1.02]' : 'border-gray-200'
+            } cursor-grab active:cursor-grabbing`}
           >
-            <span className="font-bold text-lg text-blue-600 w-8">{rowIndex + 1}.</span>
-            {item ? (
-              <>
-                <span className="flex-grow font-medium text-gray-900">
-                  {question.options?.find((opt) => opt.id === item)?.label}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removeItem(item)}
-                  className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
-                >
-                  Remove
-                </button>
-              </>
-            ) : (
-              <span className="text-gray-400 italic flex-grow">Drop here to rank</span>
-            )}
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm flex-shrink-0">
+              {index + 1}
+            </div>
+            <GripVertical className="w-5 h-5 flex-shrink-0 text-gray-400" />
+            <span className="flex-grow font-medium text-gray-800">{option.label}</span>
+            <div className="flex flex-col gap-1 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => moveUp(index)}
+                disabled={index === 0}
+                className={`p-1 rounded transition-colors ${
+                  index === 0
+                    ? 'text-gray-300 cursor-not-allowed'
+                    : 'text-gray-500 hover:text-blue-600 hover:bg-gray-100'
+                }`}
+                aria-label="Move up"
+              >
+                <ChevronUp className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => moveDown(index)}
+                disabled={index === rankedIds.length - 1}
+                className={`p-1 rounded transition-colors ${
+                  index === rankedIds.length - 1
+                    ? 'text-gray-300 cursor-not-allowed'
+                    : 'text-gray-500 hover:text-blue-600 hover:bg-gray-100'
+                }`}
+                aria-label="Move down"
+              >
+                <ChevronDown className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         );
       })}
-
-      {/* Draggable Items */}
-      {unrankedItems.length > 0 && (
-        <div className="mt-6 pt-4 border-t-2 border-gray-200">
-          <p className="text-sm font-semibold text-gray-700 mb-3">Drag items to rank them:</p>
-          <div className="space-y-2">
-            {unrankedItems.map((option) => (
-              <div
-                key={option.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, option.id)}
-                onDragEnd={handleDragEnd}
-                className={`p-3 rounded-lg border-2 cursor-move transition-all ${
-                  draggedItem === option.id
-                    ? 'bg-blue-200 border-blue-400 opacity-50'
-                    : 'bg-white border-gray-300 hover:border-blue-400 hover:bg-blue-50'
-                }`}
-              >
-                <span className="text-gray-700 font-medium">{option.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -291,28 +330,22 @@ function RankedChoiceQuestion({ question, value, onChange }: { question: VoteQue
 // Yes/No Question
 function YesNoQuestion({ question, value, onChange }: { question: VoteQuestion; value: boolean | null; onChange: (v: boolean) => void }) {
   return (
-    <div className="flex gap-4">
+    <div className="flex justify-center gap-6">
       <button
         type="button"
         onClick={() => onChange(true)}
-        className={`flex-1 py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-200 border-2 ${
-          value === true
-            ? 'bg-green-600 border-green-600 text-white shadow-lg scale-105'
-            : 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100 hover:border-green-400'
-        }`}
+        className={getButtonStyles('green', value === true)}
       >
-        Yes
+        {value === true && <Check className="w-5 h-5" />}
+        <span>Yes</span>
       </button>
       <button
         type="button"
         onClick={() => onChange(false)}
-        className={`flex-1 py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-200 border-2 ${
-          value === false
-            ? 'bg-red-600 border-red-600 text-white shadow-lg scale-105'
-            : 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100 hover:border-red-400'
-        }`}
+        className={getButtonStyles('red', value === false)}
       >
-        No
+        {value === false && <Check className="w-5 h-5" />}
+        <span>No</span>
       </button>
     </div>
   );
@@ -368,17 +401,44 @@ export function PublicVoteForm({ schema, voteTitle, memberName, voteDescription,
     }
   };
 
-  const renderQuestion = (question: VoteQuestion) => {
+  const getQuestionHelperText = (questionType: QuestionType): string => {
+    switch (questionType) {
+      case 'multiple_choice':
+        return 'Select one option';
+      case 'multiple_select':
+        return 'Select all that apply';
+      case 'yes_no':
+        return 'Select Yes or No';
+      case 'rating_scale':
+        return 'Rate from 1 to 5 stars';
+      case 'short_answer':
+        return 'Enter your response';
+      case 'ranked_choice':
+        return 'Rank the options in order of preference';
+      default:
+        return '';
+    }
+  };
+
+  const renderQuestion = (question: VoteQuestion, index: number) => {
     const questionErrors = errors[question.id];
 
     return (
-      <div key={question.id} className="bg-white rounded-xl shadow-md p-6 mb-6">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            {question.text}
-            {question.required && <span className="text-red-500">*</span>}
-          </h3>
-          {questionErrors && <p className="text-sm text-red-600 mt-1">{questionErrors}</p>}
+      <div key={question.id} className="bg-white rounded-xl shadow-soft p-6">
+        <div className="mb-6">
+          <div className="flex items-start gap-3 mb-2">
+            <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-600 font-bold text-sm flex-shrink-0">
+              {index + 1}
+            </span>
+            <h3 className="text-lg font-bold text-gray-900">
+              {question.text}
+              {question.required && <span className="text-red-500 ml-1">*</span>}
+            </h3>
+          </div>
+          <p className="text-sm text-gray-500 ml-10">
+            {getQuestionHelperText(question.question_type)}
+          </p>
+          {questionErrors && <p className="text-sm text-red-600 mt-2 ml-10">{questionErrors}</p>}
         </div>
 
         {question.question_type === 'multiple_choice' && (
@@ -479,27 +539,29 @@ export function PublicVoteForm({ schema, voteTitle, memberName, voteDescription,
       </div>
 
       {/* Questions */}
-      <div className="max-w-3xl mx-auto">
-        {questions.map(renderQuestion)}
+      <div className="max-w-3xl mx-auto space-y-6">
+        {questions.map((question, index) => renderQuestion(question, index))}
 
         {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={submitting || disabled}
-          className="w-full btn-primary py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50"
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Submitting...
-            </>
-          ) : (
-            <>
-              <CheckCircle className="w-5 h-5" />
-              Submit Vote
-            </>
-          )}
-        </button>
+        <div className="flex justify-center pt-2">
+          <button
+            type="submit"
+            disabled={submitting || disabled}
+            className="btn-primary px-12 py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="w-5 h-5" />
+                Submit Vote
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </form>
   );
