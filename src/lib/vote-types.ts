@@ -6,6 +6,7 @@ export interface VoteInfo {
   voting_starts_at: string | null;
   voting_ends_at: string | null;
   executive_only?: boolean;
+  supporting_documents?: SupportingDocument[] | null;
   session_token: string;
 }
 
@@ -24,8 +25,20 @@ export interface MemberVerification {
   voting_ends_at: string | null;
   is_eligible: boolean;
   eligibility_reason: string | null;
+  supporting_documents?: SupportingDocument[] | null;
   session_token: string;
   error?: string;
+}
+
+// Supporting document
+export interface SupportingDocument {
+  id: string;
+  url: string;
+  name: string;
+  path: string;
+  size: number;
+  uploaded_at: string;
+  content_type: string;
 }
 
 // The actual schema structure from the database

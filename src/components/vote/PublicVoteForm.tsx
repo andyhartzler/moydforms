@@ -2,12 +2,26 @@
 
 import { useState } from 'react';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import type { VoteSchema, VoteOption } from '@/lib/vote-types';
+import type { VoteSchema, VoteOption, SupportingDocument } from '@/lib/vote-types';
+
+// Helper function to extract text from HTML
+function stripHtmlTags(html: string): string {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return div.textContent || div.innerText || '';
+}
+
+// Helper function to clean and format description text
+function cleanDescription(text: string): string {
+  return text.replace(/\s+/g, ' ').trim();
+}
 
 interface PublicVoteFormProps {
   schema: VoteSchema;
   voteTitle: string;
   memberName: string;
+  voteDescription?: string | null;
+  supportingDocuments?: SupportingDocument[] | null;
   onSubmit: (voteData: Record<string, unknown>) => Promise<void>;
   disabled?: boolean;
 }
@@ -66,7 +80,7 @@ function getButtonStyles(color: 'green' | 'red' | 'yellow' | 'default', isSelect
   }
 }
 
-export function PublicVoteForm({ schema, voteTitle, memberName, onSubmit, disabled }: PublicVoteFormProps) {
+export function PublicVoteForm({ schema, voteTitle, memberName, voteDescription, supportingDocuments, onSubmit, disabled }: PublicVoteFormProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [error, setError] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
@@ -128,6 +142,38 @@ export function PublicVoteForm({ schema, voteTitle, memberName, onSubmit, disabl
         <h2 className="text-xl font-bold text-gray-900 text-center mb-4">
           {voteTitle}
         </h2>
+
+        {/* Vote Description */}
+        {voteDescription && (
+          <div className="bg-gray-50 rounded-lg p-4 mb-4">
+            <p className="text-sm text-gray-700 leading-relaxed">
+              {cleanDescription(stripHtmlTags(voteDescription))}
+            </p>
+          </div>
+        )}
+
+        {/* Supporting Documents */}
+        {supportingDocuments && Array.isArray(supportingDocuments) && supportingDocuments.length > 0 && (
+          <div className="bg-blue-50 rounded-lg p-4 mb-4">
+            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Supporting Documents</p>
+            <div className="space-y-1.5">
+              {supportingDocuments.map((doc: SupportingDocument, index: number) => (
+                <a
+                  key={doc.id || index}
+                  href={doc.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M4 4a2 2 0 012-2h6a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+                  </svg>
+                  <span className="truncate">{doc.name}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Vote Options */}
         <div className="flex flex-col items-center gap-3 mb-4">

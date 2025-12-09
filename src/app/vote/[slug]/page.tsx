@@ -220,6 +220,8 @@ export default function PublicVotePage() {
               schema={memberVerification.vote_schema}
               voteTitle={memberVerification.vote_title || 'Vote'}
               memberName={memberVerification.member_name || 'Member'}
+              voteDescription={memberVerification.vote_description}
+              supportingDocuments={memberVerification.supporting_documents}
               onSubmit={handleSubmitVote}
             />
           </>
