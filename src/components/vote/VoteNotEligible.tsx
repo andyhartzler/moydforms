@@ -1,0 +1,67 @@
+'use client';
+
+import { ShieldX, Mail } from 'lucide-react';
+
+interface VoteNotEligibleProps {
+  voteTitle: string;
+  voteSlug: string;
+  memberName: string;
+  eligibilityReason?: string;
+  onTryAgain: () => void;
+}
+
+export function VoteNotEligible({
+  voteTitle,
+  voteSlug,
+  memberName,
+  eligibilityReason,
+  onTryAgain
+}: VoteNotEligibleProps) {
+  const firstName = memberName.split(' ')[0];
+  const voteUrl = `https://forms.moyoungdemocrats.org/vote/${voteSlug}`;
+
+  // Build mailto link with pre-populated email
+  const emailSubject = encodeURIComponent(`Question About Vote Eligibility: ${voteTitle}`);
+  const emailBody = encodeURIComponent(
+    `Hello,\n\n` +
+    `I received a message that I am not eligible to vote on "${voteTitle}" (${voteUrl}).\n\n` +
+    `I believe this may be an error. Could you please help me verify my eligibility?\n\n` +
+    `Thank you,\n` +
+    `${memberName}`
+  );
+  const mailtoLink = `mailto:eboard@moyoungdemocrats.org?subject=${emailSubject}&body=${emailBody}`;
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg p-6 max-w-sm mx-auto text-center">
+      <div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <ShieldX className="w-7 h-7 text-orange-600" />
+      </div>
+
+      <h2 className="text-xl font-bold text-gray-900 mb-2">
+        Not Eligible to Vote
+      </h2>
+
+      <p className="text-gray-600 mb-2">
+        Hi {firstName}, {eligibilityReason || 'you are not eligible for this vote'}.
+      </p>
+
+      <p className="text-sm text-gray-500 mb-5">
+        If you believe this message is shown in error, please reach out to{' '}
+        <a
+          href={mailtoLink}
+          className="text-primary hover:underline font-medium inline-flex items-center gap-1"
+        >
+          <Mail className="w-3.5 h-3.5" />
+          eboard@moyoungdemocrats.org
+        </a>
+      </p>
+
+      <button
+        onClick={onTryAgain}
+        className="text-sm text-gray-500 hover:text-gray-700 font-medium"
+      >
+        Try a different phone number
+      </button>
+    </div>
+  );
+}

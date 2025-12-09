@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { getVoteInfo, verifyMember, submitVote } from '@/lib/vote-api';
 import { PhoneVerification } from '@/components/vote/PhoneVerification';
 import { VoteNotMember } from '@/components/vote/VoteNotMember';
+import { VoteNotEligible } from '@/components/vote/VoteNotEligible';
 import { VoteStatusMessage } from '@/components/vote/VoteStatusMessage';
 import { PublicVoteForm } from '@/components/vote/PublicVoteForm';
 import { VoteConfirmation } from '@/components/vote/VoteConfirmation';
@@ -15,6 +16,7 @@ type PageState =
   | 'loading'
   | 'phone_entry'
   | 'not_member'
+  | 'not_eligible'
   | 'already_voted'
   | 'vote_form'
   | 'submitted'
@@ -77,7 +79,7 @@ export default function PublicVotePage() {
       } else if (result.already_voted) {
         setPageState('already_voted');
       } else if (!result.is_eligible) {
-        setVerifyError(result.eligibility_reason || 'You are not eligible for this vote');
+        setPageState('not_eligible');
       } else if (result.vote_status !== 'open') {
         setVoteInfo({
           ...voteInfo!,
@@ -184,6 +186,17 @@ export default function PublicVotePage() {
         {/* Not a Member */}
         {pageState === 'not_member' && (
           <VoteNotMember onTryAgain={handleTryAgain} />
+        )}
+
+        {/* Not Eligible */}
+        {pageState === 'not_eligible' && memberVerification && (
+          <VoteNotEligible
+            voteTitle={memberVerification.vote_title || 'this vote'}
+            voteSlug={slug}
+            memberName={memberVerification.member_name || 'Member'}
+            eligibilityReason={memberVerification.eligibility_reason || undefined}
+            onTryAgain={handleTryAgain}
+          />
         )}
 
         {/* Already Voted */}
