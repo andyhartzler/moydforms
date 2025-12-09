@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useFormSession, FormSession } from '@/hooks/useFormSession';
+import { useFormSession } from '@/hooks/useFormSession';
 import { useBeforeUnload } from '@/hooks/useBeforeUnload';
 import { PhoneEntryStage } from './PhoneEntryStage';
 import { IdentityFieldsStage, IdentityConfig } from './IdentityFieldsStage';
@@ -24,6 +24,7 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
     values,
     isLoading,
     error,
+    setStage,
     setValues,
     handlePhoneSubmit,
     handleFieldBlur,
@@ -58,9 +59,14 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
     [setValues]
   );
 
-  // Apply custom styling from form schema
-  const styling = form.schema?.styling || {};
-  const primaryColor = styling.primaryColor || '#273351';
+  // Handle going back to previous stage
+  const handleGoBack = useCallback(() => {
+    if (stage === 'identity') {
+      setStage('phone');
+    } else if (stage === 'custom') {
+      setStage('identity');
+    }
+  }, [stage, setStage]);
 
   // Properly capitalize the form title
   const formTitle = toTitleCase(form.title);
@@ -68,18 +74,23 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
   // Get confirmation settings
   const confirmation = form.schema?.confirmation;
 
+  // Check if back button should be shown (based on show_back_button field)
+  const showBackToFormsButton = form.show_back_button === true;
+
   return (
     <div className="min-h-screen py-8 md:py-12 relative z-10">
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
-        {/* Back button */}
-        {stage !== 'submitted' && (
-          <a
-            href="/"
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 transition-colors group"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-sm font-medium">Back to Forms</span>
-          </a>
+        {/* Back to Forms button - circular style like moyd-events */}
+        {showBackToFormsButton && stage !== 'submitted' && (
+          <div className="mb-6">
+            <a
+              href="/"
+              className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all"
+              aria-label="Back to Forms"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </a>
+          </div>
         )}
 
         {/* Form Header Card */}
@@ -106,17 +117,9 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
             <p className="text-gray-600 text-base leading-relaxed">{form.description}</p>
           )}
 
-          {/* Progress indicator */}
+          {/* Progress bar only (no text) */}
           {stage !== 'submitted' && (
             <div className="mt-6">
-              <div className="flex items-center justify-between text-sm mb-2">
-                <span className="font-medium text-gray-700">
-                  Step {stage === 'phone' ? 1 : stage === 'identity' ? 2 : 3} of 3
-                </span>
-                <span className="text-gray-500">
-                  {stage === 'phone' ? 'Phone' : stage === 'identity' ? 'Your Info' : 'Details'}
-                </span>
-              </div>
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
                   className="h-2 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all duration-500 ease-out"
@@ -164,6 +167,7 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
             onFieldChange={handleFieldChange}
             onFieldBlur={handleFieldBlur}
             onComplete={handleIdentityComplete}
+            onBack={handleGoBack}
             isLoading={isLoading}
           />
         )}
@@ -176,6 +180,7 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
             onFieldChange={handleCustomFieldChange}
             onFieldBlur={handleFieldBlur}
             onSubmit={handleSubmit}
+            onBack={handleGoBack}
             isLoading={isLoading}
             submitLabel={form.settings?.submitButtonText || 'Submit'}
             onFileUpload={onFileUpload}

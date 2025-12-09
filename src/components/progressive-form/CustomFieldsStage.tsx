@@ -24,7 +24,7 @@ import {
   ImageUpload,
   Autocomplete,
 } from '@/components/form-fields';
-import { Check, Loader2, Send } from 'lucide-react';
+import { Check, Loader2, Send, ChevronLeft } from 'lucide-react';
 
 interface CustomFieldsStageProps {
   schema: FormSchema;
@@ -32,6 +32,7 @@ interface CustomFieldsStageProps {
   onFieldChange: (key: string, value: unknown) => void;
   onFieldBlur: (key: string, value: unknown, type?: string) => void;
   onSubmit: (finalData?: Record<string, unknown>) => Promise<boolean>;
+  onBack?: () => void;
   isLoading: boolean;
   submitLabel?: string;
   onFileUpload?: (file: File, fieldId: string) => Promise<string>;
@@ -87,6 +88,7 @@ export function CustomFieldsStage({
   onFieldChange,
   onFieldBlur,
   onSubmit,
+  onBack,
   isLoading,
   submitLabel = 'Submit',
   onFileUpload,
@@ -378,6 +380,19 @@ export function CustomFieldsStage({
                 </>
               )}
             </button>
+
+            {/* Back button */}
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                disabled={isLoading}
+                className="w-full mt-3 py-3 px-6 font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 flex items-center justify-center gap-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+              >
+                <ChevronLeft className="h-5 w-5" />
+                Back
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -405,6 +420,19 @@ export function CustomFieldsStage({
               </>
             )}
           </button>
+
+          {/* Back button */}
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              disabled={isLoading}
+              className="w-full mt-3 py-3 px-6 font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 flex items-center justify-center gap-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+            >
+              <ChevronLeft className="h-5 w-5" />
+              Back
+            </button>
+          )}
         </div>
       )}
     </form>

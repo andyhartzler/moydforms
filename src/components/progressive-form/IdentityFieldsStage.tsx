@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { formatPhoneDisplay } from '@/lib/phone';
-import { Check, CheckCircle, Loader2 } from 'lucide-react';
+import { Check, CheckCircle, Loader2, ChevronLeft } from 'lucide-react';
 
 export interface IdentityConfig {
   phone_label?: string;
@@ -22,6 +22,7 @@ interface IdentityFieldsStageProps {
   onFieldChange: (key: string, value: string) => void;
   onFieldBlur: (key: string, value: string, type?: string) => void;
   onComplete: () => void;
+  onBack?: () => void;
   isLoading: boolean;
 }
 
@@ -43,6 +44,7 @@ export function IdentityFieldsStage({
   onFieldChange,
   onFieldBlur,
   onComplete,
+  onBack,
   isLoading,
 }: IdentityFieldsStageProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -269,6 +271,19 @@ export function IdentityFieldsStage({
           'Continue'
         )}
       </button>
+
+      {/* Back button */}
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={isLoading}
+          className="w-full mt-3 py-3 px-6 font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 flex items-center justify-center gap-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+        >
+          <ChevronLeft className="h-5 w-5" />
+          Back
+        </button>
+      )}
     </div>
   );
 }
