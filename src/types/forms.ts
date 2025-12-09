@@ -211,6 +211,7 @@ export interface FormRecord {
   eligible_members: any | null;
   results_public: boolean;
   results_data: any | null;
+  show_back_button?: boolean;
 }
 
 // Form submission record
