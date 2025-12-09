@@ -145,7 +145,7 @@ export default function PublicVotePage() {
   if (pageState === 'status_message') {
     return (
       <div className="px-4">
-        <div className="max-w-md mx-auto">
+        <div className="max-w-2xl mx-auto">
           {/* Main Header */}
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-white">
@@ -164,7 +164,7 @@ export default function PublicVotePage() {
 
   return (
     <div className="px-4">
-      <div className="max-w-md mx-auto">
+      <div className="max-w-3xl mx-auto">
         {/* Header - only show for non-vote-form states */}
         {pageState !== 'vote_form' && (
           <div className="text-center mb-6">
