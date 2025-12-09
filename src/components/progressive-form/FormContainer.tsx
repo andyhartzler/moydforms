@@ -9,7 +9,7 @@ import { CustomFieldsStage } from './CustomFieldsStage';
 import { SuccessMessage } from './SuccessMessage';
 import { FormRecord } from '@/types/forms';
 import { toTitleCase } from '@/lib/utils';
-import { FileText, AlertCircle } from 'lucide-react';
+import { FileText, AlertCircle, ArrowLeft } from 'lucide-react';
 
 interface FormContainerProps {
   form: FormRecord;
@@ -71,6 +71,17 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
   return (
     <div className="min-h-screen py-8 md:py-12 relative z-10">
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
+        {/* Back button */}
+        {stage !== 'submitted' && (
+          <a
+            href="/"
+            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-sm font-medium">Back to Forms</span>
+          </a>
+        )}
+
         {/* Form Header Card */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-6 relative overflow-hidden">
           {/* Decorative accent */}
