@@ -27,26 +27,21 @@ export interface MemberVerification {
   error?: string;
 }
 
+// The actual schema structure from the database
+// fields array contains the vote options directly (e.g., Aye, Nay, Present)
 export interface VoteSchema {
-  fields: VoteField[];
+  fields: VoteOption[];
   settings?: {
     showDescriptions?: boolean;
   };
 }
 
-export interface VoteField {
-  id: string;
-  type: 'single_choice' | 'multiple_choice' | 'ranked_choice' | 'yes_no';
-  label: string;
-  description?: string;
-  required?: boolean;
-  options?: VoteOption[];
-}
-
+// Vote option - represents a single voting choice
 export interface VoteOption {
   id: string;
   label: string;
-  description?: string;
+  description?: string | null;
+  votes?: number;
   image_url?: string;
 }
 

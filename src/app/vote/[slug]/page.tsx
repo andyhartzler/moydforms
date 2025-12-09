@@ -144,27 +144,46 @@ export default function PublicVotePage() {
   if (pageState === 'status_message') {
     return (
       <div className="px-4">
-        <VoteStatusMessage
-          status={voteInfo?.vote_status || 'not_found'}
-          votingStartsAt={voteInfo?.voting_starts_at}
-          votingEndsAt={voteInfo?.voting_ends_at}
-        />
+        <div className="max-w-2xl mx-auto">
+          {/* Main Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+              Voting Portal
+            </h1>
+          </div>
+          <VoteStatusMessage
+            status={voteInfo?.vote_status || 'not_found'}
+            votingStartsAt={voteInfo?.voting_starts_at}
+            votingEndsAt={voteInfo?.voting_ends_at}
+          />
+        </div>
       </div>
     );
   }
+
+  // Check if we're signed in (have member verification)
+  const isSignedIn = pageState === 'vote_form' || pageState === 'already_voted' || pageState === 'submitted';
 
   return (
     <div className="px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          {voteInfo?.vote_title && (
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-              {voteInfo.vote_title}
-            </h1>
+          {/* Main title - always "Voting Portal" */}
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+            Voting Portal
+          </h1>
+
+          {/* Show vote title as smaller header when signed in */}
+          {isSignedIn && (memberVerification?.vote_title || voteInfo?.vote_title) && (
+            <h2 className="text-xl md:text-2xl font-semibold text-white/90 mt-4">
+              {memberVerification?.vote_title || voteInfo?.vote_title}
+            </h2>
           )}
-          {voteInfo?.vote_description && pageState !== 'submitted' && (
-            <p className="text-white/80 text-lg">
+
+          {/* Description only shows during phone entry */}
+          {pageState === 'phone_entry' && voteInfo?.vote_description && (
+            <p className="text-white/80 text-lg mt-2">
               {voteInfo.vote_description}
             </p>
           )}
