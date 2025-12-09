@@ -25,17 +25,10 @@ export default function VoteLayout({
         }}
       />
 
-      {/* Main Content */}
-      <main className="relative z-10 min-h-screen py-12">
+      {/* Main Content - consistent padding top and bottom */}
+      <main className="relative z-10 min-h-screen py-8">
         {children}
       </main>
-
-      {/* Minimal Footer */}
-      <footer className="relative z-10 py-6 text-center">
-        <p className="text-white/50 text-sm">
-          &copy; {new Date().getFullYear()} Missouri Young Democrats
-        </p>
-      </footer>
     </div>
   );
 }

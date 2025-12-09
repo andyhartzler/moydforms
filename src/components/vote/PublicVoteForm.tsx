@@ -6,6 +6,8 @@ import type { VoteSchema, VoteOption } from '@/lib/vote-types';
 
 interface PublicVoteFormProps {
   schema: VoteSchema;
+  voteTitle: string;
+  memberName: string;
   onSubmit: (voteData: Record<string, unknown>) => Promise<void>;
   disabled?: boolean;
 }
@@ -37,7 +39,7 @@ function getButtonColor(label: string): 'green' | 'red' | 'yellow' | 'default' {
 
 // Get button styles based on color and selected state
 function getButtonStyles(color: 'green' | 'red' | 'yellow' | 'default', isSelected: boolean): string {
-  const baseStyles = 'w-48 py-3 px-6 rounded-lg font-semibold text-center transition-all duration-200 cursor-pointer border-2';
+  const baseStyles = 'w-40 py-3 px-4 rounded-lg font-semibold text-center transition-all duration-200 cursor-pointer border-2';
 
   if (isSelected) {
     switch (color) {
@@ -64,10 +66,12 @@ function getButtonStyles(color: 'green' | 'red' | 'yellow' | 'default', isSelect
   }
 }
 
-export function PublicVoteForm({ schema, onSubmit, disabled }: PublicVoteFormProps) {
+export function PublicVoteForm({ schema, voteTitle, memberName, onSubmit, disabled }: PublicVoteFormProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [error, setError] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
+
+  const firstName = memberName.split(' ')[0];
 
   const handleOptionSelect = (optionId: string) => {
     if (disabled) return;
@@ -111,39 +115,51 @@ export function PublicVoteForm({ schema, onSubmit, disabled }: PublicVoteFormPro
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Vote Options */}
-      <div className="bg-white rounded-xl shadow-soft p-6">
-        <div className="flex flex-col items-center gap-4">
+    <form onSubmit={handleSubmit}>
+      {/* Compact Voting Card */}
+      <div className="bg-white rounded-xl shadow-lg p-5 max-w-sm mx-auto">
+        {/* Welcome + Verified inline */}
+        <div className="flex items-center justify-center gap-2 text-sm text-green-700 mb-3">
+          <CheckCircle className="w-4 h-4" />
+          <span>Welcome, {firstName}!</span>
+        </div>
+
+        {/* Vote Title */}
+        <h2 className="text-xl font-bold text-gray-900 text-center mb-4">
+          {voteTitle}
+        </h2>
+
+        {/* Vote Options */}
+        <div className="flex flex-col items-center gap-3 mb-4">
           {schema.fields.map(renderVoteOption)}
         </div>
 
         {error && (
-          <div className="mt-4 flex items-center justify-center gap-2 text-red-600">
+          <div className="flex items-center justify-center gap-2 text-red-600 mb-4">
             <AlertCircle className="w-4 h-4" />
             <span className="text-sm">{error}</span>
           </div>
         )}
-      </div>
 
-      {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={submitting || disabled || !selectedOption}
-        className="w-full btn-primary py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50"
-      >
-        {submitting ? (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Submitting Vote...
-          </>
-        ) : (
-          <>
-            <CheckCircle className="w-5 h-5" />
-            Submit Vote
-          </>
-        )}
-      </button>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={submitting || disabled || !selectedOption}
+          className="w-full btn-primary py-3 text-base flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            <>
+              <CheckCircle className="w-4 h-4" />
+              Submit Vote
+            </>
+          )}
+        </button>
+      </div>
     </form>
   );
 }
