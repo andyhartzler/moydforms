@@ -8,8 +8,8 @@ interface FormCardProps {
 export default function FormCard({ form }: FormCardProps) {
   const typeConfig: Record<string, { accentColor: string; textColor: string; icon: React.ReactNode; label: string }> = {
     survey: {
-      accentColor: 'from-blue-400 to-blue-500',
-      textColor: 'text-blue-400',
+      accentColor: 'from-white to-gray-200',
+      textColor: 'text-white',
       label: 'Survey',
       icon: (
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -18,8 +18,8 @@ export default function FormCard({ form }: FormCardProps) {
       )
     },
     registration: {
-      accentColor: 'from-green-400 to-green-500',
-      textColor: 'text-green-400',
+      accentColor: 'from-white to-gray-200',
+      textColor: 'text-white',
       label: 'Registration',
       icon: (
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -28,8 +28,8 @@ export default function FormCard({ form }: FormCardProps) {
       )
     },
     feedback: {
-      accentColor: 'from-purple-400 to-purple-500',
-      textColor: 'text-purple-400',
+      accentColor: 'from-white to-gray-200',
+      textColor: 'text-white',
       label: 'Feedback',
       icon: (
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -38,8 +38,8 @@ export default function FormCard({ form }: FormCardProps) {
       )
     },
     vote: {
-      accentColor: 'from-red-400 to-red-500',
-      textColor: 'text-red-400',
+      accentColor: 'from-white to-gray-200',
+      textColor: 'text-white',
       label: 'Vote',
       icon: (
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
