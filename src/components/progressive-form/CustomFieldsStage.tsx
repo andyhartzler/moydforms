@@ -37,8 +37,49 @@ interface CustomFieldsStageProps {
   onFileUpload?: (file: File, fieldId: string) => Promise<string>;
 }
 
-// Identity field IDs that should be excluded from custom fields
-const IDENTITY_FIELD_IDS = ['phone', 'name', 'full_name', 'email', 'zip_code', 'zip'];
+// Patterns to detect identity fields by ID or label
+const PHONE_PATTERNS = ['phone', 'mobile', 'cell', 'telephone', 'tel'];
+const NAME_PATTERNS = ['name', 'full_name', 'fullname', 'your_name', 'yourname'];
+const EMAIL_PATTERNS = ['email', 'e_mail', 'email_address', 'emailaddress'];
+const ZIP_PATTERNS = ['zip', 'zipcode', 'zip_code', 'postal', 'postal_code', 'postalcode'];
+
+type IdentityFieldType = 'phone' | 'name' | 'email' | 'zip_code' | null;
+
+// Check if a field is an identity field and return which type
+function getIdentityFieldType(field: FormFieldConfig): IdentityFieldType {
+  const idLower = field.id.toLowerCase().replace(/[-\s]/g, '_');
+  const labelLower = field.label.toLowerCase().replace(/[-\s]/g, '_');
+  const fieldType = field.type.toLowerCase();
+
+  // Check by field type first (most reliable)
+  if (fieldType === 'phone' || fieldType === 'tel') return 'phone';
+  if (fieldType === 'email') return 'email';
+
+  // Check phone patterns
+  if (PHONE_PATTERNS.some((p) => idLower.includes(p) || labelLower.includes(p))) {
+    return 'phone';
+  }
+
+  // Check email patterns
+  if (EMAIL_PATTERNS.some((p) => idLower.includes(p) || labelLower.includes(p))) {
+    return 'email';
+  }
+
+  // Check name patterns (but not if it's clearly something else like "company_name")
+  const nameExclusions = ['company', 'business', 'organization', 'event', 'product', 'project'];
+  const hasNamePattern = NAME_PATTERNS.some((p) => idLower.includes(p) || labelLower.includes(p));
+  const hasExclusion = nameExclusions.some((e) => idLower.includes(e) || labelLower.includes(e));
+  if (hasNamePattern && !hasExclusion) {
+    return 'name';
+  }
+
+  // Check zip patterns
+  if (ZIP_PATTERNS.some((p) => idLower.includes(p) || labelLower.includes(p))) {
+    return 'zip_code';
+  }
+
+  return null;
+}
 
 export function CustomFieldsStage({
   schema,
@@ -54,10 +95,19 @@ export function CustomFieldsStage({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const fieldFocusTime = useRef<Record<string, number>>({});
 
-  // Get custom fields (excluding identity fields)
-  const customFields = (schema.fields || []).filter(
-    (field) => !IDENTITY_FIELD_IDS.includes(field.id.toLowerCase())
-  );
+  // Separate identity fields from custom fields and track mappings
+  const allFields = schema.fields || [];
+  const identityFieldMappings: Array<{ field: FormFieldConfig; identityKey: IdentityFieldType }> = [];
+  const customFields: FormFieldConfig[] = [];
+
+  allFields.forEach((field) => {
+    const identityType = getIdentityFieldType(field);
+    if (identityType) {
+      identityFieldMappings.push({ field, identityKey: identityType });
+    } else {
+      customFields.push(field);
+    }
+  });
 
   // Has custom fields?
   const hasCustomFields = customFields.length > 0;
@@ -159,11 +209,20 @@ export function CustomFieldsStage({
       return;
     }
 
-    // Combine identity values with custom field values
-    const finalData = {
+    // Build final data: start with identity values
+    const finalData: Record<string, unknown> = {
       ...identityValues,
       ...formData,
     };
+
+    // Map identity values to the form's specific field IDs
+    // This ensures that if a form has a field like "phone_number" or "email_address",
+    // it gets populated with the value from the identity stage
+    identityFieldMappings.forEach(({ field, identityKey }) => {
+      if (identityKey && identityValues[identityKey] !== undefined) {
+        finalData[field.id] = identityValues[identityKey];
+      }
+    });
 
     await onSubmit(finalData);
   };
