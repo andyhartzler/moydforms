@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import { getVoteInfo, verifyMember, submitVote } from '@/lib/vote-api';
 import { PhoneVerification } from '@/components/vote/PhoneVerification';
 import { VoteNotMember } from '@/components/vote/VoteNotMember';
-import { VoteWelcome } from '@/components/vote/VoteWelcome';
 import { VoteStatusMessage } from '@/components/vote/VoteStatusMessage';
 import { PublicVoteForm } from '@/components/vote/PublicVoteForm';
 import { VoteConfirmation } from '@/components/vote/VoteConfirmation';
@@ -144,10 +143,10 @@ export default function PublicVotePage() {
   if (pageState === 'status_message') {
     return (
       <div className="px-4">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-md mx-auto">
           {/* Main Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+          <div className="text-center mb-6">
+            <h1 className="text-3xl font-bold text-white">
               Voting Portal
             </h1>
           </div>
@@ -161,33 +160,17 @@ export default function PublicVotePage() {
     );
   }
 
-  // Check if we're signed in (have member verification)
-  const isSignedIn = pageState === 'vote_form' || pageState === 'already_voted' || pageState === 'submitted';
-
   return (
     <div className="px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          {/* Main title - always "Voting Portal" */}
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-            Voting Portal
-          </h1>
-
-          {/* Show vote title as smaller header when signed in */}
-          {isSignedIn && (memberVerification?.vote_title || voteInfo?.vote_title) && (
-            <h2 className="text-xl md:text-2xl font-semibold text-white/90 mt-4">
-              {memberVerification?.vote_title || voteInfo?.vote_title}
-            </h2>
-          )}
-
-          {/* Description only shows during phone entry */}
-          {pageState === 'phone_entry' && voteInfo?.vote_description && (
-            <p className="text-white/80 text-lg mt-2">
-              {voteInfo.vote_description}
-            </p>
-          )}
-        </div>
+      <div className="max-w-md mx-auto">
+        {/* Header - only show for non-vote-form states */}
+        {pageState !== 'vote_form' && (
+          <div className="text-center mb-6">
+            <h1 className="text-3xl font-bold text-white">
+              Voting Portal
+            </h1>
+          </div>
+        )}
 
         {/* Phone Entry */}
         {pageState === 'phone_entry' && (
@@ -213,20 +196,20 @@ export default function PublicVotePage() {
 
         {/* Vote Form */}
         {pageState === 'vote_form' && memberVerification?.vote_schema && (
-          <div className="space-y-6">
-            <VoteWelcome memberName={memberVerification.member_name || 'Member'} />
-
+          <>
             {submitError && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                <p className="text-red-700">{submitError}</p>
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4 max-w-sm mx-auto">
+                <p className="text-red-700 text-sm text-center">{submitError}</p>
               </div>
             )}
 
             <PublicVoteForm
               schema={memberVerification.vote_schema}
+              voteTitle={memberVerification.vote_title || 'Vote'}
+              memberName={memberVerification.member_name || 'Member'}
               onSubmit={handleSubmitVote}
             />
-          </div>
+          </>
         )}
 
         {/* Submitted */}
