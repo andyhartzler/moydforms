@@ -5,6 +5,7 @@ export interface VoteInfo {
   vote_status: 'not_found' | 'not_active' | 'not_started' | 'ended' | 'open';
   voting_starts_at: string | null;
   voting_ends_at: string | null;
+  executive_only?: boolean;
   session_token: string;
 }
 
