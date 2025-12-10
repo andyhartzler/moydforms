@@ -29,7 +29,7 @@ export function AlreadyVoted({ memberName, voteTitle }: AlreadyVotedProps) {
       </div>
 
       <p className="text-sm text-gray-500">
-        Each member can only vote once. Your vote has been recorded.
+        Each member can only vote once.
       </p>
     </div>
   );
