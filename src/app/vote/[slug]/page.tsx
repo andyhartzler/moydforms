@@ -135,7 +135,7 @@ export default function PublicVotePage() {
           metadata: {
             found: result.is_member,
             member_name: result.member_name || undefined,
-            is_current_member: result.current_chapter_member === 'Yes',
+            is_eligible: result.is_eligible,
           },
         });
       }
@@ -319,8 +319,8 @@ export default function PublicVotePage() {
               schema={memberVerification.vote_schema}
               voteTitle={memberVerification.vote_title || 'Vote'}
               memberName={memberVerification.member_name || 'Member'}
-              memberId={memberVerification.member_id}
-              voteId={voteInfo?.vote_id}
+              memberId={memberVerification.member_id || undefined}
+              voteId={voteInfo?.vote_id || undefined}
               voteDescription={memberVerification.vote_description}
               supportingDocuments={memberVerification.supporting_documents}
               onSubmit={handleSubmitVote}
