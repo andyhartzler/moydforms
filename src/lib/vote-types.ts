@@ -80,4 +80,5 @@ export type VoteSubmissionData = Record<string, unknown>;
 export interface VoteSubmissionResult {
   success: boolean;
   error?: string;
+  vote_id?: string;
 }
