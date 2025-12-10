@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Loader2, CheckCircle, AlertCircle, Star, GripVertical, ChevronUp, ChevronDown, Check } from 'lucide-react';
+import { trackVoteFieldEvent } from '@/lib/voteAnalytics';
 import type { VoteSchema, VoteQuestion, VoteOption, SupportingDocument, QuestionType } from '@/lib/vote-types';
 
 // Helper function to extract text from HTML
@@ -20,6 +21,8 @@ interface PublicVoteFormProps {
   schema: VoteSchema;
   voteTitle: string;
   memberName: string;
+  memberId?: string;
+  voteId?: string;
   voteDescription?: string | null;
   supportingDocuments?: SupportingDocument[] | null;
   onSubmit: (voteData: Record<string, unknown>) => Promise<void>;
@@ -352,10 +355,11 @@ function YesNoQuestion({ question, value, onChange }: { question: VoteQuestion; 
 }
 
 // Main Form Component
-export function PublicVoteForm({ schema, voteTitle, memberName, voteDescription, supportingDocuments, onSubmit, disabled }: PublicVoteFormProps) {
+export function PublicVoteForm({ schema, voteTitle, memberName, memberId, voteId, voteDescription, supportingDocuments, onSubmit, disabled }: PublicVoteFormProps) {
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const fieldStartTimes = useRef<Record<string, number>>({});
 
   const firstName = memberName.split(' ')[0];
 
@@ -393,6 +397,27 @@ export function PublicVoteForm({ schema, voteTitle, memberName, voteDescription,
       return;
     }
 
+    // Track time spent on each field before submission
+    if (voteId) {
+      for (const [questionId, startTime] of Object.entries(fieldStartTimes.current)) {
+        if (startTime && answers[questionId] !== undefined && answers[questionId] !== null) {
+          const question = questions.find(q => q.id === questionId);
+          if (question) {
+            trackVoteFieldEvent({
+              form_id: voteId,
+              field_id: questionId,
+              field_type: question.question_type,
+              event_type: 'time_spent',
+              member_id: memberId,
+              metadata: {
+                duration_ms: Date.now() - startTime,
+              },
+            }).catch(err => console.error('Failed to track field time_spent:', err));
+          }
+        }
+      }
+    }
+
     setSubmitting(true);
     try {
       await onSubmit(answers);
@@ -417,6 +442,43 @@ export function PublicVoteForm({ schema, voteTitle, memberName, voteDescription,
         return 'Rank the options in order of preference';
       default:
         return '';
+    }
+  };
+
+  const handleFieldChange = (questionId: string, questionType: QuestionType, newValue: unknown) => {
+    const previousValue = answers[questionId];
+    const isFirstSelection = previousValue === undefined || previousValue === null;
+
+    // Track field interaction on first focus
+    if (isFirstSelection && voteId) {
+      trackVoteFieldEvent({
+        form_id: voteId,
+        field_id: questionId,
+        field_type: questionType,
+        event_type: 'interaction',
+        member_id: memberId,
+      }).catch(err => console.error('Failed to track field interaction:', err));
+
+      // Start timing for this field
+      fieldStartTimes.current[questionId] = Date.now();
+    }
+
+    // Update answers
+    setAnswers({ ...answers, [questionId]: newValue });
+
+    // Track field completion
+    if (voteId && newValue !== null && newValue !== undefined && newValue !== '') {
+      trackVoteFieldEvent({
+        form_id: voteId,
+        field_id: questionId,
+        field_type: questionType,
+        event_type: isFirstSelection ? 'field_completed' : 'field_updated',
+        member_id: memberId,
+        metadata: {
+          has_selection: true,
+          changed: !isFirstSelection,
+        },
+      }).catch(err => console.error('Failed to track field event:', err));
     }
   };
 
@@ -445,7 +507,7 @@ export function PublicVoteForm({ schema, voteTitle, memberName, voteDescription,
           <MultipleChoiceQuestion
             question={question}
             value={(answers[question.id] as string) || null}
-            onChange={(v) => setAnswers({ ...answers, [question.id]: v })}
+            onChange={(v) => handleFieldChange(question.id, 'multiple_choice', v)}
           />
         )}
 
@@ -453,7 +515,7 @@ export function PublicVoteForm({ schema, voteTitle, memberName, voteDescription,
           <RatingScaleQuestion
             question={question}
             value={(answers[question.id] as number) || null}
-            onChange={(v) => setAnswers({ ...answers, [question.id]: v })}
+            onChange={(v) => handleFieldChange(question.id, 'rating_scale', v)}
           />
         )}
 
@@ -461,7 +523,7 @@ export function PublicVoteForm({ schema, voteTitle, memberName, voteDescription,
           <MultipleSelectQuestion
             question={question}
             value={(answers[question.id] as string[]) || []}
-            onChange={(v) => setAnswers({ ...answers, [question.id]: v })}
+            onChange={(v) => handleFieldChange(question.id, 'multiple_select', v)}
           />
         )}
 
@@ -469,7 +531,7 @@ export function PublicVoteForm({ schema, voteTitle, memberName, voteDescription,
           <ShortAnswerQuestion
             question={question}
             value={(answers[question.id] as string) || ''}
-            onChange={(v) => setAnswers({ ...answers, [question.id]: v })}
+            onChange={(v) => handleFieldChange(question.id, 'short_answer', v)}
           />
         )}
 
@@ -477,7 +539,7 @@ export function PublicVoteForm({ schema, voteTitle, memberName, voteDescription,
           <RankedChoiceQuestion
             question={question}
             value={(answers[question.id] as string[]) || []}
-            onChange={(v) => setAnswers({ ...answers, [question.id]: v })}
+            onChange={(v) => handleFieldChange(question.id, 'ranked_choice', v)}
           />
         )}
 
@@ -485,7 +547,7 @@ export function PublicVoteForm({ schema, voteTitle, memberName, voteDescription,
           <YesNoQuestion
             question={question}
             value={(answers[question.id] as boolean) || null}
-            onChange={(v) => setAnswers({ ...answers, [question.id]: v })}
+            onChange={(v) => handleFieldChange(question.id, 'yes_no', v)}
           />
         )}
       </div>

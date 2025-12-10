@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { getVoteInfo, verifyMember, submitVote } from '@/lib/vote-api';
 import { PhoneVerification } from '@/components/vote/PhoneVerification';
@@ -10,6 +10,8 @@ import { VoteStatusMessage } from '@/components/vote/VoteStatusMessage';
 import { PublicVoteForm } from '@/components/vote/PublicVoteForm';
 import { VoteConfirmation } from '@/components/vote/VoteConfirmation';
 import { AlreadyVoted } from '@/components/vote/AlreadyVoted';
+import { trackVoteEvent, linkSessionToMember, linkSessionToVote } from '@/lib/voteAnalytics';
+import { clearSessionToken } from '@/lib/analytics';
 import type { VoteInfo, MemberVerification } from '@/lib/vote-types';
 
 type PageState =
@@ -34,11 +36,27 @@ export default function PublicVotePage() {
   const [verifyError, setVerifyError] = useState<string>('');
   const [submitError, setSubmitError] = useState<string>('');
 
+  const hasTrackedView = useRef(false);
+  const hasTrackedStart = useRef(false);
+
   const loadVoteInfo = useCallback(async () => {
     try {
       const info = await getVoteInfo(slug);
       setVoteInfo(info);
       setSessionToken(info.session_token);
+
+      // Track page view
+      if (!hasTrackedView.current && info.vote_id) {
+        await trackVoteEvent({
+          form_id: info.vote_id,
+          event_type: 'view',
+          metadata: {
+            vote_title: info.vote_title,
+            page_url: typeof window !== 'undefined' ? window.location.href : null,
+          },
+        });
+        hasTrackedView.current = true;
+      }
 
       if (info.vote_status !== 'open') {
         setPageState('status_message');
@@ -65,14 +83,67 @@ export default function PublicVotePage() {
     loadVoteInfo();
   }, [loadVoteInfo]);
 
+  // Track abandon event if user leaves without completing
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (hasTrackedStart.current && pageState !== 'submitted' && voteInfo?.vote_id) {
+        // Use sendBeacon for reliable tracking on page leave
+        const payload = JSON.stringify({
+          form_id: voteInfo.vote_id,
+          event_type: 'abandon',
+          member_id: memberVerification?.member_id || null,
+          session_token: sessionStorage.getItem('vote_session_token'),
+          timestamp: new Date().toISOString(),
+          metadata: { abandoned_at_step: pageState },
+        });
+
+        navigator.sendBeacon(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/form_analytics`,
+          payload
+        );
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [voteInfo?.vote_id, memberVerification?.member_id, pageState]);
+
   const handleVerifyPhone = async (phone: string) => {
     setVerifying(true);
     setVerifyError('');
 
     try {
+      // Track phone entered
+      if (voteInfo?.vote_id) {
+        await trackVoteEvent({
+          form_id: voteInfo.vote_id,
+          event_type: 'phone_entered',
+          metadata: { phone_last_four: phone.slice(-4) },
+        });
+      }
+
       const result = await verifyMember(phone, slug, sessionToken || undefined);
       setMemberVerification(result);
       setSessionToken(result.session_token);
+
+      // Track identity found
+      if (voteInfo?.vote_id) {
+        await trackVoteEvent({
+          form_id: voteInfo.vote_id,
+          event_type: 'identity_found',
+          member_id: result.member_id || undefined,
+          metadata: {
+            found: result.is_member,
+            member_name: result.member_name || undefined,
+            is_current_member: result.current_chapter_member === 'Yes',
+          },
+        });
+      }
+
+      // Link session to member if verified
+      if (result.is_member && voteInfo?.vote_id && result.member_id) {
+        await linkSessionToMember(voteInfo.vote_id, result.member_id);
+      }
 
       if (!result.is_member) {
         setPageState('not_member');
@@ -87,6 +158,15 @@ export default function PublicVotePage() {
         });
         setPageState('status_message');
       } else {
+        // Track start event when vote form is about to be shown
+        if (!hasTrackedStart.current && voteInfo?.vote_id && result.member_id) {
+          await trackVoteEvent({
+            form_id: voteInfo.vote_id,
+            event_type: 'start',
+            member_id: result.member_id,
+          });
+          hasTrackedStart.current = true;
+        }
         setPageState('vote_form');
       }
     } catch (err) {
@@ -112,6 +192,25 @@ export default function PublicVotePage() {
       );
 
       if (result.success) {
+        // Track submit event with vote_id from the response
+        await trackVoteEvent({
+          form_id: memberVerification.vote_id,
+          event_type: 'submit',
+          member_id: memberVerification.member_id,
+          vote_id: result.vote_id,
+          metadata: {
+            questions_answered: Object.keys(voteData).length,
+          },
+        });
+
+        // Link all session events to the vote_id
+        if (result.vote_id) {
+          await linkSessionToVote(memberVerification.vote_id, result.vote_id);
+        }
+
+        // Clear session token
+        clearSessionToken();
+
         setPageState('submitted');
       } else {
         setSubmitError(result.error || 'Failed to submit vote');
@@ -220,6 +319,8 @@ export default function PublicVotePage() {
               schema={memberVerification.vote_schema}
               voteTitle={memberVerification.vote_title || 'Vote'}
               memberName={memberVerification.member_name || 'Member'}
+              memberId={memberVerification.member_id}
+              voteId={voteInfo?.vote_id}
               voteDescription={memberVerification.vote_description}
               supportingDocuments={memberVerification.supporting_documents}
               onSubmit={handleSubmitVote}
