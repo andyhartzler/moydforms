@@ -29,7 +29,6 @@ export function VoteConfirmation({ voteTitle, memberName }: VoteConfirmationProp
       </div>
 
       <p className="text-sm text-gray-500">
-        Your vote is anonymous and has been securely recorded.
         You can close this page now.
       </p>
     </div>
