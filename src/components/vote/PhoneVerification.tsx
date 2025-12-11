@@ -1,15 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { Phone, ArrowRight, Loader2 } from 'lucide-react';
+import { Phone, ArrowRight, Loader2, Users } from 'lucide-react';
 
 interface PhoneVerificationProps {
   onVerify: (phone: string) => Promise<void>;
   loading: boolean;
   error?: string;
+  committeeRestricted?: string | null;
 }
 
-export function PhoneVerification({ onVerify, loading, error }: PhoneVerificationProps) {
+export function PhoneVerification({ onVerify, loading, error, committeeRestricted }: PhoneVerificationProps) {
   const [phone, setPhone] = useState('');
 
   const formatPhoneInput = (value: string) => {
@@ -43,6 +44,23 @@ export function PhoneVerification({ onVerify, loading, error }: PhoneVerificatio
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto">
+      {/* Committee Restriction Notice */}
+      {committeeRestricted && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <Users className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-blue-900">
+                Committee Restricted Vote
+              </p>
+              <p className="text-sm text-blue-700 mt-1">
+                This vote is only for members of the {committeeRestricted}.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="text-center mb-6">
         <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
           <Phone className="w-8 h-8 text-primary" />
