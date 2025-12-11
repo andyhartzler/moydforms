@@ -7,6 +7,7 @@ interface VoteNotEligibleProps {
   voteSlug: string;
   memberName: string;
   eligibilityReason?: string;
+  committeeRestricted?: string | null;
   onTryAgain: () => void;
 }
 
@@ -15,10 +16,28 @@ export function VoteNotEligible({
   voteSlug,
   memberName,
   eligibilityReason,
+  committeeRestricted,
   onTryAgain
 }: VoteNotEligibleProps) {
   const firstName = memberName.split(' ')[0];
   const voteUrl = `https://forms.moyoungdemocrats.org/vote/${voteSlug}`;
+
+  // Special handling for College Democrats and High School Democrats
+  const isCollegeDems = committeeRestricted === 'College Democrats';
+  const isHighSchoolDems = committeeRestricted === 'High School Democrats';
+
+  const getEligibilityMessage = () => {
+    if (isCollegeDems) {
+      return 'this ballot can only be accessed by members of the Missouri College Democrats.';
+    }
+    if (isHighSchoolDems) {
+      return 'this ballot can only be accessed by members of the Missouri High School Democrats.';
+    }
+    if (committeeRestricted) {
+      return `this ballot can only be accessed by members of the ${committeeRestricted}.`;
+    }
+    return eligibilityReason || 'you are not eligible for this vote.';
+  };
 
   // Build mailto link with pre-populated email
   const emailSubject = encodeURIComponent(`Question About Vote Eligibility: ${voteTitle}`);
@@ -42,7 +61,7 @@ export function VoteNotEligible({
       </h2>
 
       <p className="text-gray-600 mb-2">
-        Hi {firstName}, {eligibilityReason || 'you are not eligible for this vote'}.
+        Hi {firstName}, {getEligibilityMessage()}
       </p>
 
       <p className="text-sm text-gray-500 mb-5">

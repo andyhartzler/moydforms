@@ -35,6 +35,7 @@ export default function PublicVotePage() {
   const [verifying, setVerifying] = useState(false);
   const [verifyError, setVerifyError] = useState<string>('');
   const [submitError, setSubmitError] = useState<string>('');
+  const [enteredPhone, setEnteredPhone] = useState<string>('');
 
   const hasTrackedView = useRef(false);
   const hasTrackedStart = useRef(false);
@@ -112,6 +113,7 @@ export default function PublicVotePage() {
   const handleVerifyPhone = async (phone: string) => {
     setVerifying(true);
     setVerifyError('');
+    setEnteredPhone(phone);
 
     try {
       // Track phone entered
@@ -286,7 +288,12 @@ export default function PublicVotePage() {
 
         {/* Not a Member */}
         {pageState === 'not_member' && (
-          <VoteNotMember onTryAgain={handleTryAgain} />
+          <VoteNotMember
+            voteTitle={voteInfo?.vote_title || 'this vote'}
+            voteSlug={slug}
+            enteredPhone={enteredPhone}
+            onTryAgain={handleTryAgain}
+          />
         )}
 
         {/* Not Eligible */}
@@ -296,6 +303,7 @@ export default function PublicVotePage() {
             voteSlug={slug}
             memberName={memberVerification.member_name || 'Member'}
             eligibilityReason={memberVerification.eligibility_reason || undefined}
+            committeeRestricted={memberVerification.committee_restricted}
             onTryAgain={handleTryAgain}
           />
         )}
