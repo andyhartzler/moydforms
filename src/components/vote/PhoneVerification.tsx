@@ -42,6 +42,30 @@ export function PhoneVerification({ onVerify, loading, error, committeeRestricte
 
   const isValid = phone.replace(/\D/g, '').length >= 10;
 
+  // Special handling for College Democrats and High School Democrats
+  const isCollegeDems = committeeRestricted === 'College Democrats';
+  const isHighSchoolDems = committeeRestricted === 'High School Democrats';
+  const isAffiliateOrg = isCollegeDems || isHighSchoolDems;
+
+  const getHeaderText = () => {
+    if (!committeeRestricted) return 'Verify Membership';
+    if (isAffiliateOrg) return 'Verify Membership';
+    return 'Verify Committee Membership';
+  };
+
+  const getDescriptionText = () => {
+    if (!committeeRestricted) {
+      return "Enter your phone number to verify you're a Missouri Young Democrats member.";
+    }
+    if (isCollegeDems) {
+      return "Enter your phone number to verify you're a member of the Missouri College Democrats.";
+    }
+    if (isHighSchoolDems) {
+      return "Enter your phone number to verify you're a member of the Missouri High School Democrats.";
+    }
+    return `Enter your phone number to verify you're a member of the ${committeeRestricted}.`;
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto">
       <div className="text-center mb-6">
@@ -49,12 +73,10 @@ export function PhoneVerification({ onVerify, loading, error, committeeRestricte
           <Phone className="w-8 h-8 text-primary" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          {committeeRestricted ? 'Verify Committee Membership' : 'Verify Membership'}
+          {getHeaderText()}
         </h2>
         <p className="text-gray-600">
-          {committeeRestricted
-            ? `Enter your phone number to verify you're a member of the ${committeeRestricted}.`
-            : "Enter your phone number to verify you're a Missouri Young Democrats member."}
+          {getDescriptionText()}
         </p>
       </div>
 
