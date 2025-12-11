@@ -296,6 +296,7 @@ export default function PublicVotePage() {
             voteSlug={slug}
             memberName={memberVerification.member_name || 'Member'}
             eligibilityReason={memberVerification.eligibility_reason || undefined}
+            committeeRestricted={memberVerification.committee_restricted}
             onTryAgain={handleTryAgain}
           />
         )}
