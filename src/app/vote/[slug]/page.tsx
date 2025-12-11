@@ -72,6 +72,7 @@ export default function PublicVotePage() {
         vote_status: 'not_found',
         voting_starts_at: null,
         voting_ends_at: null,
+        committee_restricted: null,
         session_token: '',
       });
       setPageState('status_message');
@@ -279,6 +280,7 @@ export default function PublicVotePage() {
             onVerify={handleVerifyPhone}
             loading={verifying}
             error={verifyError}
+            committeeRestricted={voteInfo?.committee_restricted}
           />
         )}
 
