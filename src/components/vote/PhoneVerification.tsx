@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Phone, ArrowRight, Loader2, Users } from 'lucide-react';
+import { Phone, ArrowRight, Loader2, AlertTriangle } from 'lucide-react';
 
 interface PhoneVerificationProps {
   onVerify: (phone: string) => Promise<void>;
@@ -46,18 +46,15 @@ export function PhoneVerification({ onVerify, loading, error, committeeRestricte
     <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto">
       {/* Committee Restriction Notice */}
       {committeeRestricted && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <div className="flex items-start gap-3">
-            <Users className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-blue-900">
-                Committee Restricted Vote
-              </p>
-              <p className="text-sm text-blue-700 mt-1">
-                This vote is only for members of the {committeeRestricted}.
-              </p>
-            </div>
-          </div>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 text-center">
+          <AlertTriangle className="w-6 h-6 text-yellow-600 mx-auto mb-2" />
+          <p className="text-sm font-medium text-yellow-900">
+            Committee Members Only
+          </p>
+          <p className="text-sm text-yellow-700 mt-1">
+            This ballot can only be accessed by members of the<br />
+            {committeeRestricted}.
+          </p>
         </div>
       )}
 
