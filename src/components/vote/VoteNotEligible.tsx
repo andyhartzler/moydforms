@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldX, Mail, UserPlus } from 'lucide-react';
+import { ShieldX, Mail } from 'lucide-react';
 
 interface VoteNotEligibleProps {
   voteTitle: string;
@@ -25,7 +25,6 @@ export function VoteNotEligible({
   // Special handling for College Democrats and High School Democrats
   const isCollegeDems = committeeRestricted === 'College Democrats';
   const isHighSchoolDems = committeeRestricted === 'High School Democrats';
-  const isAffiliateOrg = isCollegeDems || isHighSchoolDems;
 
   const getEligibilityMessage = () => {
     if (isCollegeDems) {
@@ -51,8 +50,6 @@ export function VoteNotEligible({
   );
   const mailtoLink = `mailto:eboard@moyoungdemocrats.org?subject=${emailSubject}&body=${emailBody}`;
 
-  const membershipFormUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSd5Hd_cgdFmgE7f9gdIxmwXSAdxkuFuITENO_x5VkhDrtR8Ag/viewform';
-
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 max-w-sm mx-auto text-center">
       <div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -66,18 +63,6 @@ export function VoteNotEligible({
       <p className="text-gray-600 mb-2">
         Hi {firstName}, {getEligibilityMessage()}
       </p>
-
-      {isAffiliateOrg && (
-        <a
-          href={membershipFormUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 w-full bg-primary text-white px-4 py-3 rounded-lg hover:bg-primary/90 font-medium transition-colors mb-4"
-        >
-          <UserPlus className="w-5 h-5" />
-          Become a Member
-        </a>
-      )}
 
       <p className="text-sm text-gray-500 mb-5">
         If you believe this message is shown in error, please reach out to{' '}
