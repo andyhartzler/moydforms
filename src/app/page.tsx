@@ -1,16 +1,23 @@
 import { createClient } from '@/lib/supabase/server';
 import FormCard from '@/components/FormCard';
+import { checkFormAvailability, FormRecord } from '@/types/forms';
 
 export default async function HomePage() {
   const supabase = createClient();
 
   // Get active public forms (not voting forms)
-  const { data: forms } = await supabase
+  const { data: allForms } = await supabase
     .from('form_schemas')
     .select('*')
     .eq('status', 'active')
     .in('form_type', ['survey', 'registration', 'feedback'])
     .order('created_at', { ascending: false });
+
+  // Filter out forms that have closed (by closes_at date or max_submissions)
+  const forms = allForms?.filter((form) => {
+    const availability = checkFormAvailability(form as FormRecord);
+    return availability.available;
+  });
 
   return (
     <div className="min-h-screen">
