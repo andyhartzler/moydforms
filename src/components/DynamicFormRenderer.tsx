@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { FormFieldConfig, FormSchema, ConditionalOperator, normalizeFieldType, ValidationConfig } from '@/types/forms';
+import { FormFieldConfig, FormSchema, ConditionalOperator, normalizeFieldType, ValidationConfig, FieldType } from '@/types/forms';
 import {
   TextInput,
   TextArea,
@@ -24,6 +24,84 @@ import {
   Autocomplete,
 } from './form-fields';
 import { ChevronLeft, ChevronRight, Loader2, Send } from 'lucide-react';
+
+// Map question_type values to FieldType values
+const QUESTION_TYPE_MAP: Record<string, FieldType> = {
+  'short_answer': 'text',
+  'long_answer': 'textarea',
+  'textarea': 'textarea',
+  'phone': 'phone',
+  'email': 'email',
+  'radio': 'radio',
+  'dropdown': 'dropdown',
+  'checkbox': 'checkbox',
+  'checkbox_group': 'checkbox_group',
+  'file_upload': 'file_picker',
+  'date': 'date_picker',
+  'date_picker': 'date_picker',
+  'time': 'time_picker',
+  'time_picker': 'time_picker',
+  'number': 'number',
+  'url': 'url',
+  'hidden': 'text',
+  'section_header': 'text',
+};
+
+// Question format from new schema
+interface QuestionFormat {
+  id: string;
+  text: string;
+  question_type: string;
+  required?: boolean;
+  options?: Array<{ id?: string; value: string; label: string }>;
+  placeholder?: string;
+  helper_text?: string;
+  description?: string;
+  validation?: Record<string, unknown>;
+  condition?: { field: string; value: string } | { and?: Array<{ field: string; value: string }> };
+  page?: number;
+  file_config?: Record<string, unknown>;
+}
+
+// Extended schema type to handle both formats
+interface ExtendedSchema extends FormSchema {
+  questions?: QuestionFormat[];
+}
+
+// Normalize questions format to fields format
+function normalizeSchemaToFields(schema: ExtendedSchema): FormFieldConfig[] {
+  // If schema has fields array, use it directly
+  if (schema.fields && schema.fields.length > 0) {
+    return schema.fields;
+  }
+
+  // If schema has questions array, convert to fields format
+  if (schema.questions && schema.questions.length > 0) {
+    return schema.questions
+      .filter((q) => q.question_type !== 'section_header' && q.question_type !== 'hidden')
+      .map((q): FormFieldConfig => ({
+        id: q.id,
+        type: QUESTION_TYPE_MAP[q.question_type] || 'text',
+        label: q.text,
+        placeholder: q.placeholder,
+        help: q.helper_text || q.description,
+        required: q.required ?? false,
+        options: q.options?.map((opt) => ({
+          value: opt.value,
+          label: opt.label,
+        })),
+        validation: q.validation as FormFieldConfig['validation'],
+        conditionalFieldId: q.condition && 'field' in q.condition ? q.condition.field : undefined,
+        conditionalValue: q.condition && 'value' in q.condition ? q.condition.value : undefined,
+        showWhenConditionMet: q.condition ? true : undefined,
+        pageNumber: q.page,
+        allowedExtensions: q.file_config?.accept as string[] | undefined,
+        maxFileSizeMB: q.file_config?.max_size_mb as number | undefined,
+      }));
+  }
+
+  return [];
+}
 
 interface DynamicFormRendererProps {
   schema: FormSchema;
@@ -56,8 +134,8 @@ export default function DynamicFormRenderer({
   const [hasStarted, setHasStarted] = useState(false);
   const fieldFocusTime = useRef<Record<string, number>>({});
 
-  // Calculate total pages
-  const fields = schema.fields || [];
+  // Calculate total pages - support both 'fields' and 'questions' formats
+  const fields = normalizeSchemaToFields(schema as ExtendedSchema);
   const pageNumbers = Array.from(new Set(fields.map(f => f.pageNumber ?? 0))).sort((a, b) => a - b);
   const totalPages = pageNumbers.length || 1;
 
