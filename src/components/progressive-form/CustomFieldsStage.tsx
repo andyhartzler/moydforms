@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import { FormFieldConfig, FormSchema, normalizeFieldType, FieldType } from '@/types/forms';
 import { formatPhoneDisplay } from '@/lib/phone';
 import {
@@ -24,7 +24,7 @@ import {
   ImageUpload,
   Autocomplete,
 } from '@/components/form-fields';
-import { Check, Loader2, Send, ChevronLeft } from 'lucide-react';
+import { Check, Loader2, Send, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CustomFieldsStageProps {
   schema: FormSchema;
@@ -64,9 +64,21 @@ const QUESTION_TYPE_MAP: Record<string, FieldType> = {
   'time_picker': 'time_picker',
   'number': 'number',
   'url': 'url',
-  'hidden': 'text', // Hidden fields won't render anyway
-  'section_header': 'text', // Will be handled specially
+  'hidden': 'text',
+  'section_header': 'section_header',
 };
+
+// Condition type from schema
+interface SimpleCondition {
+  field: string;
+  value: string;
+}
+
+interface AndCondition {
+  and: SimpleCondition[];
+}
+
+type Condition = SimpleCondition | AndCondition;
 
 // Question format from new schema (questions array)
 interface QuestionFormat {
@@ -79,9 +91,17 @@ interface QuestionFormat {
   helper_text?: string;
   description?: string;
   validation?: Record<string, unknown>;
-  condition?: { field: string; value: string } | { and?: Array<{ field: string; value: string }> };
+  condition?: Condition;
   page?: number;
   file_config?: Record<string, unknown>;
+}
+
+// Extended field config to include condition and section header info
+interface ExtendedFieldConfig extends FormFieldConfig {
+  isSectionHeader?: boolean;
+  sectionDescription?: string;
+  condition?: Condition;
+  originalQuestionType?: string;
 }
 
 // Extended schema type to handle both formats
@@ -89,37 +109,37 @@ interface ExtendedSchema extends FormSchema {
   questions?: QuestionFormat[];
 }
 
-// Normalize questions format to fields format
-function normalizeSchemaToFields(schema: ExtendedSchema): FormFieldConfig[] {
+// Normalize questions format to fields format (including section headers)
+function normalizeSchemaToFields(schema: ExtendedSchema): ExtendedFieldConfig[] {
   // If schema has fields array, use it directly
   if (schema.fields && schema.fields.length > 0) {
-    return schema.fields;
+    return schema.fields as ExtendedFieldConfig[];
   }
 
   // If schema has questions array, convert to fields format
   if (schema.questions && schema.questions.length > 0) {
     return schema.questions
-      .filter((q) => q.question_type !== 'section_header' && q.question_type !== 'hidden')
-      .map((q): FormFieldConfig => ({
+      .filter((q) => q.question_type !== 'hidden')
+      .map((q): ExtendedFieldConfig => ({
         id: q.id,
         type: QUESTION_TYPE_MAP[q.question_type] || 'text',
         label: q.text,
         placeholder: q.placeholder,
-        help: q.helper_text || q.description,
+        help: q.helper_text,
         required: q.required ?? false,
         options: q.options?.map((opt) => ({
           value: opt.value,
           label: opt.label,
         })),
         validation: q.validation as FormFieldConfig['validation'],
-        // Store condition for later use
-        conditionalFieldId: q.condition && 'field' in q.condition ? q.condition.field : undefined,
-        conditionalValue: q.condition && 'value' in q.condition ? q.condition.value : undefined,
-        showWhenConditionMet: q.condition ? true : undefined,
         pageNumber: q.page,
-        // Pass through file config for file upload fields
         allowedExtensions: q.file_config?.accept as string[] | undefined,
         maxFileSizeMB: q.file_config?.max_size_mb as number | undefined,
+        // Extended properties
+        isSectionHeader: q.question_type === 'section_header',
+        sectionDescription: q.description,
+        condition: q.condition,
+        originalQuestionType: q.question_type,
       }));
   }
 
@@ -127,7 +147,10 @@ function normalizeSchemaToFields(schema: ExtendedSchema): FormFieldConfig[] {
 }
 
 // Check if a field is an identity field and return which type
-function getIdentityFieldType(field: FormFieldConfig): IdentityFieldType {
+function getIdentityFieldType(field: ExtendedFieldConfig): IdentityFieldType {
+  // Skip section headers
+  if (field.isSectionHeader) return null;
+
   const idLower = field.id.toLowerCase().replace(/[-\s]/g, '_');
   const labelLower = field.label.toLowerCase().replace(/[-\s]/g, '_');
   const fieldType = field.type.toLowerCase();
@@ -147,7 +170,7 @@ function getIdentityFieldType(field: FormFieldConfig): IdentityFieldType {
   }
 
   // Check name patterns (but not if it's clearly something else like "company_name")
-  const nameExclusions = ['company', 'business', 'organization', 'event', 'product', 'project'];
+  const nameExclusions = ['company', 'business', 'organization', 'event', 'product', 'project', 'chapter', 'school', 'college', 'university'];
   const hasNamePattern = NAME_PATTERNS.some((p) => idLower.includes(p) || labelLower.includes(p));
   const hasExclusion = nameExclusions.some((e) => idLower.includes(e) || labelLower.includes(e));
   if (hasNamePattern && !hasExclusion) {
@@ -160,6 +183,23 @@ function getIdentityFieldType(field: FormFieldConfig): IdentityFieldType {
   }
 
   return null;
+}
+
+// Evaluate a condition against the current form data
+function evaluateCondition(condition: Condition | undefined, formData: Record<string, unknown>): boolean {
+  if (!condition) return true; // No condition means always show
+
+  // Handle AND condition
+  if ('and' in condition && Array.isArray(condition.and)) {
+    return condition.and.every((c) => formData[c.field] === c.value);
+  }
+
+  // Handle simple condition
+  if ('field' in condition && 'value' in condition) {
+    return formData[condition.field] === condition.value;
+  }
+
+  return true; // Unknown condition format, show by default
 }
 
 export function CustomFieldsStage({
@@ -175,28 +215,74 @@ export function CustomFieldsStage({
 }: CustomFieldsStageProps) {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const fieldFocusTime = useRef<Record<string, number>>({});
 
-  // Separate identity fields from custom fields and track mappings
-  // Support both 'fields' format and 'questions' format
-  const allFields = normalizeSchemaToFields(schema as ExtendedSchema);
-  const identityFieldMappings: Array<{ field: FormFieldConfig; identityKey: IdentityFieldType }> = [];
-  const customFields: FormFieldConfig[] = [];
+  // Get all fields from schema
+  const allFields = useMemo(() => normalizeSchemaToFields(schema as ExtendedSchema), [schema]);
 
-  allFields.forEach((field) => {
-    const identityType = getIdentityFieldType(field);
-    if (identityType) {
-      identityFieldMappings.push({ field, identityKey: identityType });
-    } else {
-      customFields.push(field);
+  // Separate identity fields from custom fields
+  const { identityFieldMappings, customFields } = useMemo(() => {
+    const mappings: Array<{ field: ExtendedFieldConfig; identityKey: IdentityFieldType }> = [];
+    const custom: ExtendedFieldConfig[] = [];
+
+    allFields.forEach((field) => {
+      const identityType = getIdentityFieldType(field);
+      if (identityType) {
+        mappings.push({ field, identityKey: identityType });
+      } else {
+        custom.push(field);
+      }
+    });
+
+    return { identityFieldMappings: mappings, customFields: custom };
+  }, [allFields]);
+
+  // Get unique page numbers
+  const pageNumbers = useMemo(() => {
+    const pages = new Set<number>();
+    customFields.forEach((f) => {
+      if (f.pageNumber) pages.add(f.pageNumber);
+    });
+    return Array.from(pages).sort((a, b) => a - b);
+  }, [customFields]);
+
+  const totalPages = pageNumbers.length || 1;
+  const isMultiPage = totalPages > 1;
+
+  // Check if a field should be visible based on its condition
+  const shouldShowField = useCallback(
+    (field: ExtendedFieldConfig): boolean => {
+      return evaluateCondition(field.condition, formData);
+    },
+    [formData]
+  );
+
+  // Get fields for current page that should be visible
+  const currentPageFields = useMemo(() => {
+    if (!isMultiPage) {
+      // Single page form - show all custom fields that pass condition
+      return customFields.filter(shouldShowField);
     }
-  });
 
-  // Has custom fields?
-  const hasCustomFields = customFields.length > 0;
+    // Multi-page form - filter by page number and condition
+    const targetPage = pageNumbers[currentPage - 1] || pageNumbers[0];
+    return customFields
+      .filter((f) => f.pageNumber === targetPage)
+      .filter(shouldShowField);
+  }, [customFields, currentPage, pageNumbers, isMultiPage, shouldShowField]);
+
+  // Check if there are any visible fields on the current page
+  const hasVisibleFields = currentPageFields.some((f) => !f.isSectionHeader);
 
   // Validation logic
-  const validateField = (field: FormFieldConfig, value: unknown): string | null => {
+  const validateField = (field: ExtendedFieldConfig, value: unknown): string | null => {
+    // Skip section headers
+    if (field.isSectionHeader) return null;
+
+    // Skip hidden fields (condition not met)
+    if (!shouldShowField(field)) return null;
+
     // Check required
     if (field.required) {
       if (value === undefined || value === null || value === '') {
@@ -240,13 +326,42 @@ export function CustomFieldsStage({
       return `Maximum length is ${maxLength} characters`;
     }
 
+    // Pattern validation
+    if (validation.pattern && typeof value === 'string') {
+      try {
+        const regex = new RegExp(validation.pattern as string);
+        if (!regex.test(value)) {
+          return validation.message || 'Invalid format';
+        }
+      } catch {
+        // Invalid regex, skip validation
+      }
+    }
+
     return null;
+  };
+
+  const validateCurrentPage = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    currentPageFields.forEach((field) => {
+      if (field.isSectionHeader) return;
+      const error = validateField(field, formData[field.id]);
+      if (error) {
+        newErrors[field.id] = error;
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const validateAllFields = (): boolean => {
     const newErrors: Record<string, string> = {};
 
     customFields.forEach((field) => {
+      if (field.isSectionHeader) return;
+      if (!shouldShowField(field)) return; // Skip hidden fields
       const error = validateField(field, formData[field.id]);
       if (error) {
         newErrors[field.id] = error;
@@ -285,6 +400,16 @@ export function CustomFieldsStage({
     }
   };
 
+  const goToNextPage = () => {
+    if (validateCurrentPage()) {
+      setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    }
+  };
+
+  const goToPrevPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -299,8 +424,6 @@ export function CustomFieldsStage({
     };
 
     // Map identity values to the form's specific field IDs
-    // This ensures that if a form has a field like "phone_number" or "email_address",
-    // it gets populated with the value from the identity stage
     identityFieldMappings.forEach(({ field, identityKey }) => {
       if (identityKey && identityValues[identityKey] !== undefined) {
         finalData[field.id] = identityValues[identityKey];
@@ -310,8 +433,25 @@ export function CustomFieldsStage({
     await onSubmit(finalData);
   };
 
+  // Render a section header
+  const renderSectionHeader = (field: ExtendedFieldConfig) => {
+    return (
+      <div key={field.id} className="mb-6 pb-4 border-b border-gray-200">
+        <h3 className="text-lg font-semibold text-gray-900">{field.label}</h3>
+        {field.sectionDescription && (
+          <p className="mt-1 text-sm text-gray-600">{field.sectionDescription}</p>
+        )}
+      </div>
+    );
+  };
+
   // Render a single field
-  const renderField = (field: FormFieldConfig) => {
+  const renderField = (field: ExtendedFieldConfig) => {
+    // Render section headers specially
+    if (field.isSectionHeader) {
+      return renderSectionHeader(field);
+    }
+
     const value = formData[field.id];
     const error = errors[field.id];
     const normalizedType = normalizeFieldType(field.type);
@@ -410,6 +550,10 @@ export function CustomFieldsStage({
     }
   };
 
+  const isLastPage = currentPage >= totalPages;
+  const isFirstPage = currentPage <= 1;
+  const progressPercent = isMultiPage ? (currentPage / totalPages) * 100 : 100;
+
   return (
     <form onSubmit={handleSubmit}>
       {/* Identity summary */}
@@ -437,83 +581,149 @@ export function CustomFieldsStage({
         </div>
       </div>
 
-      {/* Custom fields */}
-      {hasCustomFields && (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="p-8 space-y-1">{customFields.map(renderField)}</div>
-
-          {/* Submit button */}
-          <div className="px-8 pb-8 pt-4 border-t border-gray-100 bg-gray-50/50">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white font-semibold text-base hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <Send className="h-5 w-5" />
-                  {submitLabel}
-                </>
-              )}
-            </button>
-
-            {/* Back button */}
-            {onBack && (
-              <button
-                type="button"
-                onClick={onBack}
-                disabled={isLoading}
-                className="w-full mt-3 py-3 px-6 font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 flex items-center justify-center gap-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100"
-              >
-                <ChevronLeft className="h-5 w-5" />
-                Back
-              </button>
-            )}
+      {/* Multi-page progress indicator */}
+      {isMultiPage && (
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 mb-6">
+          <div className="flex justify-between items-center text-sm mb-2">
+            <span className="font-medium text-gray-700">
+              Page {currentPage} of {totalPages}
+            </span>
+            <span className="text-gray-500">{Math.round(progressPercent)}% complete</span>
+          </div>
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-2 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progressPercent}%` }}
+            />
           </div>
         </div>
       )}
 
-      {/* If no custom fields, show submit directly */}
-      {!hasCustomFields && (
+      {/* Custom fields */}
+      {hasVisibleFields && (
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="p-8 space-y-1">{currentPageFields.map(renderField)}</div>
+
+          {/* Navigation and submit buttons */}
+          <div className="px-8 pb-8 pt-4 border-t border-gray-100 bg-gray-50/50">
+            <div className="flex gap-3">
+              {/* Previous/Back button */}
+              {!isFirstPage ? (
+                <button
+                  type="button"
+                  onClick={goToPrevPage}
+                  disabled={isLoading}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                  Previous
+                </button>
+              ) : onBack ? (
+                <button
+                  type="button"
+                  onClick={onBack}
+                  disabled={isLoading}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                  Back
+                </button>
+              ) : null}
+
+              {/* Next/Submit button */}
+              {!isLastPage ? (
+                <button
+                  type="button"
+                  onClick={goToNextPage}
+                  disabled={isLoading}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl text-white font-semibold hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+                >
+                  Next
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white font-semibold text-base hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-5 w-5" />
+                      {submitLabel}
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* If no visible fields on current page (all conditional fields hidden), show message */}
+      {!hasVisibleFields && (
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
           <p className="text-gray-600 text-center mb-6">
-            Please review your information above and submit when ready.
+            Please review your information above and continue.
           </p>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white font-semibold text-base hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              <>
-                <Send className="h-5 w-5" />
-                {submitLabel}
-              </>
-            )}
-          </button>
+          <div className="flex gap-3">
+            {!isFirstPage ? (
+              <button
+                type="button"
+                onClick={goToPrevPage}
+                disabled={isLoading}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              >
+                <ChevronLeft className="h-5 w-5" />
+                Previous
+              </button>
+            ) : onBack ? (
+              <button
+                type="button"
+                onClick={onBack}
+                disabled={isLoading}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              >
+                <ChevronLeft className="h-5 w-5" />
+                Back
+              </button>
+            ) : null}
 
-          {/* Back button */}
-          {onBack && (
-            <button
-              type="button"
-              onClick={onBack}
-              disabled={isLoading}
-              className="w-full mt-3 py-3 px-6 font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 flex items-center justify-center gap-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100"
-            >
-              <ChevronLeft className="h-5 w-5" />
-              Back
-            </button>
-          )}
+            {!isLastPage ? (
+              <button
+                type="button"
+                onClick={goToNextPage}
+                disabled={isLoading}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl text-white font-semibold hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                Next
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="flex-1 flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white font-semibold text-base hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-5 w-5" />
+                    {submitLabel}
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         </div>
       )}
     </form>
