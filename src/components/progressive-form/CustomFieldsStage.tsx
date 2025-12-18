@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { FormFieldConfig, FormSchema, normalizeFieldType } from '@/types/forms';
+import { FormFieldConfig, FormSchema, normalizeFieldType, FieldType } from '@/types/forms';
 import { formatPhoneDisplay } from '@/lib/phone';
 import {
   TextInput,
@@ -45,6 +45,86 @@ const EMAIL_PATTERNS = ['email', 'e_mail', 'email_address', 'emailaddress'];
 const ZIP_PATTERNS = ['zip', 'zipcode', 'zip_code', 'postal', 'postal_code', 'postalcode'];
 
 type IdentityFieldType = 'phone' | 'name' | 'email' | 'zip_code' | null;
+
+// Map question_type values to FieldType values
+const QUESTION_TYPE_MAP: Record<string, FieldType> = {
+  'short_answer': 'text',
+  'long_answer': 'textarea',
+  'textarea': 'textarea',
+  'phone': 'phone',
+  'email': 'email',
+  'radio': 'radio',
+  'dropdown': 'dropdown',
+  'checkbox': 'checkbox',
+  'checkbox_group': 'checkbox_group',
+  'file_upload': 'file_picker',
+  'date': 'date_picker',
+  'date_picker': 'date_picker',
+  'time': 'time_picker',
+  'time_picker': 'time_picker',
+  'number': 'number',
+  'url': 'url',
+  'hidden': 'text', // Hidden fields won't render anyway
+  'section_header': 'text', // Will be handled specially
+};
+
+// Question format from new schema (questions array)
+interface QuestionFormat {
+  id: string;
+  text: string;
+  question_type: string;
+  required?: boolean;
+  options?: Array<{ id?: string; value: string; label: string }>;
+  placeholder?: string;
+  helper_text?: string;
+  description?: string;
+  validation?: Record<string, unknown>;
+  condition?: { field: string; value: string } | { and?: Array<{ field: string; value: string }> };
+  page?: number;
+  file_config?: Record<string, unknown>;
+}
+
+// Extended schema type to handle both formats
+interface ExtendedSchema extends FormSchema {
+  questions?: QuestionFormat[];
+}
+
+// Normalize questions format to fields format
+function normalizeSchemaToFields(schema: ExtendedSchema): FormFieldConfig[] {
+  // If schema has fields array, use it directly
+  if (schema.fields && schema.fields.length > 0) {
+    return schema.fields;
+  }
+
+  // If schema has questions array, convert to fields format
+  if (schema.questions && schema.questions.length > 0) {
+    return schema.questions
+      .filter((q) => q.question_type !== 'section_header' && q.question_type !== 'hidden')
+      .map((q): FormFieldConfig => ({
+        id: q.id,
+        type: QUESTION_TYPE_MAP[q.question_type] || 'text',
+        label: q.text,
+        placeholder: q.placeholder,
+        help: q.helper_text || q.description,
+        required: q.required ?? false,
+        options: q.options?.map((opt) => ({
+          value: opt.value,
+          label: opt.label,
+        })),
+        validation: q.validation as FormFieldConfig['validation'],
+        // Store condition for later use
+        conditionalFieldId: q.condition && 'field' in q.condition ? q.condition.field : undefined,
+        conditionalValue: q.condition && 'value' in q.condition ? q.condition.value : undefined,
+        showWhenConditionMet: q.condition ? true : undefined,
+        pageNumber: q.page,
+        // Pass through file config for file upload fields
+        allowedExtensions: q.file_config?.accept as string[] | undefined,
+        maxFileSizeMB: q.file_config?.max_size_mb as number | undefined,
+      }));
+  }
+
+  return [];
+}
 
 // Check if a field is an identity field and return which type
 function getIdentityFieldType(field: FormFieldConfig): IdentityFieldType {
@@ -98,7 +178,8 @@ export function CustomFieldsStage({
   const fieldFocusTime = useRef<Record<string, number>>({});
 
   // Separate identity fields from custom fields and track mappings
-  const allFields = schema.fields || [];
+  // Support both 'fields' format and 'questions' format
+  const allFields = normalizeSchemaToFields(schema as ExtendedSchema);
   const identityFieldMappings: Array<{ field: FormFieldConfig; identityKey: IdentityFieldType }> = [];
   const customFields: FormFieldConfig[] = [];
 
