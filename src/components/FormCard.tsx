@@ -5,23 +5,6 @@ interface FormCardProps {
   form: FormRecord;
 }
 
-// Helper function to extract text from HTML (server-safe)
-function stripHtmlTags(html: string): string {
-  // Use regex instead of DOM parsing to work on both server and client
-  return html
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
-    .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
-    .replace(/&amp;/g, '&')  // Replace &amp; with &
-    .replace(/&lt;/g, '<')   // Replace &lt; with <
-    .replace(/&gt;/g, '>')   // Replace &gt; with >
-    .replace(/&quot;/g, '"') // Replace &quot; with "
-    .replace(/&#39;/g, "'"); // Replace &#39; with '
-}
-
-// Helper function to clean and format description text
-function cleanDescription(text: string): string {
-  return text.replace(/\s+/g, ' ').trim();
-}
 
 export default function FormCard({ form }: FormCardProps) {
   const typeConfig: Record<string, { accentColor: string; textColor: string; icon: React.ReactNode; label: string }> = {
@@ -94,11 +77,12 @@ export default function FormCard({ form }: FormCardProps) {
               {form.title}
             </h3>
 
-            {/* Description */}
+            {/* Description - renders HTML if present, plain text works fine too */}
             {form.description && (
-              <p className="text-gray-300 text-sm mb-6 flex-grow line-clamp-3 normal-case leading-relaxed">
-                {cleanDescription(stripHtmlTags(form.description))}
-              </p>
+              <div
+                className="text-gray-300 text-sm mb-6 flex-grow line-clamp-3 normal-case leading-relaxed [&_a]:text-blue-300 [&_a]:underline [&_a:hover]:text-blue-200 [&_p]:m-0 [&_div]:m-0 [&_strong]:text-white [&_b]:text-white"
+                dangerouslySetInnerHTML={{ __html: form.description }}
+              />
             )}
 
             {/* Supporting Documents */}
