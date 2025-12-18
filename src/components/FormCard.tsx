@@ -5,11 +5,17 @@ interface FormCardProps {
   form: FormRecord;
 }
 
-// Helper function to extract text from HTML
+// Helper function to extract text from HTML (server-safe)
 function stripHtmlTags(html: string): string {
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  return div.textContent || div.innerText || '';
+  // Use regex instead of DOM parsing to work on both server and client
+  return html
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
+    .replace(/&amp;/g, '&')  // Replace &amp; with &
+    .replace(/&lt;/g, '<')   // Replace &lt; with <
+    .replace(/&gt;/g, '>')   // Replace &gt; with >
+    .replace(/&quot;/g, '"') // Replace &quot; with "
+    .replace(/&#39;/g, "'"); // Replace &#39; with '
 }
 
 // Helper function to clean and format description text
