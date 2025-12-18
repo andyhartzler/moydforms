@@ -33,6 +33,8 @@ export type FieldType =
   | 'typeahead'
   | 'file_picker'
   | 'image_picker'
+  | 'section_header'
+  | 'hidden'
   // iOS (Cupertino) - render as standard on web
   | 'cupertino_text_field'
   | 'cupertino_checkbox'
