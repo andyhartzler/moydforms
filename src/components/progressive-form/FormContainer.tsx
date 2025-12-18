@@ -114,7 +114,10 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
           </div>
 
           {form.description && (
-            <p className="text-gray-600 text-base leading-relaxed">{form.description}</p>
+            <div
+              className="text-gray-600 text-base leading-relaxed [&_a]:text-primary-600 [&_a]:underline [&_a:hover]:text-primary-700 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_b]:font-semibold"
+              dangerouslySetInnerHTML={{ __html: form.description }}
+            />
           )}
 
           {/* Progress bar only (no text) */}
