@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { FormFieldConfig } from '@/types/forms';
+import { FormFieldConfig, FileUploadResult } from '@/types/forms';
 import { Camera, Image as ImageIcon, X, Plus, Monitor } from 'lucide-react';
 
 // Google Drive icon component using actual logo
@@ -27,12 +27,13 @@ interface ImageUploadProps {
   error?: string;
   onBlur?: () => void;
   onFocus?: () => void;
-  onFileUpload?: (file: File, fieldId: string) => Promise<string>;
+  onFileUpload?: (file: File, fieldId: string) => Promise<FileUploadResult>;
 }
 
 interface UploadedImage {
   name: string;
   url: string;
+  storage_path?: string;
   file?: File;
   source?: 'device' | 'google_drive';
 }
@@ -115,14 +116,15 @@ export default function ImageUpload({ field, value, onChange, error, onBlur, onF
     return null;
   };
 
-  const processImage = async (file: File): Promise<string> => {
+  const processImage = async (file: File): Promise<{ url: string; path?: string }> => {
     if (onFileUpload) {
-      return onFileUpload(file, field.id);
+      const result = await onFileUpload(file, field.id);
+      return { url: result.url, path: result.path };
     }
 
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onload = (e) => resolve({ url: e.target?.result as string });
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
@@ -148,10 +150,11 @@ export default function ImageUpload({ field, value, onChange, error, onBlur, onF
         }
 
         try {
-          const url = await processImage(file);
+          const result = await processImage(file);
           newImages.push({
             name: file.name,
-            url,
+            url: result.url,
+            storage_path: result.path,
             file: onFileUpload ? undefined : file,
             source: 'device',
           });
@@ -243,6 +246,8 @@ export default function ImageUpload({ field, value, onChange, error, onBlur, onF
         const mimeType: string = doc.mimeType || 'image/jpeg';
         let imageUrl = doc.url || `https://drive.google.com/uc?id=${doc.id}`;
 
+        let storagePath: string | undefined;
+
         // If onFileUpload is provided, download and re-upload the file
         if (onFileUpload && accessToken) {
           try {
@@ -266,7 +271,9 @@ export default function ImageUpload({ field, value, onChange, error, onBlur, onF
 
               // Create File object from blob
               const file = createFile(blob, fileName, mimeType);
-              imageUrl = await onFileUpload(file, field.id);
+              const uploadResult = await onFileUpload(file, field.id);
+              imageUrl = uploadResult.url;
+              storagePath = uploadResult.path;
             }
           } catch (err) {
             console.error('Failed to download Google Drive image:', err);
@@ -278,6 +285,7 @@ export default function ImageUpload({ field, value, onChange, error, onBlur, onF
         newImages.push({
           name: fileName,
           url: imageUrl,
+          storage_path: storagePath,
           source: 'google_drive',
         });
       }

@@ -322,6 +322,16 @@ export interface FormAvailability {
   reason?: string;
 }
 
+// File upload result from API
+export interface FileUploadResult {
+  url: string;
+  path: string;
+  file_name?: string;
+  file_size?: number;
+  mime_type?: string;
+  field_id?: string;
+}
+
 // Utility function to normalize field types (handle aliases)
 export function normalizeFieldType(type: string): FieldType {
   const aliases: Record<string, FieldType> = {

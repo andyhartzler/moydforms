@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { FormFieldConfig, FormSchema, ConditionalOperator, normalizeFieldType, ValidationConfig, FieldType } from '@/types/forms';
+import { FormFieldConfig, FormSchema, ConditionalOperator, normalizeFieldType, ValidationConfig, FieldType, FileUploadResult } from '@/types/forms';
 import {
   TextInput,
   TextArea,
@@ -113,7 +113,7 @@ interface DynamicFormRendererProps {
   onFieldInteraction?: (fieldId: string, fieldType: string) => void;
   onValidationError?: (fieldId: string, fieldType: string, error: string) => void;
   onFieldTimeSpent?: (fieldId: string, fieldType: string, seconds: number) => void;
-  onFileUpload?: (file: File, fieldId: string) => Promise<string>;
+  onFileUpload?: (file: File, fieldId: string) => Promise<FileUploadResult>;
 }
 
 export default function DynamicFormRenderer({

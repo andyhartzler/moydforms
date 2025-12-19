@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback, useRef, useMemo } from 'react';
-import { FormFieldConfig, FormSchema, normalizeFieldType, FieldType } from '@/types/forms';
+import { FormFieldConfig, FormSchema, normalizeFieldType, FieldType, FileUploadResult } from '@/types/forms';
+import { FileUploadInfo } from '@/lib/edgeFunction';
 import { formatPhoneDisplay } from '@/lib/phone';
 import {
   TextInput,
@@ -31,11 +32,11 @@ interface CustomFieldsStageProps {
   identityValues: Record<string, unknown>;
   onFieldChange: (key: string, value: unknown) => void;
   onFieldBlur: (key: string, value: unknown, type?: string) => void;
-  onSubmit: (finalData?: Record<string, unknown>) => Promise<boolean>;
+  onSubmit: (finalData?: Record<string, unknown>, fileUploads?: FileUploadInfo[]) => Promise<boolean>;
   onBack?: () => void;
   isLoading: boolean;
   submitLabel?: string;
-  onFileUpload?: (file: File, fieldId: string) => Promise<string>;
+  onFileUpload?: (file: File, fieldId: string) => Promise<FileUploadResult>;
 }
 
 // Patterns to detect identity fields by ID or label
@@ -430,7 +431,29 @@ export function CustomFieldsStage({
       }
     });
 
-    await onSubmit(finalData);
+    // Extract file upload info from form data for Edge Function processing
+    const fileUploads: FileUploadInfo[] = [];
+    customFields.forEach((field) => {
+      const normalizedType = normalizeFieldType(field.type);
+      if (normalizedType === 'file_picker' || normalizedType === 'image_picker') {
+        const fieldValue = formData[field.id];
+        if (fieldValue && Array.isArray(fieldValue)) {
+          fieldValue.forEach((file: { name?: string; size?: number; type?: string; storage_path?: string }) => {
+            if (file.storage_path) {
+              fileUploads.push({
+                field_id: field.id,
+                storage_path: file.storage_path,
+                file_name: file.name || 'unknown',
+                file_size: file.size || 0,
+                mime_type: file.type || 'application/octet-stream',
+              });
+            }
+          });
+        }
+      }
+    });
+
+    await onSubmit(finalData, fileUploads);
   };
 
   // Render a section header

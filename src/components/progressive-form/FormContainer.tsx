@@ -7,14 +7,14 @@ import { PhoneEntryStage } from './PhoneEntryStage';
 import { IdentityFieldsStage, IdentityConfig } from './IdentityFieldsStage';
 import { CustomFieldsStage } from './CustomFieldsStage';
 import { SuccessMessage } from './SuccessMessage';
-import { FormRecord } from '@/types/forms';
+import { FormRecord, FileUploadResult } from '@/types/forms';
 import { toTitleCase } from '@/lib/utils';
 import { FileText, AlertCircle, ArrowLeft } from 'lucide-react';
 
 interface FormContainerProps {
   form: FormRecord;
   identityConfig?: IdentityConfig;
-  onFileUpload?: (file: File, fieldId: string) => Promise<string>;
+  onFileUpload?: (file: File, fieldId: string) => Promise<FileUploadResult>;
 }
 
 export function FormContainer({ form, identityConfig, onFileUpload }: FormContainerProps) {
