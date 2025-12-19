@@ -4,12 +4,21 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { FormFieldConfig } from '@/types/forms';
 import { Camera, Image as ImageIcon, X, Plus, Monitor } from 'lucide-react';
 
-// Google Drive icon component
-const GoogleDriveIcon = () => (
-  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-    <path d="M7.71 3.5L1.15 15l3.43 5.5h6.56l3.43-5.5L7.71 3.5zm.79 1.61l5.06 8.39H3.64l5.06-8.39zm7.79-1.61l6.56 11.5-3.43 5.5h-1.15l3.43-5.5L15.29 3.5h1zm-1.79.32l5.06 8.39-1.72 2.78-5.06-8.39 1.72-2.78zM8.5 15l-3.43 5.5h6.86L8.5 15z"/>
-  </svg>
-);
+// Google Drive icon component using actual logo
+const GoogleDriveIcon = ({ size = 'sm' }: { size?: 'sm' | 'md' | 'lg' }) => {
+  const sizeClasses = {
+    sm: 'h-4 w-4',
+    md: 'h-5 w-5',
+    lg: 'h-10 w-10',
+  };
+  return (
+    <img
+      src="/icons/google-drive-icon.png"
+      alt="Google Drive"
+      className={sizeClasses[size]}
+    />
+  );
+};
 
 interface ImageUploadProps {
   field: FormFieldConfig;

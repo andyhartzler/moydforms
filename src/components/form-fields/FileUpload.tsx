@@ -4,12 +4,21 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { FormFieldConfig } from '@/types/forms';
 import { Upload, X, File, FileText, FileImage, FileVideo, FileAudio, HardDrive, Monitor } from 'lucide-react';
 
-// Google Drive icon component
-const GoogleDriveIcon = () => (
-  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-    <path d="M7.71 3.5L1.15 15l3.43 5.5h6.56l3.43-5.5L7.71 3.5zm.79 1.61l5.06 8.39H3.64l5.06-8.39zm7.79-1.61l6.56 11.5-3.43 5.5h-1.15l3.43-5.5L15.29 3.5h1zm-1.79.32l5.06 8.39-1.72 2.78-5.06-8.39 1.72-2.78zM8.5 15l-3.43 5.5h6.86L8.5 15z"/>
-  </svg>
-);
+// Google Drive icon component using actual logo
+const GoogleDriveIcon = ({ size = 'sm' }: { size?: 'sm' | 'md' | 'lg' }) => {
+  const sizeClasses = {
+    sm: 'h-4 w-4',
+    md: 'h-5 w-5',
+    lg: 'h-10 w-10',
+  };
+  return (
+    <img
+      src="/icons/google-drive-icon.png"
+      alt="Google Drive"
+      className={sizeClasses[size]}
+    />
+  );
+};
 
 interface FileUploadProps {
   field: FormFieldConfig;
@@ -379,7 +388,7 @@ export default function FileUpload({ field, value, onChange, error, onBlur, onFo
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
-            <GoogleDriveIcon />
+            <GoogleDriveIcon size="md" />
             Google Drive
           </button>
         </div>
@@ -451,13 +460,11 @@ export default function FileUpload({ field, value, onChange, error, onBlur, onFo
             </div>
           ) : (
             <>
-              <div className="mx-auto h-10 w-10 text-blue-500 mb-2 flex items-center justify-center">
-                <svg viewBox="0 0 24 24" className="h-10 w-10" fill="currentColor">
-                  <path d="M7.71 3.5L1.15 15l3.43 5.5h6.56l3.43-5.5L7.71 3.5zm.79 1.61l5.06 8.39H3.64l5.06-8.39zm7.79-1.61l6.56 11.5-3.43 5.5h-1.15l3.43-5.5L15.29 3.5h1zm-1.79.32l5.06 8.39-1.72 2.78-5.06-8.39 1.72-2.78zM8.5 15l-3.43 5.5h6.86L8.5 15z"/>
-                </svg>
+              <div className="mx-auto mb-2 flex items-center justify-center">
+                <GoogleDriveIcon size="lg" />
               </div>
               <p className="text-sm text-gray-600">
-                <span className="text-blue-600 font-medium">Click to select</span> from Google Drive
+                <span className="text-blue-600 font-medium">Click to select from Google Drive</span>
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 {allowedExtensions
