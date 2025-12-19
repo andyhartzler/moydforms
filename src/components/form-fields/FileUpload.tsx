@@ -250,7 +250,8 @@ export default function FileUpload({ field, value, onChange, error, onBlur, onFo
 
     const tokenClient = window.google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/drive.file',
+      // Use drive.readonly to allow picking any file from user's Drive
+      scope: 'https://www.googleapis.com/auth/drive.readonly',
       callback: (response: any) => {
         if (response.access_token) {
           setAccessToken(response.access_token);
