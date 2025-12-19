@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useFormSession } from '@/hooks/useFormSession';
+import { useFormSession, SubmissionResult } from '@/hooks/useFormSession';
 import { useBeforeUnload } from '@/hooks/useBeforeUnload';
 import { PhoneEntryStage } from './PhoneEntryStage';
 import { IdentityFieldsStage, IdentityConfig } from './IdentityFieldsStage';
@@ -24,6 +24,7 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
     values,
     isLoading,
     error,
+    submissionResult,
     setStage,
     setValues,
     handlePhoneSubmit,
@@ -33,7 +34,9 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
     handleAbandon,
   } = useFormSession({
     formId: form.id,
-    onSubmitSuccess: () => console.log('Form submitted successfully'),
+    formSlug: form.slug,
+    formSettings: form.settings as Record<string, unknown> | undefined,
+    onSubmitSuccess: (result?: SubmissionResult) => console.log('Form submitted successfully', result),
   });
 
   // Track abandon on page leave
@@ -196,6 +199,7 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
             formTitle={formTitle}
             message={confirmation?.message}
             redirectUrl={confirmation?.redirectUrl}
+            submissionResult={submissionResult}
           />
         )}
 

@@ -9,6 +9,16 @@ import {
   recordFormView,
   getEdgeFunctionUrl,
   InitSessionResponse,
+  getEdgeFunctionForForm,
+  processCharteringSubmission,
+  processMemberSignup,
+  processMemberInfoUpdate,
+  uploadFileToStorage,
+  FileUploadInfo,
+  EdgeFunctionResponse,
+  CharteringSubmissionResponse,
+  MemberSignupResponse,
+  MemberInfoUpdateResponse,
 } from '@/lib/edgeFunction';
 import { isValidPhone, formatPhoneE164 } from '@/lib/phone';
 
@@ -28,18 +38,32 @@ export interface FormSession {
   };
 }
 
-interface UseFormSessionOptions {
-  formId: string;
-  onSessionStart?: (session: FormSession) => void;
-  onSubmitSuccess?: () => void;
+// Submission result with dynamic content from Edge Functions
+export interface SubmissionResult {
+  success: boolean;
+  message?: string;
+  membershipFormUrl?: string;
+  membershipFormSlug?: string;
+  chapterName?: string;
+  officersProcessed?: number;
+  membersProcessed?: number;
 }
 
-export function useFormSession({ formId, onSessionStart, onSubmitSuccess }: UseFormSessionOptions) {
+interface UseFormSessionOptions {
+  formId: string;
+  formSlug?: string;
+  formSettings?: Record<string, unknown>;
+  onSessionStart?: (session: FormSession) => void;
+  onSubmitSuccess?: (result?: SubmissionResult) => void;
+}
+
+export function useFormSession({ formId, formSlug, formSettings, onSessionStart, onSubmitSuccess }: UseFormSessionOptions) {
   const [stage, setStage] = useState<FormStage>('phone');
   const [session, setSession] = useState<FormSession | null>(null);
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submissionResult, setSubmissionResult] = useState<SubmissionResult | null>(null);
   const sessionTokenRef = useRef<string | null>(null);
 
   // Record view on mount
@@ -133,26 +157,91 @@ export function useFormSession({ formId, onSessionStart, onSubmitSuccess }: UseF
 
   // Handle form submission
   const handleSubmit = useCallback(
-    async (finalData?: Record<string, unknown>) => {
+    async (finalData?: Record<string, unknown>, fileUploads?: FileUploadInfo[]) => {
       if (!session) return false;
 
       setIsLoading(true);
       setError(null);
 
       try {
+        const formData = finalData || (values as Record<string, unknown>);
+
+        // First, submit the basic form
         const result = await submitForm(
           session.submissionId,
           session.sessionToken,
-          finalData || (values as Record<string, unknown>)
+          formData
         );
 
-        if (result.success) {
-          setStage('submitted');
-          onSubmitSuccess?.();
-          return true;
+        if (!result.success) {
+          throw new Error('Submission failed');
         }
 
-        throw new Error('Submission failed');
+        // Determine which specialized Edge Function to call (if any)
+        const edgeFunctionType = formSlug ? getEdgeFunctionForForm(formSlug) : null;
+        let submissionResultData: SubmissionResult = { success: true };
+
+        if (edgeFunctionType === 'chartering') {
+          // Call chartering submission endpoint
+          const charteringResult = await processCharteringSubmission(
+            session.submissionId,
+            formData,
+            fileUploads || []
+          );
+
+          if (charteringResult.success && charteringResult.data) {
+            submissionResultData = {
+              success: true,
+              message: charteringResult.data.message,
+              membershipFormUrl: charteringResult.data.membership_form_url || undefined,
+              membershipFormSlug: charteringResult.data.membership_form_slug || undefined,
+              chapterName: charteringResult.data.chapter_name,
+              officersProcessed: charteringResult.data.officers_processed,
+              membersProcessed: charteringResult.data.members_processed,
+            };
+          } else if (charteringResult.error) {
+            throw new Error(charteringResult.error);
+          }
+        } else if (edgeFunctionType === 'member-signup') {
+          // Call member signup endpoint
+          const signupResult = await processMemberSignup(
+            session.submissionId,
+            formSlug!,
+            formData,
+            formSettings
+          );
+
+          if (signupResult.success && signupResult.data) {
+            submissionResultData = {
+              success: true,
+              message: signupResult.data.message,
+              chapterName: signupResult.data.chapter_name,
+            };
+          } else if (signupResult.error) {
+            throw new Error(signupResult.error);
+          }
+        } else if (edgeFunctionType === 'member-info') {
+          // Call member info update endpoint
+          const updateResult = await processMemberInfoUpdate(
+            session.submissionId,
+            formData,
+            formSettings
+          );
+
+          if (updateResult.success && updateResult.data) {
+            submissionResultData = {
+              success: true,
+              message: updateResult.data.message,
+            };
+          } else if (updateResult.error) {
+            throw new Error(updateResult.error);
+          }
+        }
+
+        setSubmissionResult(submissionResultData);
+        setStage('submitted');
+        onSubmitSuccess?.(submissionResultData);
+        return true;
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to submit form');
         return false;
@@ -160,7 +249,7 @@ export function useFormSession({ formId, onSessionStart, onSubmitSuccess }: UseF
         setIsLoading(false);
       }
     },
-    [session, values, onSubmitSuccess]
+    [session, values, formSlug, formSettings, onSubmitSuccess]
   );
 
   // Handle abandon
@@ -187,6 +276,7 @@ export function useFormSession({ formId, onSessionStart, onSubmitSuccess }: UseF
     values,
     isLoading,
     error,
+    submissionResult,
     setStage,
     setValues,
     handlePhoneSubmit,

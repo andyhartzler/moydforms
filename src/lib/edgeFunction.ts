@@ -2,7 +2,9 @@
 // This connects to the Supabase edge function at:
 // https://faajpcarasilbfndzkmd.supabase.co/functions/v1/submit-form
 
-const EDGE_FUNCTION_URL = 'https://faajpcarasilbfndzkmd.supabase.co/functions/v1/submit-form';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://faajpcarasilbfndzkmd.supabase.co';
+const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/submit-form`;
+const EDGE_FUNCTIONS_BASE = `${SUPABASE_URL}/functions/v1`;
 
 export interface InitSessionResponse {
   success: boolean;
@@ -114,4 +116,183 @@ export async function abandonForm(
 // Get the edge function URL for sendBeacon
 export function getEdgeFunctionUrl(): string {
   return EDGE_FUNCTION_URL;
+}
+
+// ============================================
+// Specialized Edge Functions for Form Processing
+// ============================================
+
+export interface FileUploadInfo {
+  field_id: string;
+  storage_path: string;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+}
+
+// Response from process-chartering-submission
+export interface CharteringSubmissionResponse {
+  success: boolean;
+  data?: {
+    chapter_id: string;
+    chapter_name: string;
+    chapter_type: string;
+    status: string;
+    membership_form_url: string | null;
+    membership_form_slug: string | null;
+    membership_form_id: string | null;
+    officers_processed: number;
+    members_processed: number;
+    governing_docs_converted: boolean;
+    message: string;
+  };
+  error?: string;
+}
+
+// Response from process-member-signup
+export interface MemberSignupResponse {
+  success: boolean;
+  data?: {
+    member_id: string;
+    was_existing: boolean;
+    chapter_name: string;
+    message: string;
+  };
+  error?: string;
+}
+
+// Response from process-member-info-update
+export interface MemberInfoUpdateResponse {
+  success: boolean;
+  data?: {
+    member_id: string;
+    fields_updated: number;
+    message: string;
+  };
+  error?: string;
+}
+
+// Generic Edge Function response
+export type EdgeFunctionResponse = CharteringSubmissionResponse | MemberSignupResponse | MemberInfoUpdateResponse;
+
+// Call a specific Edge Function endpoint
+async function callSpecificEdgeFunction<T>(
+  endpoint: string,
+  data: Record<string, unknown>
+): Promise<T> {
+  const response = await fetch(`${EDGE_FUNCTIONS_BASE}/${endpoint}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok && !result.success) {
+    throw new Error(result.error || `Edge function call to ${endpoint} failed`);
+  }
+
+  return result;
+}
+
+// Process chartering form submission
+export async function processCharteringSubmission(
+  submissionId: string,
+  formData: Record<string, unknown>,
+  files: FileUploadInfo[]
+): Promise<CharteringSubmissionResponse> {
+  return callSpecificEdgeFunction<CharteringSubmissionResponse>(
+    'process-chartering-submission',
+    {
+      submission_id: submissionId,
+      form_data: formData,
+      files,
+    }
+  );
+}
+
+// Process member signup from join-* forms
+export async function processMemberSignup(
+  submissionId: string,
+  formSlug: string,
+  formData: Record<string, unknown>,
+  formSettings?: Record<string, unknown>
+): Promise<MemberSignupResponse> {
+  return callSpecificEdgeFunction<MemberSignupResponse>(
+    'process-member-signup',
+    {
+      submission_id: submissionId,
+      form_slug: formSlug,
+      form_data: formData,
+      form_settings: formSettings,
+    }
+  );
+}
+
+// Process member info update
+export async function processMemberInfoUpdate(
+  submissionId: string,
+  formData: Record<string, unknown>,
+  settings?: Record<string, unknown>
+): Promise<MemberInfoUpdateResponse> {
+  return callSpecificEdgeFunction<MemberInfoUpdateResponse>(
+    'process-member-info-update',
+    {
+      submission_id: submissionId,
+      form_data: formData,
+      settings,
+    }
+  );
+}
+
+// Determine which Edge Function to call based on form slug
+export function getEdgeFunctionForForm(slug: string): 'chartering' | 'member-signup' | 'member-info' | null {
+  if (slug === 'chapter-chartering') {
+    return 'chartering';
+  }
+  if (slug.startsWith('join-')) {
+    return 'member-signup';
+  }
+  if (slug === 'member-info') {
+    return 'member-info';
+  }
+  return null;
+}
+
+// Upload file to Supabase Storage
+export async function uploadFileToStorage(
+  file: File,
+  storagePath: string,
+  bucket: string = 'form-uploads'
+): Promise<{ path: string; url: string }> {
+  // Generate unique filename
+  const uuid = crypto.randomUUID();
+  const fileName = `${uuid}_${file.name}`;
+  const fullPath = `${storagePath}/${fileName}`;
+
+  const response = await fetch(
+    `${SUPABASE_URL}/storage/v1/object/${bucket}/${fullPath}`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+        'Content-Type': file.type,
+        'x-upsert': 'true',
+      },
+      body: file,
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || 'File upload failed');
+  }
+
+  return {
+    path: fullPath,
+    url: `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${fullPath}`,
+  };
 }

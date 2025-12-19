@@ -213,6 +213,44 @@ export default function RootLayout({
         {/* Footer */}
         <footer className="relative z-10" style={{ backgroundColor: '#273351' }}>
           <div className="container-custom py-12">
+            {/* Mobile Footer Links - Above social icons, shown only on mobile */}
+            <div className="flex flex-col items-center gap-2 mb-6 md:hidden">
+              <div className="flex items-center justify-center" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: '1rem' }}>
+                <a
+                  href="https://www.moyoungdemocrats.org/terms"
+                  className="hover:opacity-80 transition-opacity"
+                  style={{ color: '#32A6DE', textDecoration: 'underline' }}
+                >
+                  TERMS OF SERVICE
+                </a>
+                <span className="mx-4" style={{ color: '#32A6DE' }}>|</span>
+                <a
+                  href="https://www.moyoungdemocrats.org/privacy"
+                  className="hover:opacity-80 transition-opacity"
+                  style={{ color: '#32A6DE', textDecoration: 'underline' }}
+                >
+                  PRIVACY POLICY
+                </a>
+              </div>
+              <div className="flex items-center justify-center" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: '1rem' }}>
+                <a
+                  href="https://jobs.moyoungdemocrats.org"
+                  className="hover:opacity-80 transition-opacity"
+                  style={{ color: '#32A6DE', textDecoration: 'underline' }}
+                >
+                  OPPORTUNITIES
+                </a>
+                <span className="mx-4" style={{ color: '#32A6DE' }}>|</span>
+                <a
+                  href="https://www.moyoungdemocrats.org/contact"
+                  className="hover:opacity-80 transition-opacity"
+                  style={{ color: '#32A6DE', textDecoration: 'underline' }}
+                >
+                  CONTACT US
+                </a>
+              </div>
+            </div>
+
             {/* Social Media Icons */}
             <div className="flex justify-center items-center space-x-3 md:space-x-6 mb-8">
               <a href="https://www.instagram.com/moyoungdemocrats/#" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
@@ -263,21 +301,81 @@ export default function RootLayout({
             </div>
           </a>
 
-          {/* Paid For Banner */}
-          <a
-            href="https://secure.actblue.com/donate/moyd"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex justify-center py-8"
-          >
-            <Image
-              src="/paid-for-banner.png"
-              alt="Paid for by Missouri Young Democrats"
-              width={400}
-              height={100}
-              className="max-w-full h-auto hover:opacity-80 transition-opacity cursor-pointer"
-            />
-          </a>
+          {/* Paid For Banner with Footer Links */}
+          <div className="py-8 px-4">
+            {/* Desktop Layout - Links on sides of banner */}
+            <div className="hidden md:flex items-end justify-between max-w-6xl mx-auto">
+              {/* Left Links */}
+              <div className="flex items-center gap-4" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: '1rem' }}>
+                <a
+                  href="https://www.moyoungdemocrats.org/terms"
+                  className="hover:opacity-80 transition-opacity"
+                  style={{ color: '#32A6DE', textDecoration: 'underline' }}
+                >
+                  TERMS OF SERVICE
+                </a>
+                <span style={{ color: '#32A6DE' }}>|</span>
+                <a
+                  href="https://www.moyoungdemocrats.org/privacy"
+                  className="hover:opacity-80 transition-opacity"
+                  style={{ color: '#32A6DE', textDecoration: 'underline' }}
+                >
+                  PRIVACY POLICY
+                </a>
+              </div>
+
+              {/* Center - Paid For Banner */}
+              <a
+                href="https://secure.actblue.com/donate/moyd"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-shrink-0"
+              >
+                <Image
+                  src="/paid-for-banner.png"
+                  alt="Paid for by Missouri Young Democrats"
+                  width={400}
+                  height={100}
+                  className="max-w-full h-auto hover:opacity-80 transition-opacity cursor-pointer"
+                />
+              </a>
+
+              {/* Right Links */}
+              <div className="flex items-center gap-4" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: '1rem' }}>
+                <a
+                  href="https://jobs.moyoungdemocrats.org"
+                  className="hover:opacity-80 transition-opacity"
+                  style={{ color: '#32A6DE', textDecoration: 'underline' }}
+                >
+                  OPPORTUNITIES
+                </a>
+                <span style={{ color: '#32A6DE' }}>|</span>
+                <a
+                  href="https://www.moyoungdemocrats.org/contact"
+                  className="hover:opacity-80 transition-opacity"
+                  style={{ color: '#32A6DE', textDecoration: 'underline' }}
+                >
+                  CONTACT US
+                </a>
+              </div>
+            </div>
+
+            {/* Mobile - Centered Paid For Banner */}
+            <a
+              href="https://secure.actblue.com/donate/moyd"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex justify-center md:hidden"
+            >
+              <Image
+                src="/paid-for-banner.png"
+                alt="Paid for by Missouri Young Democrats"
+                width={400}
+                height={100}
+                className="max-w-full h-auto hover:opacity-80 transition-opacity cursor-pointer"
+              />
+            </a>
+          </div>
         </footer>
         <SpeedInsights />
         <Analytics />
