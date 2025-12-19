@@ -226,6 +226,7 @@ export interface FormRecord {
   results_public: boolean;
   results_data: any | null;
   show_back_button?: boolean;
+  public_form?: boolean;
 }
 
 // Form submission record
