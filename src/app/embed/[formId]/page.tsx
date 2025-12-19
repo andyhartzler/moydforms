@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
-import FormRenderer from '@/app/[formId]/FormRenderer';
+import FormRenderer from '@/app/[slug]/FormRenderer';
 
 // Minimal layout for embedding in iframes
 export default async function EmbedFormPage({ params }: { params: { formId: string } }) {

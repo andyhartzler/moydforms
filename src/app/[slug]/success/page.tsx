@@ -7,14 +7,32 @@ interface SuccessPageProps {
   params: { slug: string };
 }
 
+// Helper to check if string looks like a UUID
+function isUUID(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+}
+
 export async function generateMetadata({ params }: SuccessPageProps) {
   const supabase = createClient();
 
-  const { data: form } = await supabase
-    .from('form_schemas')
-    .select('title')
-    .eq('slug', params.slug)
-    .single();
+  let form;
+
+  if (isUUID(params.slug)) {
+    const { data } = await supabase
+      .from('form_schemas')
+      .select('title')
+      .eq('id', params.slug)
+      .single();
+    form = data;
+  } else {
+    const { data } = await supabase
+      .from('form_schemas')
+      .select('title')
+      .eq('slug', params.slug)
+      .single();
+    form = data;
+  }
 
   return {
     title: `Submitted | ${form?.title || 'Form'} | MOYD Forms`,
@@ -24,11 +42,26 @@ export async function generateMetadata({ params }: SuccessPageProps) {
 export default async function SuccessPage({ params }: SuccessPageProps) {
   const supabase = createClient();
 
-  const { data: form, error } = await supabase
-    .from('form_schemas')
-    .select('title, schema')
-    .eq('slug', params.slug)
-    .single();
+  let form;
+  let error;
+
+  if (isUUID(params.slug)) {
+    const result = await supabase
+      .from('form_schemas')
+      .select('title, schema')
+      .eq('id', params.slug)
+      .single();
+    form = result.data;
+    error = result.error;
+  } else {
+    const result = await supabase
+      .from('form_schemas')
+      .select('title, schema')
+      .eq('slug', params.slug)
+      .single();
+    form = result.data;
+    error = result.error;
+  }
 
   if (error || !form) {
     notFound();

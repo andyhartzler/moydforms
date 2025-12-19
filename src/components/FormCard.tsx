@@ -53,7 +53,7 @@ export default function FormCard({ form }: FormCardProps) {
   const config = typeConfig[form.form_type] || typeConfig.survey;
 
   // Use slug-based URL if available, otherwise fall back to ID
-  const formUrl = form.slug ? `/f/${form.slug}` : `/${form.id}`;
+  const formUrl = `/${form.slug || form.id}`;
 
   return (
     <Link href={formUrl}>
