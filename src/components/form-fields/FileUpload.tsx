@@ -173,7 +173,9 @@ export default function FileUpload({ field, value, onChange, error, onBlur, onFo
 
     if (allowedExtensions && allowedExtensions.length > 0) {
       const ext = file.name.split('.').pop()?.toLowerCase();
-      if (!ext || !allowedExtensions.includes(ext)) {
+      // Normalize allowed extensions by removing leading dots for comparison
+      const normalizedAllowed = allowedExtensions.map(e => e.replace(/^\./, '').toLowerCase());
+      if (!ext || !normalizedAllowed.includes(ext)) {
         return `File type not allowed. Allowed: ${allowedExtensions.join(', ')}`;
       }
     }
