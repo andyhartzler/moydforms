@@ -205,6 +205,7 @@ export interface FormRecord {
   created_by: string | null;
   title: string;
   description: string | null;
+  preview_text: string | null;
   form_type: 'survey' | 'registration' | 'feedback' | 'vote';
   schema: FormSchema;
   settings: FormSettings | null;
