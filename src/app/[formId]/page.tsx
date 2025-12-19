@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: FormPageProps) {
   // Try to find form by ID
   const { data: form } = await supabase
     .from('form_schemas')
-    .select('title, description')
+    .select('title, preview_text')
     .eq('id', params.formId)
     .single();
 
@@ -23,9 +23,22 @@ export async function generateMetadata({ params }: FormPageProps) {
     };
   }
 
+  const description = form.preview_text || 'Submit your response to this MOYD form';
+
   return {
     title: `${form.title} | MOYD Forms`,
-    description: form.description || 'Submit your response',
+    description,
+    openGraph: {
+      title: form.title,
+      description,
+      type: 'website',
+      siteName: 'MOYD Forms',
+    },
+    twitter: {
+      card: 'summary',
+      title: form.title,
+      description,
+    },
   };
 }
 
