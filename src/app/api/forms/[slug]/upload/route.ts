@@ -137,5 +137,10 @@ export async function POST(
     file_id: fileRecord?.id,
     url: urlData.publicUrl,
     path: storagePath,
+    // Include file metadata for Edge Function processing
+    file_name: file.name,
+    file_size: file.size,
+    mime_type: file.type,
+    field_id: fieldId,
   });
 }

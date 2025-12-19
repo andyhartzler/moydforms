@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { FormFieldConfig } from '@/types/forms';
+import { FormFieldConfig, FileUploadResult } from '@/types/forms';
 import { Upload, X, File, FileText, FileImage, FileVideo, FileAudio, HardDrive, Monitor } from 'lucide-react';
 
 // Google Drive icon component using actual logo
@@ -27,7 +27,7 @@ interface FileUploadProps {
   error?: string;
   onBlur?: () => void;
   onFocus?: () => void;
-  onFileUpload?: (file: File, fieldId: string) => Promise<string>;
+  onFileUpload?: (file: File, fieldId: string) => Promise<FileUploadResult>;
 }
 
 interface UploadedFile {
@@ -35,6 +35,7 @@ interface UploadedFile {
   size: number;
   type: string;
   url?: string;
+  storage_path?: string;
   file?: File;
   source?: 'device' | 'google_drive';
 }
@@ -196,10 +197,13 @@ export default function FileUpload({ field, value, onChange, error, onBlur, onFo
       }
 
       let url: string | undefined;
+      let storagePath: string | undefined;
       if (onFileUpload) {
         setUploading(true);
         try {
-          url = await onFileUpload(file, field.id);
+          const result = await onFileUpload(file, field.id);
+          url = result.url;
+          storagePath = result.path;
         } catch (err) {
           console.error('Upload failed:', err);
           alert('File upload failed');
@@ -214,6 +218,7 @@ export default function FileUpload({ field, value, onChange, error, onBlur, onFo
         size: file.size,
         type: file.type,
         url,
+        storage_path: storagePath,
         file: onFileUpload ? undefined : file,
         source: 'device',
       });
@@ -322,8 +327,9 @@ export default function FileUpload({ field, value, onChange, error, onBlur, onFo
 
               // Create File object from blob
               const file = createFile(blob, fileName, mimeType);
-              const uploadedUrl = await onFileUpload(file, field.id);
-              driveFile.url = uploadedUrl;
+              const uploadResult = await onFileUpload(file, field.id);
+              driveFile.url = uploadResult.url;
+              driveFile.storage_path = uploadResult.path;
             }
           } catch (err) {
             console.error('Failed to download Google Drive file:', err);

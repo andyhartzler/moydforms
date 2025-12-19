@@ -2,16 +2,16 @@
 
 import { useCallback } from 'react';
 import { FormContainer } from '@/components/progressive-form';
-import { FormRecord } from '@/types/forms';
+import { FormRecord, FileUploadResult } from '@/types/forms';
 
 interface FormRendererProps {
   form: FormRecord;
 }
 
 export default function FormRenderer({ form }: FormRendererProps) {
-  // Handle file upload
+  // Handle file upload - returns full upload result for Edge Function processing
   const handleFileUpload = useCallback(
-    async (file: File, fieldId: string): Promise<string> => {
+    async (file: File, fieldId: string): Promise<FileUploadResult> => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('fieldId', fieldId);
@@ -27,7 +27,14 @@ export default function FormRenderer({ form }: FormRendererProps) {
       }
 
       const data = await response.json();
-      return data.url;
+      return {
+        url: data.url,
+        path: data.path,
+        file_name: data.file_name,
+        file_size: data.file_size,
+        mime_type: data.mime_type,
+        field_id: data.field_id,
+      };
     },
     [form.id, form.slug]
   );

@@ -7,14 +7,33 @@ interface FormPageProps {
   params: { slug: string };
 }
 
+// Helper to check if string looks like a UUID
+function isUUID(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+}
+
 export async function generateMetadata({ params }: FormPageProps) {
   const supabase = createClient();
 
-  const { data: form } = await supabase
-    .from('form_schemas')
-    .select('title, preview_text')
-    .eq('slug', params.slug)
-    .single();
+  // Try to find form by slug first, then by UUID
+  let form;
+
+  if (isUUID(params.slug)) {
+    const { data } = await supabase
+      .from('form_schemas')
+      .select('title, preview_text')
+      .eq('id', params.slug)
+      .single();
+    form = data;
+  } else {
+    const { data } = await supabase
+      .from('form_schemas')
+      .select('title, preview_text')
+      .eq('slug', params.slug)
+      .single();
+    form = data;
+  }
 
   if (!form) {
     return {
@@ -44,12 +63,27 @@ export async function generateMetadata({ params }: FormPageProps) {
 export default async function FormPage({ params }: FormPageProps) {
   const supabase = createClient();
 
-  // Get form by slug
-  const { data: form, error } = await supabase
-    .from('form_schemas')
-    .select('*')
-    .eq('slug', params.slug)
-    .single();
+  // Try to find form by slug first, then by UUID
+  let form;
+  let error;
+
+  if (isUUID(params.slug)) {
+    const result = await supabase
+      .from('form_schemas')
+      .select('*')
+      .eq('id', params.slug)
+      .single();
+    form = result.data;
+    error = result.error;
+  } else {
+    const result = await supabase
+      .from('form_schemas')
+      .select('*')
+      .eq('slug', params.slug)
+      .single();
+    form = result.data;
+    error = result.error;
+  }
 
   if (error || !form) {
     notFound();
