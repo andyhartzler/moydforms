@@ -5,11 +5,12 @@ import { checkFormAvailability, FormRecord } from '@/types/forms';
 export default async function HomePage() {
   const supabase = createClient();
 
-  // Get active public forms (not voting forms)
+  // Get active public forms (not voting forms, only those marked as public_form)
   const { data: allForms } = await supabase
     .from('form_schemas')
     .select('*')
     .eq('status', 'active')
+    .eq('public_form', true)
     .in('form_type', ['survey', 'registration', 'feedback'])
     .order('created_at', { ascending: false });
 
