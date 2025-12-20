@@ -158,7 +158,8 @@ function getIdentityFieldType(field: ExtendedFieldConfig): IdentityFieldType {
 
   // Common exclusions for social media and secondary contact fields
   // These should NOT be treated as identity fields even if they have email/phone type
-  const socialMediaExclusions = ['twitter', 'instagram', 'facebook', 'tiktok', 'linkedin', 'youtube', 'social', 'secondary', 'backup', 'alternate', 'alt_', 'other_', 'work_', 'home_', 'personal_', 'business_', 'emergency', 'parent', 'guardian', 'spouse', 'partner', 'notification', 'contact_'];
+  // Note: "contact_" is NOT excluded because "contact_name", "contact_email", "contact_phone" ARE primary identity fields
+  const socialMediaExclusions = ['twitter', 'instagram', 'facebook', 'tiktok', 'linkedin', 'youtube', 'social_', 'secondary', 'backup', 'alternate', 'alt_', 'other_', 'work_', 'home_', 'personal_', 'business_', 'emergency', 'parent', 'guardian', 'spouse', 'partner', 'notification'];
   const isExcludedField = socialMediaExclusions.some((e) => idLower.includes(e) || labelLower.includes(e));
 
   // Check by field type first (most reliable), but skip if it's a secondary/social field
