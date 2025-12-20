@@ -160,18 +160,25 @@ function getIdentityFieldType(field: ExtendedFieldConfig): IdentityFieldType {
   if (fieldType === 'phone' || fieldType === 'tel') return 'phone';
   if (fieldType === 'email') return 'email';
 
-  // Check phone patterns
-  if (PHONE_PATTERNS.some((p) => idLower.includes(p) || labelLower.includes(p))) {
+  // Common exclusions for social media and secondary contact fields
+  const socialMediaExclusions = ['twitter', 'instagram', 'facebook', 'tiktok', 'linkedin', 'youtube', 'social', 'secondary', 'backup', 'alternate', 'alt_', 'other_', 'work_', 'home_', 'personal_', 'business_', 'emergency', 'parent', 'guardian', 'spouse', 'partner'];
+
+  // Check phone patterns (but not secondary/social phone fields)
+  const hasPhonePattern = PHONE_PATTERNS.some((p) => idLower.includes(p) || labelLower.includes(p));
+  const isSecondaryPhone = socialMediaExclusions.some((e) => idLower.includes(e) || labelLower.includes(e));
+  if (hasPhonePattern && !isSecondaryPhone) {
     return 'phone';
   }
 
-  // Check email patterns
-  if (EMAIL_PATTERNS.some((p) => idLower.includes(p) || labelLower.includes(p))) {
+  // Check email patterns (but not secondary/social email fields)
+  const hasEmailPattern = EMAIL_PATTERNS.some((p) => idLower.includes(p) || labelLower.includes(p));
+  const isSecondaryEmail = socialMediaExclusions.some((e) => idLower.includes(e) || labelLower.includes(e));
+  if (hasEmailPattern && !isSecondaryEmail) {
     return 'email';
   }
 
   // Check name patterns (but not if it's clearly something else like "company_name")
-  const nameExclusions = ['company', 'business', 'organization', 'event', 'product', 'project', 'chapter', 'school', 'college', 'university'];
+  const nameExclusions = ['company', 'business', 'organization', 'event', 'product', 'project', 'chapter', 'school', 'college', 'university', 'username', 'user_name', 'screen_name', 'screenname', 'handle', 'twitter', 'instagram', 'facebook', 'tiktok', 'linkedin', 'social', 'website', 'domain', 'channel', 'youtube'];
   const hasNamePattern = NAME_PATTERNS.some((p) => idLower.includes(p) || labelLower.includes(p));
   const hasExclusion = nameExclusions.some((e) => idLower.includes(e) || labelLower.includes(e));
   if (hasNamePattern && !hasExclusion) {
