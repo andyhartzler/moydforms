@@ -156,24 +156,26 @@ function getIdentityFieldType(field: ExtendedFieldConfig): IdentityFieldType {
   const labelLower = field.label.toLowerCase().replace(/[-\s]/g, '_');
   const fieldType = field.type.toLowerCase();
 
-  // Check by field type first (most reliable)
-  if (fieldType === 'phone' || fieldType === 'tel') return 'phone';
-  if (fieldType === 'email') return 'email';
-
   // Common exclusions for social media and secondary contact fields
-  const socialMediaExclusions = ['twitter', 'instagram', 'facebook', 'tiktok', 'linkedin', 'youtube', 'social', 'secondary', 'backup', 'alternate', 'alt_', 'other_', 'work_', 'home_', 'personal_', 'business_', 'emergency', 'parent', 'guardian', 'spouse', 'partner'];
+  // These should NOT be treated as identity fields even if they have email/phone type
+  const socialMediaExclusions = ['twitter', 'instagram', 'facebook', 'tiktok', 'linkedin', 'youtube', 'social', 'secondary', 'backup', 'alternate', 'alt_', 'other_', 'work_', 'home_', 'personal_', 'business_', 'emergency', 'parent', 'guardian', 'spouse', 'partner', 'notification', 'contact_'];
+  const isExcludedField = socialMediaExclusions.some((e) => idLower.includes(e) || labelLower.includes(e));
+
+  // Check by field type first (most reliable), but skip if it's a secondary/social field
+  if (!isExcludedField) {
+    if (fieldType === 'phone' || fieldType === 'tel') return 'phone';
+    if (fieldType === 'email') return 'email';
+  }
 
   // Check phone patterns (but not secondary/social phone fields)
   const hasPhonePattern = PHONE_PATTERNS.some((p) => idLower.includes(p) || labelLower.includes(p));
-  const isSecondaryPhone = socialMediaExclusions.some((e) => idLower.includes(e) || labelLower.includes(e));
-  if (hasPhonePattern && !isSecondaryPhone) {
+  if (hasPhonePattern && !isExcludedField) {
     return 'phone';
   }
 
   // Check email patterns (but not secondary/social email fields)
   const hasEmailPattern = EMAIL_PATTERNS.some((p) => idLower.includes(p) || labelLower.includes(p));
-  const isSecondaryEmail = socialMediaExclusions.some((e) => idLower.includes(e) || labelLower.includes(e));
-  if (hasEmailPattern && !isSecondaryEmail) {
+  if (hasEmailPattern && !isExcludedField) {
     return 'email';
   }
 
