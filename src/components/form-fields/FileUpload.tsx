@@ -363,7 +363,9 @@ export default function FileUpload({ field, value, onChange, error, onBlur, onFo
     }
   };
 
-  const googleDriveEnabled = !!(GOOGLE_API_KEY && GOOGLE_CLIENT_ID);
+  // Temporarily disabled while waiting for Google OAuth scope approval
+  // TODO: Re-enable once drive.readonly scope is approved
+  const googleDriveEnabled = false; // !!(GOOGLE_API_KEY && GOOGLE_CLIENT_ID);
 
   return (
     <div className="mb-6">

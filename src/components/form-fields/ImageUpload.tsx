@@ -67,7 +67,9 @@ export default function ImageUpload({ field, value, onChange, error, onBlur, onF
   // Google API configuration
   const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
   const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  const googleDriveEnabled = !!(GOOGLE_API_KEY && GOOGLE_CLIENT_ID);
+  // Temporarily disabled while waiting for Google OAuth scope approval
+  // TODO: Re-enable once drive.readonly scope is approved
+  const googleDriveEnabled = false; // !!(GOOGLE_API_KEY && GOOGLE_CLIENT_ID);
 
   // Load Google API scripts
   useEffect(() => {
