@@ -249,7 +249,7 @@ export async function processMemberInfoUpdate(
 }
 
 // Determine which Edge Function to call based on form slug
-export function getEdgeFunctionForForm(slug: string): 'chartering' | 'member-signup' | 'member-info' | null {
+export function getEdgeFunctionForForm(slug: string): 'chartering' | 'member-signup' | 'member-info' | 'membership' | null {
   if (slug === 'chapter-chartering') {
     return 'chartering';
   }
@@ -259,7 +259,31 @@ export function getEdgeFunctionForForm(slug: string): 'chartering' | 'member-sig
   if (slug === 'member-info') {
     return 'member-info';
   }
+  if (slug === 'membership' || slug === 'membership-form') {
+    return 'membership';
+  }
   return null;
+}
+
+// Process membership form submission
+export async function processMembershipSubmission(
+  submissionId: string,
+  formData: Record<string, unknown>,
+): Promise<MemberSignupResponse> {
+  const response = await fetch('/api/membership/process', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      submission_id: submissionId,
+      form_data: formData,
+    }),
+  });
+
+  const result = await response.json();
+  if (!response.ok && !result.success) {
+    throw new Error(result.error || 'Membership processing failed');
+  }
+  return result;
 }
 
 // Upload file to Supabase Storage

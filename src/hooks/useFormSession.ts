@@ -13,6 +13,7 @@ import {
   processCharteringSubmission,
   processMemberSignup,
   processMemberInfoUpdate,
+  processMembershipSubmission,
   uploadFileToStorage,
   FileUploadInfo,
   EdgeFunctionResponse,
@@ -235,6 +236,21 @@ export function useFormSession({ formId, formSlug, formSettings, onSessionStart,
             };
           } else if (updateResult.error) {
             throw new Error(updateResult.error);
+          }
+        } else if (edgeFunctionType === 'membership') {
+          // Call membership form processing endpoint
+          const membershipResult = await processMembershipSubmission(
+            session.submissionId,
+            formData,
+          );
+
+          if (membershipResult.success && membershipResult.data) {
+            submissionResultData = {
+              success: true,
+              message: membershipResult.data.message,
+            };
+          } else if (membershipResult.error) {
+            throw new Error(membershipResult.error);
           }
         }
 

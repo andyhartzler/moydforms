@@ -1,0 +1,874 @@
+{
+  "fields": [
+    {
+      "id": "header_welcome",
+      "type": "section_header",
+      "label": "Welcome to Missouri Young Democrats! 🎉",
+      "help": "We're so glad you're here. Whether you're a first-time voter, a seasoned organizer, or just looking for your political community — you belong here. Let's start with the basics.",
+      "required": false,
+      "pageNumber": 1
+    },
+    {
+      "id": "7ef3d9a0",
+      "type": "text",
+      "label": "First Name",
+      "placeholder": "Your first name",
+      "required": true,
+      "pageNumber": 1
+    },
+    {
+      "id": "7221a225",
+      "type": "text",
+      "label": "Last Name",
+      "placeholder": "Your last name",
+      "required": true,
+      "pageNumber": 1
+    },
+    {
+      "id": "562e6d09",
+      "type": "date_picker",
+      "label": "Date of Birth",
+      "required": true,
+      "pageNumber": 1,
+      "help": "MOYD membership is open to ages 14–36."
+    },
+    {
+      "id": "email_field",
+      "type": "email",
+      "label": "Email Address",
+      "placeholder": "you@example.com",
+      "required": true,
+      "pageNumber": 1,
+      "help": "Please use a personal email — not a work or school address."
+    },
+    {
+      "id": "458e9ec2",
+      "type": "phone",
+      "label": "Phone Number",
+      "placeholder": "(555) 555-5555",
+      "required": false,
+      "pageNumber": 1
+    },
+
+    {
+      "id": "header_location",
+      "type": "section_header",
+      "label": "Where Are You? 📍",
+      "help": "This helps us connect you with your local chapter and ensures you're represented in the right districts. Your address is required for YDA (Young Democrats of America) membership.",
+      "required": false,
+      "pageNumber": 2
+    },
+    {
+      "id": "73400ed5",
+      "type": "text",
+      "label": "City/Town of Residence",
+      "placeholder": "Kansas City, Springfield, Columbia...",
+      "required": true,
+      "pageNumber": 2
+    },
+    {
+      "id": "207879c2",
+      "type": "text",
+      "label": "Street Address",
+      "placeholder": "123 Main St, Apt 4",
+      "required": true,
+      "pageNumber": 2,
+      "help": "Including apartment or suite number. Required by YDA for all members."
+    },
+    {
+      "id": "41db9d9c",
+      "type": "radio",
+      "label": "State",
+      "required": true,
+      "pageNumber": 2,
+      "options": [
+        { "value": "Missouri", "label": "Missouri" },
+        { "value": "Other", "label": "Other" }
+      ]
+    },
+    {
+      "id": "23cca2cb",
+      "type": "text",
+      "label": "Zip Code",
+      "placeholder": "63101",
+      "required": true,
+      "pageNumber": 2,
+      "validation": {
+        "pattern": "^[0-9]{5}(-[0-9]{4})?$",
+        "message": "Please enter a valid zip code"
+      }
+    },
+    {
+      "id": "3a456eeb",
+      "type": "checkbox_group",
+      "label": "Preferred Pronouns (Select all that apply)",
+      "required": false,
+      "pageNumber": 2,
+      "options": [
+        { "value": "She/her", "label": "She/her" },
+        { "value": "He/him", "label": "He/him" },
+        { "value": "They/them", "label": "They/them" },
+        { "value": "Ze/zir", "label": "Ze/zir" },
+        { "value": "Xe/xem", "label": "Xe/xem" },
+        { "value": "Any pronouns", "label": "Any pronouns" },
+        { "value": "Prefer not to say", "label": "Prefer not to say" }
+      ]
+    },
+    {
+      "id": "559c0f96",
+      "type": "radio",
+      "label": "Are you registered to vote in Missouri?",
+      "required": true,
+      "pageNumber": 2,
+      "help": "Not sure? <a href='https://www.sos.mo.gov/elections/voterlookup' target='_blank' class='text-primary-600 underline'>Check your status here</a>",
+      "options": [
+        { "value": "Yes", "label": "Yes" },
+        { "value": "No", "label": "No" },
+        { "value": "Unsure", "label": "Unsure" }
+      ]
+    },
+
+    {
+      "id": "header_social",
+      "type": "section_header",
+      "label": "Let's Connect! 📱",
+      "help": "Social media is one of the best ways we build momentum and keep you in the loop. Drop your handles if you're comfortable — we'd love to follow you!",
+      "required": false,
+      "pageNumber": 3
+    },
+    {
+      "id": "596e8a46",
+      "type": "text",
+      "label": "Instagram",
+      "placeholder": "@yourusername",
+      "required": false,
+      "pageNumber": 3
+    },
+    {
+      "id": "6428fdf1",
+      "type": "text",
+      "label": "TikTok",
+      "placeholder": "@yourusername",
+      "required": false,
+      "pageNumber": 3
+    },
+    {
+      "id": "417477cd",
+      "type": "text",
+      "label": "X (formerly Twitter)",
+      "placeholder": "@yourusername",
+      "required": false,
+      "pageNumber": 3
+    },
+    {
+      "id": "011b2200",
+      "type": "text",
+      "label": "Bluesky",
+      "placeholder": "@you.bsky.social",
+      "required": false,
+      "pageNumber": 3
+    },
+
+    {
+      "id": "header_education",
+      "type": "section_header",
+      "label": "School & Career 🎓",
+      "help": "Everyone's journey looks different — students, workers, job seekers, all are welcome. This helps us shape opportunities that fit where you are right now.",
+      "required": false,
+      "pageNumber": 4
+    },
+    {
+      "id": "69d07773",
+      "type": "radio",
+      "label": "Are you currently enrolled in school?",
+      "required": true,
+      "pageNumber": 4,
+      "options": [
+        { "value": "Yes", "label": "Yes" },
+        { "value": "No", "label": "No" },
+        { "value": "Prefer not to say", "label": "Prefer not to say" }
+      ]
+    },
+    {
+      "id": "4a9c0213",
+      "type": "text",
+      "label": "School Name",
+      "placeholder": "e.g., Mizzou, UMKC, Lincoln University...",
+      "required": false,
+      "pageNumber": 4,
+      "conditionalFieldId": "69d07773",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true
+    },
+    {
+      "id": "706b4e0b",
+      "type": "text",
+      "label": "Expected Graduation Year",
+      "placeholder": "e.g., 2027",
+      "required": false,
+      "pageNumber": 4,
+      "conditionalFieldId": "69d07773",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true
+    },
+    {
+      "id": "major_field",
+      "type": "text",
+      "label": "Major / Area of Study",
+      "placeholder": "e.g., Political Science, Nursing, Engineering...",
+      "required": false,
+      "pageNumber": 4,
+      "conditionalFieldId": "69d07773",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true
+    },
+    {
+      "id": "51cff5db",
+      "type": "dropdown",
+      "label": "Highest Level of Education Completed",
+      "required": false,
+      "pageNumber": 4,
+      "options": [
+        { "value": "I'm currently in high school", "label": "I'm currently in high school" },
+        { "value": "High school diploma or GED", "label": "High school diploma or GED" },
+        { "value": "Some college or trade school", "label": "Some college or trade school" },
+        { "value": "Associate degree (AA/AS)", "label": "Associate degree (AA/AS)" },
+        { "value": "Bachelor's degree (BA/BS)", "label": "Bachelor's degree (BA/BS)" },
+        { "value": "Some graduate school", "label": "Some graduate school" },
+        { "value": "Master's degree (MA/MS)", "label": "Master's degree (MA/MS)" },
+        { "value": "Professional degree (JD, MD, etc.)", "label": "Professional degree (JD, MD, etc.)" },
+        { "value": "Doctorate (PhD or equivalent)", "label": "Doctorate (PhD or equivalent)" },
+        { "value": "Prefer not to say", "label": "Prefer not to say" }
+      ]
+    },
+    {
+      "id": "6fa4f34c",
+      "type": "radio",
+      "label": "Are you currently employed?",
+      "required": false,
+      "pageNumber": 4,
+      "options": [
+        { "value": "Yes", "label": "Yes" },
+        { "value": "No", "label": "No" },
+        { "value": "Prefer not to say", "label": "Prefer not to say" }
+      ]
+    },
+    {
+      "id": "2585235b",
+      "type": "dropdown",
+      "label": "Industry",
+      "required": false,
+      "pageNumber": 4,
+      "help": "Select the one that best fits your current work.",
+      "conditionalFieldId": "6fa4f34c",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true,
+      "options": [
+        { "value": "Agriculture", "label": "Agriculture" },
+        { "value": "Arts, Entertainment, and Recreation", "label": "Arts, Entertainment & Recreation" },
+        { "value": "Construction", "label": "Construction" },
+        { "value": "Education", "label": "Education" },
+        { "value": "Energy & Utilities", "label": "Energy & Utilities" },
+        { "value": "Finance & Insurance", "label": "Finance & Insurance" },
+        { "value": "Government & Public Administration", "label": "Government & Public Administration" },
+        { "value": "Healthcare & Social Assistance", "label": "Healthcare & Social Assistance" },
+        { "value": "Hospitality & Food Services", "label": "Hospitality & Food Services" },
+        { "value": "Information Technology & Services", "label": "Information Technology & Services" },
+        { "value": "Legal Services", "label": "Legal Services" },
+        { "value": "Manufacturing", "label": "Manufacturing" },
+        { "value": "Marketing, Advertising & PR", "label": "Marketing, Advertising & PR" },
+        { "value": "Media & Journalism", "label": "Media & Journalism" },
+        { "value": "Nonprofit & Advocacy", "label": "Nonprofit & Advocacy" },
+        { "value": "Real Estate", "label": "Real Estate" },
+        { "value": "Retail", "label": "Retail" },
+        { "value": "Science, Research & Development", "label": "Science, Research & Development" },
+        { "value": "Telecommunications", "label": "Telecommunications" },
+        { "value": "Transportation & Warehousing", "label": "Transportation & Warehousing" },
+        { "value": "Wholesale Trade", "label": "Wholesale Trade" }
+      ]
+    },
+
+    {
+      "id": "header_involvement",
+      "type": "section_header",
+      "label": "Interests & Involvement ✊",
+      "help": "This is where it gets fun. Tell us what fires you up and how you'd like to get involved. There's no wrong answer — every level of engagement matters.",
+      "required": false,
+      "pageNumber": 5
+    },
+    {
+      "id": "17d3907b",
+      "type": "radio",
+      "label": "Are you interested in serving as an officer, committee member, or leader with MOYD?",
+      "required": true,
+      "pageNumber": 5,
+      "options": [
+        { "value": "Yes", "label": "Yes — let's go!" },
+        { "value": "Maybe", "label": "Maybe — tell me more" },
+        { "value": "No", "label": "Not right now" }
+      ]
+    },
+    {
+      "id": "committee_choices",
+      "type": "checkbox_group",
+      "label": "Which committees interest you? (Select all that apply)",
+      "required": false,
+      "pageNumber": 5,
+      "help": "*Per national guidelines, High School Democrats and College Democrats committees are only for those currently enrolled.",
+      "conditionalFieldId": "17d3907b",
+      "conditionalOperator": "notEquals",
+      "conditionalValue": "No",
+      "showWhenConditionMet": true,
+      "options": [
+        { "value": "College Democrats", "label": "College Democrats" },
+        { "value": "High School Democrats", "label": "High School Democrats" },
+        { "value": "Fundraising Committee", "label": "Fundraising Committee" },
+        { "value": "Communications Committee", "label": "Communications Committee" },
+        { "value": "Political Affairs Committee", "label": "Political Affairs Committee" },
+        { "value": "Policy & Advocacy Committee", "label": "Policy & Advocacy Committee" },
+        { "value": "Membership & Outreach Committee", "label": "Membership & Outreach Committee" }
+      ]
+    },
+    {
+      "id": "226743e3",
+      "type": "radio",
+      "label": "How many hours per week can you dedicate?",
+      "required": false,
+      "pageNumber": 5,
+      "options": [
+        { "value": "Less than 2 hours", "label": "Less than 2 hours" },
+        { "value": "2-5 hours", "label": "2-5 hours" },
+        { "value": "5-10 hours", "label": "5-10 hours" },
+        { "value": "More than 10 hours", "label": "More than 10 hours" },
+        { "value": "None", "label": "None right now — just keep me in the loop" }
+      ]
+    },
+    {
+      "id": "51e12843",
+      "type": "checkbox_group",
+      "label": "What issues are you most passionate about? (Check all that apply)",
+      "required": false,
+      "pageNumber": 5,
+      "options": [
+        { "value": "Voting Rights & Election Reform", "label": "Voting Rights & Election Reform" },
+        { "value": "Racial Justice", "label": "Racial Justice" },
+        { "value": "LGBTQ+ Rights", "label": "LGBTQ+ Rights" },
+        { "value": "Reproductive Freedom & Abortion Access", "label": "Reproductive Freedom & Abortion Access" },
+        { "value": "Climate Change & Environmental Justice", "label": "Climate Change & Environmental Justice" },
+        { "value": "Affordable Housing", "label": "Affordable Housing" },
+        { "value": "Healthcare Access & Equity", "label": "Healthcare Access & Equity" },
+        { "value": "Disability Rights", "label": "Disability Rights" },
+        { "value": "Criminal Justice Reform", "label": "Criminal Justice Reform" },
+        { "value": "Workers' Rights & Labor Protections", "label": "Workers' Rights & Labor Protections" },
+        { "value": "Education Equity & Student Debt Relief", "label": "Education Equity & Student Debt Relief" },
+        { "value": "Gun Violence Prevention", "label": "Gun Violence Prevention" },
+        { "value": "Immigration Rights & Protections", "label": "Immigration Rights & Protections" },
+        { "value": "Rural Development & Agricultural Policy", "label": "Rural Development & Agricultural Policy" },
+        { "value": "Native and Indigenous Rights", "label": "Native and Indigenous Rights" },
+        { "value": "Drug Policy Reform", "label": "Drug Policy Reform" },
+        { "value": "Youth Empowerment & Civic Engagement", "label": "Youth Empowerment & Civic Engagement" },
+        { "value": "Economic Justice & Wealth Inequality", "label": "Economic Justice & Wealth Inequality" },
+        { "value": "Mental Health Awareness", "label": "Mental Health Awareness" },
+        { "value": "Transportation & Infrastructure", "label": "Transportation & Infrastructure" },
+        { "value": "Foreign Policy & International Solidarity", "label": "Foreign Policy & International Solidarity" }
+      ]
+    },
+    {
+      "id": "016ae30f",
+      "type": "radio",
+      "label": "Are you a member of a Young Democrats chapter at your school or in your local area?",
+      "required": true,
+      "pageNumber": 5,
+      "options": [
+        { "value": "Yes", "label": "Yes" },
+        { "value": "No", "label": "No" },
+        { "value": "Maybe", "label": "Maybe / Not sure" }
+      ]
+    },
+    {
+      "id": "3b88c54f",
+      "type": "text",
+      "label": "Chapter Name",
+      "placeholder": "e.g., Mizzou Young Democrats",
+      "required": false,
+      "pageNumber": 5,
+      "conditionalFieldId": "016ae30f",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true
+    },
+    {
+      "id": "3f84c11f",
+      "type": "text",
+      "label": "Are you involved with any other political or community organizations?",
+      "placeholder": "Organization names and your role...",
+      "required": false,
+      "pageNumber": 5
+    },
+
+    {
+      "id": "header_demographics",
+      "type": "section_header",
+      "label": "Demographics 🌈",
+      "help": "These questions are <strong>completely optional</strong>. Your answers help us understand who we're reaching and ensure our work is truly inclusive and representative. All responses are confidential.",
+      "required": false,
+      "pageNumber": 6
+    },
+    {
+      "id": "60686161",
+      "type": "checkbox_group",
+      "label": "Gender Identity (Select all that apply)",
+      "required": false,
+      "pageNumber": 6,
+      "options": [
+        { "value": "Cisgender man", "label": "Cisgender man" },
+        { "value": "Transgender man", "label": "Transgender man" },
+        { "value": "Cisgender woman", "label": "Cisgender woman" },
+        { "value": "Transgender woman", "label": "Transgender woman" },
+        { "value": "Non-binary", "label": "Non-binary" },
+        { "value": "Genderqueer", "label": "Genderqueer" },
+        { "value": "Agender", "label": "Agender" },
+        { "value": "Two-Spirit", "label": "Two-Spirit" },
+        { "value": "Prefer not to say", "label": "Prefer not to say" }
+      ]
+    },
+    {
+      "id": "3c7a8a3d",
+      "type": "checkbox_group",
+      "label": "Sexual Orientation (Select all that apply)",
+      "required": false,
+      "pageNumber": 6,
+      "options": [
+        { "value": "Straight/Heterosexual", "label": "Straight/Heterosexual" },
+        { "value": "Gay", "label": "Gay" },
+        { "value": "Lesbian", "label": "Lesbian" },
+        { "value": "Bisexual", "label": "Bisexual" },
+        { "value": "Queer", "label": "Queer" },
+        { "value": "Asexual", "label": "Asexual" },
+        { "value": "Pansexual", "label": "Pansexual" },
+        { "value": "Prefer not to say", "label": "Prefer not to say" }
+      ]
+    },
+    {
+      "id": "2238ba58",
+      "type": "radio",
+      "label": "Are you of Hispanic, Latino/a, or Spanish origin?",
+      "required": false,
+      "pageNumber": 6,
+      "options": [
+        { "value": "Yes", "label": "Yes" },
+        { "value": "No", "label": "No" },
+        { "value": "Prefer not to say", "label": "Prefer not to say" }
+      ]
+    },
+    {
+      "id": "4a6d1b7f",
+      "type": "checkbox_group",
+      "label": "Race (Select all that apply)",
+      "required": false,
+      "pageNumber": 6,
+      "options": [
+        { "value": "American Indian or Alaska Native", "label": "American Indian or Alaska Native" },
+        { "value": "Asian", "label": "Asian" },
+        { "value": "Black or African American", "label": "Black or African American" },
+        { "value": "Native Hawaiian or Other Pacific Islander", "label": "Native Hawaiian or Other Pacific Islander" },
+        { "value": "White", "label": "White" },
+        { "value": "Prefer not to say", "label": "Prefer not to say" }
+      ]
+    },
+    {
+      "id": "66a5f51e",
+      "type": "radio",
+      "label": "Do you identify as a person with a disability, chronic illness, or neurodivergence?",
+      "required": false,
+      "pageNumber": 6,
+      "help": "We ask this to ensure our programming is inclusive and accessible.",
+      "options": [
+        { "value": "Yes", "label": "Yes" },
+        { "value": "No", "label": "No" },
+        { "value": "Unsure or questioning", "label": "Unsure or questioning" },
+        { "value": "Prefer not to say", "label": "Prefer not to say" }
+      ]
+    },
+    {
+      "id": "331915b2",
+      "type": "textarea",
+      "label": "Do you need any accommodations to participate fully?",
+      "placeholder": "ASL interpretation, accessible materials, flexible scheduling, or other support...",
+      "required": false,
+      "pageNumber": 6,
+      "help": "Your response helps us create a more accessible experience for everyone."
+    },
+    {
+      "id": "32bfab74",
+      "type": "radio",
+      "label": "Type of Community You Live In",
+      "required": false,
+      "pageNumber": 6,
+      "options": [
+        { "value": "Urban", "label": "Urban" },
+        { "value": "Suburban", "label": "Suburban" },
+        { "value": "Rural", "label": "Rural" },
+        { "value": "Prefer not to say", "label": "Prefer not to say" }
+      ]
+    },
+    {
+      "id": "442d6c18",
+      "type": "checkbox_group",
+      "label": "Religious Affiliation",
+      "required": false,
+      "pageNumber": 6,
+      "options": [
+        { "value": "No religious affiliation", "label": "No religious affiliation" },
+        { "value": "Christian", "label": "Christian" },
+        { "value": "Catholic", "label": "Catholic" },
+        { "value": "Jewish", "label": "Jewish" },
+        { "value": "Muslim", "label": "Muslim" },
+        { "value": "Hindu", "label": "Hindu" },
+        { "value": "Buddhist", "label": "Buddhist" },
+        { "value": "Sikh", "label": "Sikh" },
+        { "value": "Jain", "label": "Jain" },
+        { "value": "Bahá'í", "label": "Bahá'í" },
+        { "value": "Pagan", "label": "Pagan" },
+        { "value": "Wiccan", "label": "Wiccan" },
+        { "value": "Unitarian Universalist", "label": "Unitarian Universalist" },
+        { "value": "Spiritual but not religious", "label": "Spiritual but not religious" },
+        { "value": "Agnostic", "label": "Agnostic" },
+        { "value": "Atheist", "label": "Atheist" },
+        { "value": "Prefer not to say", "label": "Prefer not to say" }
+      ]
+    },
+    {
+      "id": "40602e67",
+      "type": "text",
+      "label": "Languages Spoken Fluently",
+      "placeholder": "English, Spanish, ASL...",
+      "required": false,
+      "pageNumber": 6
+    },
+
+    {
+      "id": "header_final",
+      "type": "section_header",
+      "label": "Final Thoughts 💬",
+      "help": "Almost done! Here's your chance to share anything else — why you're here, what you're hoping to get out of this, how we can best support you.",
+      "required": false,
+      "pageNumber": 7
+    },
+    {
+      "id": "280f5f06",
+      "type": "textarea",
+      "label": "Why do you want to join Missouri Young Democrats?",
+      "placeholder": "What drew you here? What are you looking for?",
+      "required": false,
+      "pageNumber": 7,
+      "minLines": 3
+    },
+    {
+      "id": "6cf26feb",
+      "type": "textarea",
+      "label": "Any other information, suggestions, or ideas you'd like to share?",
+      "placeholder": "We're all ears...",
+      "required": false,
+      "pageNumber": 7,
+      "minLines": 2
+    },
+    {
+      "id": "6c6d967c",
+      "type": "checkbox_group",
+      "label": "How did you hear about us? (Select all that apply)",
+      "required": false,
+      "pageNumber": 7,
+      "options": [
+        { "value": "Instagram", "label": "Instagram" },
+        { "value": "TikTok", "label": "TikTok" },
+        { "value": "X (formerly Twitter)", "label": "X (formerly Twitter)" },
+        { "value": "Bluesky", "label": "Bluesky" },
+        { "value": "Facebook", "label": "Facebook" },
+        { "value": "Email", "label": "Email" },
+        { "value": "Website", "label": "Website" },
+        { "value": "Word of mouth", "label": "Word of mouth" },
+        { "value": "A friend or peer", "label": "A friend or peer" },
+        { "value": "A school or university group", "label": "A school or university group" },
+        { "value": "A local political or advocacy organization", "label": "A local political org" },
+        { "value": "A public event or rally", "label": "A public event or rally" },
+        { "value": "A community center or public library", "label": "A community center or library" },
+        { "value": "A Young Democrats chapter in another state", "label": "A YD chapter in another state" },
+        { "value": "A local elected official or candidate", "label": "A local elected official" },
+        { "value": "A student government or youth council", "label": "Student government or youth council" },
+        { "value": "A podcast or livestream", "label": "A podcast or livestream" },
+        { "value": "A flyer or printed material", "label": "A flyer or printed material" },
+        { "value": "A news article or op-ed", "label": "A news article or op-ed" }
+      ]
+    },
+    {
+      "id": "7e3d564c",
+      "type": "checkbox_group",
+      "label": "What skills or interests do you bring? (Select all that apply)",
+      "required": false,
+      "pageNumber": 7,
+      "options": [
+        { "value": "Community Organizing", "label": "Community Organizing" },
+        { "value": "Voter Registration Drives", "label": "Voter Registration Drives" },
+        { "value": "Policy Research and Advocacy", "label": "Policy Research & Advocacy" },
+        { "value": "Campaign Work", "label": "Campaign Work" },
+        { "value": "Communications and Social Media", "label": "Communications & Social Media" },
+        { "value": "Graphic Design and Web Development", "label": "Graphic Design & Web Dev" },
+        { "value": "Fundraising and Development", "label": "Fundraising & Development" },
+        { "value": "Event Planning and Coordination", "label": "Event Planning & Coordination" },
+        { "value": "Legal or Compliance Expertise", "label": "Legal or Compliance Expertise" }
+      ]
+    },
+    {
+      "id": "1de09937",
+      "type": "checkbox_group",
+      "label": "Which days work for monthly virtual meetings? (Check all that apply)",
+      "required": false,
+      "pageNumber": 7,
+      "options": [
+        { "value": "Monday", "label": "Monday" },
+        { "value": "Tuesday", "label": "Tuesday" },
+        { "value": "Wednesday", "label": "Wednesday" },
+        { "value": "Thursday", "label": "Thursday" },
+        { "value": "Friday", "label": "Friday" },
+        { "value": "Saturday", "label": "Saturday" },
+        { "value": "Sunday", "label": "Sunday" }
+      ]
+    },
+    {
+      "id": "1af21ffa",
+      "type": "checkbox_group",
+      "label": "What times work best? (Check all that apply)",
+      "required": false,
+      "pageNumber": 7,
+      "options": [
+        { "value": "Mornings", "label": "Mornings" },
+        { "value": "Afternoons", "label": "Afternoons" },
+        { "value": "Evenings", "label": "Evenings" },
+        { "value": "Weekends", "label": "Weekends" }
+      ]
+    },
+
+    {
+      "id": "header_leadership",
+      "type": "section_header",
+      "label": "Leadership Application 🌟",
+      "help": "You expressed interest in a leadership role — awesome! Whether you're a seasoned organizer or just getting started, we welcome new leaders and fresh energy. Tell us a bit more about yourself.",
+      "required": false,
+      "pageNumber": 8,
+      "conditionalFieldId": "17d3907b",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true
+    },
+    {
+      "id": "committee_1st_choice",
+      "type": "radio",
+      "label": "1st Choice Committee",
+      "required": false,
+      "pageNumber": 8,
+      "conditionalFieldId": "17d3907b",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true,
+      "options": [
+        { "value": "College Democrats", "label": "College Democrats" },
+        { "value": "High School Democrats", "label": "High School Democrats" },
+        { "value": "Fundraising Committee", "label": "Fundraising Committee" },
+        { "value": "Communications Committee", "label": "Communications Committee" },
+        { "value": "Political Affairs Committee", "label": "Political Affairs Committee" },
+        { "value": "Policy & Advocacy Committee", "label": "Policy & Advocacy Committee" },
+        { "value": "Membership & Outreach Committee", "label": "Membership & Outreach Committee" }
+      ]
+    },
+    {
+      "id": "committee_2nd_choice",
+      "type": "radio",
+      "label": "2nd Choice Committee",
+      "required": false,
+      "pageNumber": 8,
+      "conditionalFieldId": "17d3907b",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true,
+      "options": [
+        { "value": "College Democrats", "label": "College Democrats" },
+        { "value": "High School Democrats", "label": "High School Democrats" },
+        { "value": "Fundraising Committee", "label": "Fundraising Committee" },
+        { "value": "Communications Committee", "label": "Communications Committee" },
+        { "value": "Political Affairs Committee", "label": "Political Affairs Committee" },
+        { "value": "Policy & Advocacy Committee", "label": "Policy & Advocacy Committee" },
+        { "value": "Membership & Outreach Committee", "label": "Membership & Outreach Committee" }
+      ]
+    },
+    {
+      "id": "committee_3rd_choice",
+      "type": "radio",
+      "label": "3rd Choice Committee",
+      "required": false,
+      "pageNumber": 8,
+      "conditionalFieldId": "17d3907b",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true,
+      "options": [
+        { "value": "College Democrats", "label": "College Democrats" },
+        { "value": "High School Democrats", "label": "High School Democrats" },
+        { "value": "Fundraising Committee", "label": "Fundraising Committee" },
+        { "value": "Communications Committee", "label": "Communications Committee" },
+        { "value": "Political Affairs Committee", "label": "Political Affairs Committee" },
+        { "value": "Policy & Advocacy Committee", "label": "Policy & Advocacy Committee" },
+        { "value": "Membership & Outreach Committee", "label": "Membership & Outreach Committee" }
+      ]
+    },
+    {
+      "id": "11648ea3",
+      "type": "radio",
+      "label": "How many hours per week can you commit to a leadership role?",
+      "required": false,
+      "pageNumber": 8,
+      "conditionalFieldId": "17d3907b",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true,
+      "options": [
+        { "value": "1-2 Hours Per Week", "label": "1-2 hours" },
+        { "value": "3-4 Hours Per Week", "label": "3-4 hours" },
+        { "value": "4-5 Hours Per Week", "label": "4-5 hours" },
+        { "value": "5-6 Hours Per Week", "label": "5-6 hours" },
+        { "value": "6-8 Hours Per Week", "label": "6-8 hours" },
+        { "value": "8-9 Hours Per Week", "label": "8-9 hours" },
+        { "value": "10+ Hours Per Week", "label": "10+ hours" }
+      ]
+    },
+    {
+      "id": "54016ebb",
+      "type": "textarea",
+      "label": "Why are you interested in this role, and what do you hope to accomplish?",
+      "placeholder": "Your vision for the role...",
+      "required": false,
+      "pageNumber": 8,
+      "conditionalFieldId": "17d3907b",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true,
+      "minLines": 3
+    },
+    {
+      "id": "67b2a620",
+      "type": "textarea",
+      "label": "What experience, skills, or perspective would you bring to this position?",
+      "placeholder": "Campaigning, organizing, fundraising, communications, policy, etc.",
+      "required": false,
+      "pageNumber": 8,
+      "conditionalFieldId": "17d3907b",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true,
+      "minLines": 3
+    },
+    {
+      "id": "13f36d81",
+      "type": "textarea",
+      "label": "Have you held a leadership role before? If yes, briefly describe.",
+      "placeholder": "Student org, nonprofit, campaign, Democratic Party body... If not, that's okay — we value new voices!",
+      "required": false,
+      "pageNumber": 8,
+      "conditionalFieldId": "17d3907b",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true,
+      "minLines": 3
+    },
+    {
+      "id": "5780de4a",
+      "type": "radio",
+      "label": "Can you attend regular statewide and committee meetings (virtual or in person)?",
+      "required": false,
+      "pageNumber": 8,
+      "conditionalFieldId": "17d3907b",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true,
+      "options": [
+        { "value": "Yes", "label": "Yes" },
+        { "value": "No", "label": "No" },
+        { "value": "Maybe", "label": "Maybe" }
+      ]
+    },
+    {
+      "id": "7949931e",
+      "type": "radio",
+      "label": "Are you comfortable working as part of a team across the state?",
+      "required": false,
+      "pageNumber": 8,
+      "conditionalFieldId": "17d3907b",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true,
+      "options": [
+        { "value": "Yes", "label": "Yes" },
+        { "value": "No", "label": "No" },
+        { "value": "Maybe", "label": "Maybe" }
+      ]
+    },
+    {
+      "id": "75a2099d",
+      "type": "checkbox_group",
+      "label": "Available meeting days (Check all that apply)",
+      "required": false,
+      "pageNumber": 8,
+      "conditionalFieldId": "17d3907b",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true,
+      "options": [
+        { "value": "Monday", "label": "Monday" },
+        { "value": "Tuesday", "label": "Tuesday" },
+        { "value": "Wednesday", "label": "Wednesday" },
+        { "value": "Thursday", "label": "Thursday" },
+        { "value": "Friday", "label": "Friday" },
+        { "value": "Saturday", "label": "Saturday" },
+        { "value": "Sunday", "label": "Sunday" }
+      ]
+    },
+    {
+      "id": "3f6c5cff",
+      "type": "checkbox_group",
+      "label": "Best meeting times (Check all that apply)",
+      "required": false,
+      "pageNumber": 8,
+      "conditionalFieldId": "17d3907b",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true,
+      "options": [
+        { "value": "Mornings", "label": "Mornings" },
+        { "value": "Afternoons", "label": "Afternoons" },
+        { "value": "Evenings", "label": "Evenings" },
+        { "value": "Weekends", "label": "Weekends" }
+      ]
+    },
+    {
+      "id": "leader_street_address",
+      "type": "text",
+      "label": "Street Address (required for leadership positions)",
+      "placeholder": "123 Main St, Apt 4",
+      "required": false,
+      "pageNumber": 8,
+      "conditionalFieldId": "17d3907b",
+      "conditionalOperator": "equals",
+      "conditionalValue": "Yes",
+      "showWhenConditionMet": true,
+      "help": "YDA requires addresses for all members in leadership positions."
+    }
+  ],
+  "confirmation": {
+    "message": "Welcome to Missouri Young Democrats! 🎉 Your membership application has been received. Check your email for next steps — we'll be in touch soon!",
+    "redirectUrl": "https://moyoungdemocrats.org"
+  }
+}
