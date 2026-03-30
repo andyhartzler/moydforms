@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useFormSession, SubmissionResult } from '@/hooks/useFormSession';
 import { useBeforeUnload } from '@/hooks/useBeforeUnload';
 import { PhoneEntryStage } from './PhoneEntryStage';
@@ -10,6 +11,8 @@ import { SuccessMessage } from './SuccessMessage';
 import { FormRecord, FileUploadResult } from '@/types/forms';
 import { toTitleCase } from '@/lib/utils';
 import { FileText, AlertCircle, ArrowLeft } from 'lucide-react';
+import { AnimatedProgressBar } from '../motion/AnimatedProgress';
+import { pageVariants, pageTransition, fadeInUp } from '@/lib/motion';
 
 interface FormContainerProps {
   form: FormRecord;
@@ -17,7 +20,13 @@ interface FormContainerProps {
   onFileUpload?: (file: File, fieldId: string) => Promise<FileUploadResult>;
 }
 
+// Stage order for direction calculation
+const STAGE_ORDER = ['phone', 'identity', 'custom', 'submitted'];
+
 export function FormContainer({ form, identityConfig, onFileUpload }: FormContainerProps) {
+  const [direction, setDirection] = useState(1);
+  const [prevStage, setPrevStage] = useState('phone');
+
   const {
     stage,
     session,
@@ -39,14 +48,20 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
     onSubmitSuccess: (result?: SubmissionResult) => console.log('Form submitted successfully', result),
   });
 
-  // Track abandon on page leave
+  // Track direction for page transitions
+  useEffect(() => {
+    const prevIdx = STAGE_ORDER.indexOf(prevStage);
+    const currIdx = STAGE_ORDER.indexOf(stage);
+    setDirection(currIdx >= prevIdx ? 1 : -1);
+    setPrevStage(stage);
+  }, [stage]);
+
   useBeforeUnload({
     enabled: stage !== 'phone' && stage !== 'submitted',
     onUnload: handleAbandon,
     message: 'Your form progress will be saved. Are you sure you want to leave?',
   });
 
-  // Handle field change for identity fields
   const handleFieldChange = useCallback(
     (key: string, value: string) => {
       setValues((prev) => ({ ...prev, [key]: value }));
@@ -54,7 +69,6 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
     [setValues]
   );
 
-  // Handle field change for custom fields
   const handleCustomFieldChange = useCallback(
     (key: string, value: unknown) => {
       setValues((prev) => ({ ...prev, [key]: value }));
@@ -62,7 +76,6 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
     [setValues]
   );
 
-  // Handle going back to previous stage
   const handleGoBack = useCallback(() => {
     if (stage === 'identity') {
       setStage('phone');
@@ -71,21 +84,23 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
     }
   }, [stage, setStage]);
 
-  // Properly capitalize the form title
   const formTitle = toTitleCase(form.title);
-
-  // Get confirmation settings
   const confirmation = form.schema?.confirmation;
-
-  // Check if back button should be shown (based on show_back_button field)
   const showBackToFormsButton = form.show_back_button === true;
+
+  // Progress percentage based on stage
+  const progressPercent = stage === 'phone' ? 33 : stage === 'identity' ? 66 : 100;
 
   return (
     <div className="min-h-screen py-8 md:py-12 relative z-10">
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
-        {/* Back to Forms button - circular style like moyd-events */}
+        {/* Back to Forms button */}
         {showBackToFormsButton && stage !== 'submitted' && (
-          <div className="mb-6">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="mb-6"
+          >
             <a
               href="/"
               className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all"
@@ -93,19 +108,29 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
             >
               <ArrowLeft className="w-5 h-5" />
             </a>
-          </div>
+          </motion.div>
         )}
 
-        {/* Form Header Card */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-6 relative overflow-hidden">
-          {/* Decorative accent */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700" />
+        {/* Form Header Card — animated entrance */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8 mb-6 relative overflow-hidden"
+        >
+          {/* Decorative accent — gold highlight */}
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary-600 via-gold-400 to-primary-600" />
 
           {/* Form icon */}
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 15, delay: 0.2 }}
+              className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center"
+            >
               <FileText className="w-6 h-6 text-primary-600" />
-            </div>
+            </motion.div>
             <div className="flex-1">
               <h1
                 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight"
@@ -117,96 +142,141 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
           </div>
 
           {form.description && (
-            <div
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
               className="text-gray-600 text-base leading-relaxed [&_a]:text-primary-600 [&_a]:underline [&_a:hover]:text-primary-700 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_b]:font-semibold"
               dangerouslySetInnerHTML={{ __html: form.description }}
             />
           )}
 
-          {/* Progress bar only (no text) */}
+          {/* Animated progress bar */}
           {stage !== 'submitted' && (
             <div className="mt-6">
-              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-2 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all duration-500 ease-out"
-                  style={{
-                    width: stage === 'phone' ? '33%' : stage === 'identity' ? '66%' : '100%',
-                  }}
-                />
-              </div>
+              <AnimatedProgressBar percent={progressPercent} />
             </div>
           )}
-        </div>
+        </motion.div>
 
-        {/* Error message */}
-        {error && (
-          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6 animate-fade-in">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0">
-                <AlertCircle className="h-5 w-5 text-red-500" />
+        {/* Error message with animation */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              className="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6"
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <AlertCircle className="h-5 w-5 text-red-500" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-red-800">Error</h3>
+                  <p className="text-sm text-red-700 mt-0.5">{error}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-semibold text-red-800">Error</h3>
-                <p className="text-sm text-red-700 mt-0.5">{error}</p>
-              </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Stage: Phone Entry */}
-        {stage === 'phone' && (
-          <PhoneEntryStage
-            label="Phone Number"
-            helpText="Enter your phone number to get started"
-            onSubmit={handlePhoneSubmit}
-            isLoading={isLoading}
-          />
-        )}
+        {/* Stage transitions with AnimatePresence */}
+        <AnimatePresence mode="wait" custom={direction}>
+          {stage === 'phone' && (
+            <motion.div
+              key="phone"
+              custom={direction}
+              variants={pageVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={pageTransition}
+            >
+              <PhoneEntryStage
+                label="Phone Number"
+                helpText="Enter your phone number to get started"
+                onSubmit={handlePhoneSubmit}
+                isLoading={isLoading}
+              />
+            </motion.div>
+          )}
 
-        {/* Stage: Identity Fields */}
-        {stage === 'identity' && session && (
-          <IdentityFieldsStage
-            config={identityConfig}
-            values={values as Record<string, unknown>}
-            prefill={session.prefill}
-            personFound={session.personFound}
-            onFieldChange={handleFieldChange}
-            onFieldBlur={handleFieldBlur}
-            onComplete={handleIdentityComplete}
-            onBack={handleGoBack}
-            isLoading={isLoading}
-          />
-        )}
+          {stage === 'identity' && session && (
+            <motion.div
+              key="identity"
+              custom={direction}
+              variants={pageVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={pageTransition}
+            >
+              <IdentityFieldsStage
+                config={identityConfig}
+                values={values as Record<string, unknown>}
+                prefill={session.prefill}
+                personFound={session.personFound}
+                onFieldChange={handleFieldChange}
+                onFieldBlur={handleFieldBlur}
+                onComplete={handleIdentityComplete}
+                onBack={handleGoBack}
+                isLoading={isLoading}
+              />
+            </motion.div>
+          )}
 
-        {/* Stage: Custom Fields */}
-        {stage === 'custom' && session && (
-          <CustomFieldsStage
-            schema={form.schema}
-            identityValues={values as Record<string, unknown>}
-            onFieldChange={handleCustomFieldChange}
-            onFieldBlur={handleFieldBlur}
-            onSubmit={handleSubmit}
-            onBack={handleGoBack}
-            isLoading={isLoading}
-            submitLabel={form.settings?.submitButtonText || 'Submit'}
-            onFileUpload={onFileUpload}
-          />
-        )}
+          {stage === 'custom' && session && (
+            <motion.div
+              key="custom"
+              custom={direction}
+              variants={pageVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={pageTransition}
+            >
+              <CustomFieldsStage
+                schema={form.schema}
+                identityValues={values as Record<string, unknown>}
+                onFieldChange={handleCustomFieldChange}
+                onFieldBlur={handleFieldBlur}
+                onSubmit={handleSubmit}
+                onBack={handleGoBack}
+                isLoading={isLoading}
+                submitLabel={form.settings?.submitButtonText || 'Submit'}
+                onFileUpload={onFileUpload}
+              />
+            </motion.div>
+          )}
 
-        {/* Stage: Success */}
-        {stage === 'submitted' && (
-          <SuccessMessage
-            formTitle={formTitle}
-            message={confirmation?.message}
-            redirectUrl={confirmation?.redirectUrl}
-            submissionResult={submissionResult}
-          />
-        )}
+          {stage === 'submitted' && (
+            <motion.div
+              key="submitted"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+            >
+              <SuccessMessage
+                formTitle={formTitle}
+                message={confirmation?.message}
+                redirectUrl={confirmation?.redirectUrl}
+                submissionResult={submissionResult}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Footer Note */}
-        <p className="mt-8 text-sm text-blue-100 text-center">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-8 text-sm text-blue-100 text-center"
+        >
           Powered by <span className="font-semibold text-white">Missouri Young Democrats</span>
-        </p>
+        </motion.p>
       </div>
     </div>
   );

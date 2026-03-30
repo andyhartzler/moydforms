@@ -1,5 +1,6 @@
 'use client';
 
+import { motion, AnimatePresence } from 'framer-motion';
 import { FormFieldConfig } from '@/types/forms';
 
 interface RadioGroupProps {
@@ -24,63 +25,87 @@ export default function RadioGroup({ field, value, onChange, error, onBlur, onFo
         <p className="text-sm text-gray-500 mb-3">{field.help}</p>
       )}
       <div className="space-y-2">
-        {options.map((option) => (
-          <label
-            key={option.value}
-            htmlFor={`${field.id}-${option.value}`}
-            className={`
-              flex items-center p-4 rounded-xl cursor-pointer
-              border-2 transition-all duration-200
-              ${value === option.value
-                ? 'border-primary-500 bg-primary-50'
-                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-              }
-              ${field.enabled === false ? 'opacity-50 cursor-not-allowed' : ''}
-            `}
-          >
-            <div className="relative flex items-center justify-center">
-              <input
-                type="radio"
-                id={`${field.id}-${option.value}`}
-                name={field.id}
-                value={option.value}
-                checked={value === option.value}
-                onChange={(e) => onChange(e.target.value)}
-                onBlur={onBlur}
-                onFocus={onFocus}
-                className="sr-only"
-                disabled={field.enabled === false}
-              />
-              <div className={`
-                w-5 h-5 rounded-full border-2 flex items-center justify-center
-                transition-all duration-200
-                ${value === option.value
-                  ? 'border-primary-500 bg-primary-500'
-                  : 'border-gray-300 bg-white'
+        {options.map((option, index) => {
+          const isSelected = value === option.value;
+          return (
+            <motion.label
+              key={option.value}
+              htmlFor={`${field.id}-${option.value}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05, type: 'spring', stiffness: 400, damping: 25 }}
+              whileTap={{ scale: 0.98 }}
+              className={`
+                flex items-center p-4 rounded-xl cursor-pointer
+                border-2 transition-colors duration-200
+                min-h-[56px]
+                ${isSelected
+                  ? 'border-primary-600 bg-primary-50'
+                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                 }
-              `}>
-                {value === option.value && (
-                  <div className="w-2 h-2 rounded-full bg-white" />
-                )}
+                ${field.enabled === false ? 'opacity-50 cursor-not-allowed' : ''}
+              `}
+              style={isSelected ? { boxShadow: '0 0 0 1px rgba(11, 77, 184, 0.2)' } : {}}
+            >
+              <div className="relative flex items-center justify-center">
+                <input
+                  type="radio"
+                  id={`${field.id}-${option.value}`}
+                  name={field.id}
+                  value={option.value}
+                  checked={isSelected}
+                  onChange={(e) => onChange(e.target.value)}
+                  onBlur={onBlur}
+                  onFocus={onFocus}
+                  className="sr-only"
+                  disabled={field.enabled === false}
+                />
+                <motion.div
+                  className="w-6 h-6 rounded-full border-2 flex items-center justify-center"
+                  animate={{
+                    borderColor: isSelected ? '#0b4db8' : '#d1d5db',
+                    backgroundColor: isSelected ? '#0b4db8' : '#ffffff',
+                  }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <AnimatePresence>
+                    {isSelected && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                        className="w-2.5 h-2.5 rounded-full bg-white"
+                      />
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               </div>
-            </div>
-            <span className={`
-              ml-3 text-sm font-medium
-              ${value === option.value ? 'text-primary-900' : 'text-gray-700'}
-            `}>
-              {option.label}
-            </span>
-          </label>
-        ))}
+              <span className={`
+                ml-3 text-sm font-medium
+                ${isSelected ? 'text-primary-900' : 'text-gray-700'}
+              `}>
+                {option.label}
+              </span>
+            </motion.label>
+          );
+        })}
       </div>
-      {error && (
-        <p className="mt-2 text-sm text-red-600 flex items-center gap-1.5">
-          <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-          </svg>
-          {error}
-        </p>
-      )}
+      <AnimatePresence mode="wait">
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, y: -8, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -8, height: 0 }}
+            className="mt-2 text-sm text-red-600 flex items-center gap-1.5 overflow-hidden"
+          >
+            <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

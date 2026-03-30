@@ -3,52 +3,49 @@
 @tailwind utilities;
 
 :root {
-  --primary: #273351;
-  --primary-dark: #1a2338;
-  --primary-light: #677fa3;
+  --primary: #0b4db8;
+  --primary-dark: #0b1e37;
+  --primary-light: #3368ff;
   --accent-blue: #1e40af;
   --accent-red: #dc2626;
-  --accent-gold: #d97706;
+  --accent-gold: #d4a039;
+  --gold-light: #f0c04e;
 }
 
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Default heading styles - can be overridden with specific classes */
+  /* Default heading styles */
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold;
     font-family: 'Montserrat', sans-serif;
     line-height: 1.3em;
   }
 
-  /* Only apply uppercase to specific contexts, not forms */
   .hero h1, .hero h2, .hero h3,
   .section-title {
     letter-spacing: -0.06em;
     text-transform: uppercase;
   }
 
-  h1 {
-    font-size: clamp(1.75rem, 4vw, 3.4rem);
-  }
+  h1 { font-size: clamp(1.75rem, 4vw, 3.4rem); }
+  h2 { font-size: clamp(1.5rem, 3vw, 2.8rem); }
+  h3 { font-size: clamp(1.25rem, 2.5vw, 2.2rem); }
+  h4 { font-size: clamp(1.1rem, 2vw, 1.5rem); }
 
-  h2 {
-    font-size: clamp(1.5rem, 3vw, 2.8rem);
-  }
-
-  h3 {
-    font-size: clamp(1.25rem, 2.5vw, 2.2rem);
-  }
-
-  h4 {
-    font-size: clamp(1.1rem, 2vw, 1.5rem);
-  }
-
-  /* Form-specific input resets for consistent styling */
+  /* Form-specific input resets */
   input, textarea, select {
     @apply outline-none;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+
+  /* Ensure minimum tap targets */
+  button, [role="button"], a, input, select, textarea, label {
+    min-height: 44px;
   }
 }
 
@@ -81,7 +78,98 @@
     @apply container mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  /* Scrolling Banner Container */
+  /* ── Form field focus glow ─────────────────────────── */
+  .field-focus-glow {
+    box-shadow: 0 0 0 3px rgba(11, 77, 184, 0.12),
+                0 4px 16px rgba(11, 77, 184, 0.08);
+    transform: translateY(-1px);
+  }
+
+  /* ── Animated progress bar ─────────────────────────── */
+  .progress-bar-animated {
+    background: linear-gradient(90deg, var(--primary) 0%, var(--gold-light) 50%, var(--primary) 100%);
+    background-size: 200% 100%;
+    animation: progressShimmer 2s ease-in-out infinite;
+  }
+
+  @keyframes progressShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ── Floating label styles ─────────────────────────── */
+  .floating-label-wrapper {
+    position: relative;
+  }
+
+  .floating-label {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: #9ca3af;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    padding: 0 4px;
+  }
+
+  .floating-label.active,
+  input:focus ~ .floating-label,
+  textarea:focus ~ .floating-label {
+    top: 0;
+    font-size: 0.75rem;
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  /* ── Custom radio/checkbox ─────────────────────────── */
+  .custom-radio-option {
+    @apply relative flex items-center p-4 rounded-xl cursor-pointer
+           border-2 transition-all duration-200;
+    min-height: 56px; /* 44px + padding for tap target */
+  }
+
+  .custom-radio-option:active {
+    transform: scale(0.98);
+  }
+
+  .custom-radio-option.selected {
+    @apply border-primary-600 bg-primary-50;
+    box-shadow: 0 0 0 1px rgba(11, 77, 184, 0.2);
+  }
+
+  .custom-radio-option:not(.selected) {
+    @apply border-gray-200 hover:border-gray-300 hover:bg-gray-50;
+  }
+
+  /* ── Sticky bottom nav (mobile) ────────────────────── */
+  .sticky-bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 z-40
+           bg-white/95 backdrop-blur-md border-t border-gray-200
+           px-4 py-3 shadow-lg;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  /* ── Gradient background shifts ────────────────────── */
+  .gradient-page-bg {
+    transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .gradient-page-1 {
+    background: linear-gradient(135deg, #0b1e37 0%, #0b4db8 100%);
+  }
+
+  .gradient-page-2 {
+    background: linear-gradient(135deg, #0b1e37 0%, #1a3a6b 50%, #0b4db8 100%);
+  }
+
+  .gradient-page-3 {
+    background: linear-gradient(135deg, #0b4db8 0%, #0b1e37 100%);
+  }
+
+  /* ── Scrolling Banner Container ────────────────────── */
   .scrolling-banner::before,
   .scrolling-banner::after {
     content: '';
@@ -114,7 +202,6 @@
     animation: marquee 30s linear infinite;
   }
 
-  /* Pause on hover */
   .scrolling-banner:hover .marquee-content {
     animation-play-state: paused;
   }
@@ -134,13 +221,6 @@
     100% { transform: translateX(-50%); }
   }
 
-  /* Respect reduced motion preference */
-  @media (prefers-reduced-motion: reduce) {
-    .marquee-content {
-      animation: none;
-    }
-  }
-
   .glass-card {
     @apply bg-white/90 backdrop-blur-sm;
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -158,14 +238,8 @@
   }
 
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .success-checkmark {
@@ -173,16 +247,42 @@
   }
 
   @keyframes checkmark {
-    0% {
-      transform: scale(0) rotate(-45deg);
-      opacity: 0;
-    }
-    50% {
-      transform: scale(1.2) rotate(-10deg);
-    }
-    100% {
-      transform: scale(1) rotate(0deg);
-      opacity: 1;
-    }
+    0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+    50% { transform: scale(1.2) rotate(-10deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+}
+
+/* ── Reduced motion support ────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .marquee-content {
+    animation: none;
+  }
+
+  .progress-bar-animated {
+    animation: none;
+    background: var(--primary);
+  }
+}
+
+/* ── Mobile keyboard handling ──────────────────────── */
+@media (max-height: 500px) and (max-width: 768px) {
+  /* When keyboard is open on mobile, keep fields visible */
+  .sticky-bottom-nav {
+    position: relative;
+  }
+}
+
+/* ── Safe area for notched devices ─────────────────── */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .sticky-bottom-nav {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   }
 }

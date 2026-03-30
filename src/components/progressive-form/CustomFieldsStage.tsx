@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FormFieldConfig, FormSchema, normalizeFieldType, FieldType, FileUploadResult } from '@/types/forms';
 import { FileUploadInfo } from '@/lib/edgeFunction';
 import { formatPhoneDisplay } from '@/lib/phone';
@@ -26,6 +27,8 @@ import {
   Autocomplete,
 } from '@/components/form-fields';
 import { Check, Loader2, Send, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AnimatedProgressBar, PageDots, StepCounter } from '@/components/motion/AnimatedProgress';
+import { pageVariants, pageTransition, staggerContainer, fieldEntrance } from '@/lib/motion';
 
 interface CustomFieldsStageProps {
   schema: FormSchema;
@@ -466,7 +469,7 @@ export function CustomFieldsStage({
     await onSubmit(finalData, fileUploads);
   };
 
-  // Render a section header
+  // Render a section header with animation
   const renderSectionHeader = (field: ExtendedFieldConfig) => {
     return (
       <div key={field.id} className="mb-6 pb-4 border-b border-gray-200">
@@ -583,102 +586,165 @@ export function CustomFieldsStage({
     }
   };
 
+  const [pageDirection, setPageDirection] = useState(1);
   const isLastPage = currentPage >= totalPages;
   const isFirstPage = currentPage <= 1;
   const progressPercent = isMultiPage ? (currentPage / totalPages) * 100 : 100;
 
+  // Override nav functions to track direction
+  const goToNextPageAnimated = () => {
+    if (validateCurrentPage()) {
+      setPageDirection(1);
+      setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+
+      // Auto-scroll to top of form on page change
+      setTimeout(() => {
+        document.querySelector('.custom-fields-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    } else {
+      // Auto-scroll to first error
+      const firstErrorEl = document.querySelector('[class*="text-red-600"]');
+      firstErrorEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  const goToPrevPageAnimated = () => {
+    setPageDirection(-1);
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
   return (
-    <form onSubmit={handleSubmit}>
-      {/* Identity summary */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6">
+    <form onSubmit={handleSubmit} className="custom-fields-form">
+      {/* Identity summary with stagger animation */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6"
+      >
         <h3 className="text-sm font-medium text-gray-500 mb-3">Your Information</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="flex items-center text-sm">
-            <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-            <span className="text-gray-600">
-              {formatPhoneDisplay((identityValues.phone as string) || '')}
-            </span>
-          </div>
-          <div className="flex items-center text-sm">
-            <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-            <span className="text-gray-600 truncate">{(identityValues.name as string) || ''}</span>
-          </div>
-          <div className="flex items-center text-sm">
-            <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-            <span className="text-gray-600 truncate">{(identityValues.email as string) || ''}</span>
-          </div>
-          <div className="flex items-center text-sm">
-            <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-            <span className="text-gray-600">{(identityValues.zip_code as string) || ''}</span>
-          </div>
+          {[
+            { icon: '📱', value: formatPhoneDisplay((identityValues.phone as string) || '') },
+            { icon: '👤', value: (identityValues.name as string) || '' },
+            { icon: '✉️', value: (identityValues.email as string) || '' },
+            { icon: '📍', value: (identityValues.zip_code as string) || '' },
+          ].filter(item => item.value).map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.1, type: 'spring', stiffness: 400, damping: 25 }}
+              className="flex items-center text-sm"
+            >
+              <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+              <span className="text-gray-600 truncate">{item.value}</span>
+            </motion.div>
+          ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Multi-page progress indicator */}
       {isMultiPage && (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 mb-6"
+        >
           <div className="flex justify-between items-center text-sm mb-2">
-            <span className="font-medium text-gray-700">
-              Page {currentPage} of {totalPages}
-            </span>
-            <span className="text-gray-500">{Math.round(progressPercent)}% complete</span>
+            <StepCounter current={currentPage} total={totalPages} />
+            <motion.span
+              key={Math.round(progressPercent)}
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-gray-500"
+            >
+              {Math.round(progressPercent)}% complete
+            </motion.span>
           </div>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-2 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-        </div>
+          <AnimatedProgressBar percent={progressPercent} />
+          <PageDots total={totalPages} current={currentPage - 1} />
+        </motion.div>
       )}
 
-      {/* Custom fields */}
+      {/* Custom fields with page transitions */}
       {hasVisibleFields && (
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="p-8 space-y-1">{currentPageFields.map(renderField)}</div>
+          <AnimatePresence mode="wait" custom={pageDirection}>
+            <motion.div
+              key={currentPage}
+              custom={pageDirection}
+              variants={pageVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={pageTransition}
+              className="p-6 sm:p-8"
+            >
+              <motion.div
+                variants={staggerContainer}
+                initial="hidden"
+                animate="show"
+                className="space-y-1"
+              >
+                {currentPageFields.map((field) => (
+                  <motion.div key={field.id} variants={fieldEntrance}>
+                    {renderField(field)}
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
+          </AnimatePresence>
 
-          {/* Navigation and submit buttons */}
-          <div className="px-8 pb-8 pt-4 border-t border-gray-100 bg-gray-50/50">
+          {/* Navigation and submit buttons — sticky on mobile */}
+          <div className="px-6 sm:px-8 pb-6 sm:pb-8 pt-4 border-t border-gray-100 bg-gray-50/50 md:relative sticky-bottom-nav md:static md:bg-gray-50/50">
             <div className="flex gap-3">
-              {/* Previous/Back button */}
               {!isFirstPage ? (
-                <button
+                <motion.button
                   type="button"
-                  onClick={goToPrevPage}
+                  onClick={goToPrevPageAnimated}
                   disabled={isLoading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 min-h-[48px]"
                 >
                   <ChevronLeft className="h-5 w-5" />
-                  Previous
-                </button>
+                  <span className="hidden sm:inline">Previous</span>
+                </motion.button>
               ) : onBack ? (
-                <button
+                <motion.button
                   type="button"
                   onClick={onBack}
                   disabled={isLoading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 min-h-[48px]"
                 >
                   <ChevronLeft className="h-5 w-5" />
-                  Back
-                </button>
+                  <span className="hidden sm:inline">Back</span>
+                </motion.button>
               ) : null}
 
-              {/* Next/Submit button */}
               {!isLastPage ? (
-                <button
+                <motion.button
                   type="button"
-                  onClick={goToNextPage}
+                  onClick={goToNextPageAnimated}
                   disabled={isLoading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl text-white font-semibold hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl text-white font-semibold hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-md hover:shadow-lg min-h-[48px]"
                 >
                   Next
                   <ChevronRight className="h-5 w-5" />
-                </button>
+                </motion.button>
               ) : (
-                <button
+                <motion.button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white font-semibold text-base hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+                  whileHover={!isLoading ? { scale: 1.02 } : {}}
+                  whileTap={!isLoading ? { scale: 0.97 } : {}}
+                  className="flex-1 flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white font-semibold text-base hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-md hover:shadow-lg min-h-[48px]"
                 >
                   {isLoading ? (
                     <>
@@ -691,14 +757,14 @@ export function CustomFieldsStage({
                       {submitLabel}
                     </>
                   )}
-                </button>
+                </motion.button>
               )}
             </div>
           </div>
         </div>
       )}
 
-      {/* If no visible fields on current page (all conditional fields hidden), show message */}
+      {/* If no visible fields */}
       {!hasVisibleFields && (
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
           <p className="text-gray-600 text-center mb-6">
@@ -706,42 +772,50 @@ export function CustomFieldsStage({
           </p>
           <div className="flex gap-3">
             {!isFirstPage ? (
-              <button
+              <motion.button
                 type="button"
-                onClick={goToPrevPage}
+                onClick={goToPrevPageAnimated}
                 disabled={isLoading}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 min-h-[48px]"
               >
                 <ChevronLeft className="h-5 w-5" />
                 Previous
-              </button>
+              </motion.button>
             ) : onBack ? (
-              <button
+              <motion.button
                 type="button"
                 onClick={onBack}
                 disabled={isLoading}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 min-h-[48px]"
               >
                 <ChevronLeft className="h-5 w-5" />
                 Back
-              </button>
+              </motion.button>
             ) : null}
 
             {!isLastPage ? (
-              <button
+              <motion.button
                 type="button"
-                onClick={goToNextPage}
+                onClick={goToNextPageAnimated}
                 disabled={isLoading}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl text-white font-semibold hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl text-white font-semibold hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-md hover:shadow-lg min-h-[48px]"
               >
                 Next
                 <ChevronRight className="h-5 w-5" />
-              </button>
+              </motion.button>
             ) : (
-              <button
+              <motion.button
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white font-semibold text-base hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+                whileHover={!isLoading ? { scale: 1.02 } : {}}
+                whileTap={!isLoading ? { scale: 0.97 } : {}}
+                className="flex-1 flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white font-semibold text-base hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-md hover:shadow-lg min-h-[48px]"
               >
                 {isLoading ? (
                   <>
@@ -754,7 +828,7 @@ export function CustomFieldsStage({
                     {submitLabel}
                   </>
                 )}
-              </button>
+              </motion.button>
             )}
           </div>
         </div>
