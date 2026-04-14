@@ -200,35 +200,6 @@ export function useFormSession({ formId, formSlug, formSettings, onSessionStart,
               officersProcessed: charteringResult.data.officers_processed,
               membersProcessed: charteringResult.data.members_processed,
             };
-
-            // Materialize the auto-generated join form_schemas row. The Edge
-            // Function records the intended id/slug/url in its response but
-            // doesn't actually create the row; without this call the URL
-            // returned to the user 404s on visit. Fire-and-forget so we
-            // don't block the submission confirmation UI.
-            const {
-              membership_form_id,
-              membership_form_slug,
-              membership_form_url,
-              chapter_id,
-              chapter_name,
-            } = charteringResult.data;
-            if (membership_form_id && membership_form_slug && chapter_id && chapter_name) {
-              void fetch('/api/chartering/create-join-form', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  formId: membership_form_id,
-                  slug: membership_form_slug,
-                  url: membership_form_url,
-                  chapterId: chapter_id,
-                  chapterName: chapter_name,
-                  submissionId: session.submissionId,
-                }),
-              }).catch((err) => {
-                console.warn('[chartering] join-form creation failed:', err);
-              });
-            }
           } else if (charteringResult.error) {
             throw new Error(charteringResult.error);
           }
