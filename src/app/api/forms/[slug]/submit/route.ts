@@ -1,13 +1,14 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
+import { dualWriteSubmission } from '@/lib/sheetsDualWrite';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: { slug: string } | Promise<{ slug: string }> }
 ) {
   const supabase = createClient();
-  const { slug } = params;
+  const { slug } = await params;
 
   // Get request body
   let body;
@@ -65,7 +66,7 @@ export async function POST(
   }
 
   // Get request headers for metadata
-  const headersList = headers();
+  const headersList = await headers();
   const ipAddress = headersList.get('x-forwarded-for')?.split(',')[0] ||
                     headersList.get('x-real-ip') ||
                     'unknown';
@@ -177,6 +178,19 @@ export async function POST(
     },
     ip_address: ipAddress,
     user_agent: userAgent,
+  });
+
+  // Continuity dual-write: append to the pre-moydforms Google Sheet for the
+  // handful of legacy-critical forms (membership, chapter-chartering). The
+  // historical response log predates moydforms and we keep it continuous so
+  // nothing gets lost when Google Forms is retired. Fire-and-forget — don't
+  // fail the submission if the append errors out.
+  const normalizedFileUrls =
+    fileUrls && typeof fileUrls === 'object' && !Array.isArray(fileUrls)
+      ? (fileUrls as Record<string, string | string[]>)
+      : null;
+  void dualWriteSubmission(slug, formData, normalizedFileUrls).catch((err) => {
+    console.warn('[sheetsDualWrite] fire-and-forget failed:', err);
   });
 
   return NextResponse.json({
