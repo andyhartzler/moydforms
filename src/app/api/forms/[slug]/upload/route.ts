@@ -1,15 +1,18 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { dualWriteToDriveFolder } from '@/lib/googleDrive';
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB default
+// Supabase storage allows up to 5GB per object on paid plans; we cap at
+// 250MB to align with the chartering form's max_size_mb setting.
+const MAX_FILE_SIZE = 250 * 1024 * 1024;
 const STORAGE_BUCKET = 'form-uploads';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: { slug: string } | Promise<{ slug: string }> }
 ) {
   const supabase = createClient();
-  const { slug } = params;
+  const { slug } = await params;
 
   // Find form by slug or ID
   let form;
@@ -61,7 +64,10 @@ export async function POST(
 
   // Validate file size
   if (file.size > MAX_FILE_SIZE) {
-    return NextResponse.json({ error: 'File size exceeds 10MB limit' }, { status: 400 });
+    return NextResponse.json(
+      { error: `File size exceeds ${Math.floor(MAX_FILE_SIZE / 1024 / 1024)}MB limit` },
+      { status: 400 }
+    );
   }
 
   // Generate unique file path
@@ -131,6 +137,14 @@ export async function POST(
     console.error('File record error:', recordError);
     // Still return success since file is uploaded, just not recorded
   }
+
+  // Continuity dual-write to the Google Drive folder the pre-moydforms
+  // Zapier pipeline wrote to (chartering file uploads only — member list,
+  // officers list, governing documents per chapter type). Fire-and-forget,
+  // and serialize the buffer once so we reuse the bytes we already read.
+  void dualWriteToDriveFolder(fieldId, file.name, file.type, buffer).catch(
+    (err) => console.warn('[upload] Drive dual-write failed:', err)
+  );
 
   return NextResponse.json({
     success: true,
