@@ -1,0 +1,840 @@
+{
+  "formId": "1hlcMktMJPQ5Oxi9FyD1DhW-aPiZBJLGhnFwEp7QnxF0",
+  "info": {
+    "title": "Chartering Form",
+    "description": "This form is the first step to officially chartering your local chapter with the Missouri Young Democrats. \n\nBe sure to review the Chapter Guide for an overview of the chartering process. \n\nBy completing it, you\u2019ll help us recognize your chapter, connect you with statewide resources, and ensure your members are part of a growing network of young leaders across Missouri. \n\nPlease complete all required sections so we can maintain accurate records and provide your chapter with the necessary support. ",
+    "documentTitle": "Chartering Form"
+  },
+  "settings": {
+    "emailCollectionType": "DO_NOT_COLLECT"
+  },
+  "revisionId": "00000340",
+  "responderUri": "https://docs.google.com/forms/d/e/1FAIpQLSdrfZurH2NxmWWXoTV26GQ3fF3jRWVaQMbJFvDXcPz6cAsEoQ/viewform",
+  "items": [
+    {
+      "itemId": "2f4ee5fd",
+      "textItem": {},
+      "title": "Chartering Contact Information",
+      "description": "Please enter the contact information for who is submitting this chartering application. \nThis person will serve as the point of contact throughout the chartering process."
+    },
+    {
+      "itemId": "32fef80d",
+      "title": "First Name",
+      "questionItem": {
+        "question": {
+          "questionId": "2503a391",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "0e9aef1a",
+      "title": "Last Name",
+      "questionItem": {
+        "question": {
+          "questionId": "48b72130",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "2fbbb2e2",
+      "title": "Phone Number",
+      "questionItem": {
+        "question": {
+          "questionId": "682b0ec1",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "13312c46",
+      "title": "Email Address",
+      "description": "Please use your personal email\u2014NOT your school or work email.",
+      "questionItem": {
+        "question": {
+          "questionId": "56414ba0",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "3be8ab81",
+      "title": "Please Select the Type of Unit to be Chartered",
+      "questionItem": {
+        "question": {
+          "questionId": "60a1eb7e",
+          "required": true,
+          "choiceQuestion": {
+            "type": "RADIO",
+            "options": [
+              {
+                "value": "County Chapter",
+                "goToSectionId": "21c3bdb2"
+              },
+              {
+                "value": "High School Chapter",
+                "goToSectionId": "72df8c44"
+              },
+              {
+                "value": "College Chapter",
+                "goToSectionId": "53310bfe"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "26fe9f61",
+      "title": "What is the official name of your Chartered Unit",
+      "description": "Examples:\n\"Cole County Young Democrats\"\n\"University of Missouri Democrats\"\n\"Central High School Democrats\"",
+      "questionItem": {
+        "question": {
+          "questionId": "1bc9431a",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "21c3bdb2",
+      "pageBreakItem": {},
+      "title": "County Chapter",
+      "description": "Missouri is made up of 114 counties. Each county chapter of the Missouri Young Democrats represents young people within that county, helping to organize locally while staying connected to our statewide movement."
+    },
+    {
+      "itemId": "0b8f80c3",
+      "title": "Please Select Your County",
+      "questionItem": {
+        "question": {
+          "questionId": "68b342ac",
+          "required": true,
+          "choiceQuestion": {
+            "type": "DROP_DOWN",
+            "options": [
+              {
+                "value": "Adair"
+              },
+              {
+                "value": "Andrew"
+              },
+              {
+                "value": "Atchison"
+              },
+              {
+                "value": "Audrain"
+              },
+              {
+                "value": "Barry"
+              },
+              {
+                "value": "Barton"
+              },
+              {
+                "value": "Bates"
+              },
+              {
+                "value": "Benton"
+              },
+              {
+                "value": "Bollinger"
+              },
+              {
+                "value": "Boone"
+              },
+              {
+                "value": "Buchanan"
+              },
+              {
+                "value": "Butler"
+              },
+              {
+                "value": "Caldwell"
+              },
+              {
+                "value": "Callaway"
+              },
+              {
+                "value": "Camden"
+              },
+              {
+                "value": "Cape Girardeau"
+              },
+              {
+                "value": "Carroll"
+              },
+              {
+                "value": "Carter"
+              },
+              {
+                "value": "Cass"
+              },
+              {
+                "value": "Cedar"
+              },
+              {
+                "value": "Chariton"
+              },
+              {
+                "value": "Christian"
+              },
+              {
+                "value": "Clark"
+              },
+              {
+                "value": "Clay"
+              },
+              {
+                "value": "Clinton"
+              },
+              {
+                "value": "Cole"
+              },
+              {
+                "value": "Cooper"
+              },
+              {
+                "value": "Crawford"
+              },
+              {
+                "value": "Dade"
+              },
+              {
+                "value": "Dallas"
+              },
+              {
+                "value": "Daviess"
+              },
+              {
+                "value": "DeKalb"
+              },
+              {
+                "value": "Dent"
+              },
+              {
+                "value": "Douglas"
+              },
+              {
+                "value": "Dunklin"
+              },
+              {
+                "value": "Franklin"
+              },
+              {
+                "value": "Gasconade"
+              },
+              {
+                "value": "Gentry"
+              },
+              {
+                "value": "Greene"
+              },
+              {
+                "value": "Grundy"
+              },
+              {
+                "value": "Harrison"
+              },
+              {
+                "value": "Henry"
+              },
+              {
+                "value": "Hickory"
+              },
+              {
+                "value": "Holt"
+              },
+              {
+                "value": "Howard"
+              },
+              {
+                "value": "Howell"
+              },
+              {
+                "value": "Iron"
+              },
+              {
+                "value": "Jackson"
+              },
+              {
+                "value": "Jasper"
+              },
+              {
+                "value": "Jefferson"
+              },
+              {
+                "value": "Johnson"
+              },
+              {
+                "value": "Knox"
+              },
+              {
+                "value": "Laclede"
+              },
+              {
+                "value": "Lafayette"
+              },
+              {
+                "value": "Lawrence"
+              },
+              {
+                "value": "Lewis"
+              },
+              {
+                "value": "Lincoln"
+              },
+              {
+                "value": "Linn"
+              },
+              {
+                "value": "Livingston"
+              },
+              {
+                "value": "Macon"
+              },
+              {
+                "value": "Madison"
+              },
+              {
+                "value": "Maries"
+              },
+              {
+                "value": "Marion"
+              },
+              {
+                "value": "McDonald"
+              },
+              {
+                "value": "Mercer"
+              },
+              {
+                "value": "Miller"
+              },
+              {
+                "value": "Mississippi"
+              },
+              {
+                "value": "Moniteau"
+              },
+              {
+                "value": "Monroe"
+              },
+              {
+                "value": "Montgomery"
+              },
+              {
+                "value": "Morgan"
+              },
+              {
+                "value": "New Madrid"
+              },
+              {
+                "value": "Newton"
+              },
+              {
+                "value": "Nodaway"
+              },
+              {
+                "value": "Oregon"
+              },
+              {
+                "value": "Osage"
+              },
+              {
+                "value": "Ozark"
+              },
+              {
+                "value": "Pemiscot"
+              },
+              {
+                "value": "Perry"
+              },
+              {
+                "value": "Pettis"
+              },
+              {
+                "value": "Phelps"
+              },
+              {
+                "value": "Pike"
+              },
+              {
+                "value": "Platte"
+              },
+              {
+                "value": "Polk"
+              },
+              {
+                "value": "Pulaski"
+              },
+              {
+                "value": "Putnam"
+              },
+              {
+                "value": "Ralls"
+              },
+              {
+                "value": "Randolph"
+              },
+              {
+                "value": "Ray"
+              },
+              {
+                "value": "Reynolds"
+              },
+              {
+                "value": "Ripley"
+              },
+              {
+                "value": "Saline"
+              },
+              {
+                "value": "Schuyler"
+              },
+              {
+                "value": "Scotland"
+              },
+              {
+                "value": "Scott"
+              },
+              {
+                "value": "Shannon"
+              },
+              {
+                "value": "Shelby"
+              },
+              {
+                "value": "St. Charles"
+              },
+              {
+                "value": "St. Clair"
+              },
+              {
+                "value": "St. Francois"
+              },
+              {
+                "value": "St. Louis County"
+              },
+              {
+                "value": "St. Louis City"
+              },
+              {
+                "value": "Ste. Genevieve"
+              },
+              {
+                "value": "Stoddard"
+              },
+              {
+                "value": "Stone"
+              },
+              {
+                "value": "Sullivan"
+              },
+              {
+                "value": "Taney"
+              },
+              {
+                "value": "Texas"
+              },
+              {
+                "value": "Vernon"
+              },
+              {
+                "value": "Warren"
+              },
+              {
+                "value": "Washington"
+              },
+              {
+                "value": "Wayne"
+              },
+              {
+                "value": "Webster"
+              },
+              {
+                "value": "Worth"
+              },
+              {
+                "value": "Wright"
+              },
+              {
+                "value": "Other"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "2a03438f",
+      "title": "If you selected \"Other\" from the list above, please specify the geographic region you would like to charter. ",
+      "questionItem": {
+        "question": {
+          "questionId": "52eb7684",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "4aad03cf",
+      "title": "County Chapter - Governing Documents",
+      "description": "Please Upload Your Governing Documents (Bylaws)\n\nIf you need help getting started, feel free to use the template found in the County Chapter Charting Guide.",
+      "questionItem": {
+        "question": {
+          "questionId": "6679138d",
+          "required": true,
+          "fileUploadQuestion": {
+            "folderId": "1nFyCaiBkRPXFyjl28gLZuhyxYl7VBkPbrSIwC9WoJF3kMGwfku_aJGlt4GybDaEPg-WNsFUq",
+            "types": [
+              "ANY"
+            ],
+            "maxFiles": 5,
+            "maxFileSize": "1073741824"
+          }
+        }
+      }
+    },
+    {
+      "itemId": "051fa907",
+      "title": "County Chapter - Officers List",
+      "description": "Upload Your Officers List (Google Sheets or Excel files only, please)\n\nPlease use this template or a similar one, as long as it includes the following information: first name, last name, address, city, state, zip code, date of birth, email address, phone number, position, date of election (if applicable), and date of term expiration.\n\nFor county chapters, a minimum of two officers is required to establish a chapter. ",
+      "questionItem": {
+        "question": {
+          "questionId": "223e959f",
+          "required": true,
+          "fileUploadQuestion": {
+            "folderId": "1bGSZJcGgTdBxJfa0dj1QwLxhGwNga3t0K9jBN6692wlyy4obq-Ne_ry7vrw9CChEdkDEJCR0",
+            "types": [
+              "ANY"
+            ],
+            "maxFiles": 5,
+            "maxFileSize": "1073741824"
+          }
+        }
+      }
+    },
+    {
+      "itemId": "2d3a81d5",
+      "title": "County Chapter - Membership List",
+      "description": "Upload Your Membership List (Google Sheets or Excel files only, please)\n\nPlease use this template or a similar one, as long as it includes the following information: first name, last name, city, state, zip code, date of birth, email address, and phone number.\n\nAt a minimum, you need five members, and officers count towards this total, so be sure to include them on this list. ",
+      "questionItem": {
+        "question": {
+          "questionId": "097b5088",
+          "required": true,
+          "fileUploadQuestion": {
+            "folderId": "1mZwPAyI_yUFdMHLn7xESmkGOprao0wx23z1Z1WuWEaKBGVv0rkpT_h5KI2uin9kU0EArj8nc",
+            "types": [
+              "ANY"
+            ],
+            "maxFiles": 5,
+            "maxFileSize": "1073741824"
+          }
+        }
+      }
+    },
+    {
+      "itemId": "72df8c44",
+      "pageBreakItem": {},
+      "title": "High School Chapters",
+      "description": "There are 618 high schools across 465 school districts in Missouri! Each High School Chapter Represents Students at that High School, helping to organize people around the high school while staying connected to the movement statewide!"
+    },
+    {
+      "itemId": "737ab7f8",
+      "title": "Name of High School",
+      "description": "Please do not abbreviate.",
+      "questionItem": {
+        "question": {
+          "questionId": "4c9bc6b7",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "25d347f9",
+      "title": "City of High School",
+      "questionItem": {
+        "question": {
+          "questionId": "0a12b67d",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "11f3c423",
+      "title": "Zip Code of High School",
+      "questionItem": {
+        "question": {
+          "questionId": "3bd0f193",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "680f497c",
+      "title": "Street Address of High School",
+      "questionItem": {
+        "question": {
+          "questionId": "09f9775c",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "0842d1d1",
+      "title": "High School Chapter - Governing Documents",
+      "description": "Please Upload Your Governing Documents (Bylaws)\n\nIf you need help getting started, feel free to use the template in the High School Chapter Charting Guide.",
+      "questionItem": {
+        "question": {
+          "questionId": "5c9c80d7",
+          "required": true,
+          "fileUploadQuestion": {
+            "folderId": "1zJm9JKl1xjf0414dP-u0B815HNmNo-45W3ejGKf2_EPSf9rH4fWW0SJFftiIavM7dx6YYcJj",
+            "types": [
+              "ANY"
+            ],
+            "maxFiles": 5,
+            "maxFileSize": "1073741824"
+          }
+        }
+      }
+    },
+    {
+      "itemId": "40506545",
+      "title": "High School Chapter - Officers List",
+      "description": "Upload your Officers List (Google Sheets or Excel files only, please)\n\nPlease use this template or a similar one, as long as it includes the following information: first name, last name, address, city, state, zip code, date of birth, email address, phone number, position, date of election (if applicable), and date of term expiration.",
+      "questionItem": {
+        "question": {
+          "questionId": "6e916bec",
+          "required": true,
+          "fileUploadQuestion": {
+            "folderId": "17BH5i4_8f81n1uMb63HP9HtlHDteQqESw4Tuw0KIxlB24N2llv0CJqgnjDjfNqEMC1M7ckxt",
+            "types": [
+              "ANY"
+            ],
+            "maxFiles": 1,
+            "maxFileSize": "10485760"
+          }
+        }
+      }
+    },
+    {
+      "itemId": "2e417226",
+      "title": "High School Chapter - Membership List",
+      "description": "Upload your Membership List (Google Sheets or Excel files only, please)\n\nPlease use this template or a similar one, as long as it includes the following information: first name, last name, city, state, zip code, date of birth, email address, and phone number.",
+      "questionItem": {
+        "question": {
+          "questionId": "53174b23",
+          "required": true,
+          "fileUploadQuestion": {
+            "folderId": "1_u07c1KBVQgy7HDB6U0KUrF74scbBDt9DezaWxt9Oz90EdXgggtuq8o5cMc6sJpwNyfA3xuh",
+            "types": [
+              "ANY"
+            ],
+            "maxFiles": 1,
+            "maxFileSize": "10485760"
+          }
+        }
+      }
+    },
+    {
+      "itemId": "53310bfe",
+      "pageBreakItem": {},
+      "title": "College Chapters",
+      "description": "Missouri is home to 67 post-secondary institutions, including colleges, universities, and community colleges. Each campus chapter of the Missouri College Democrats organizes progressively aligned democratic students at their institution, building power on campus while staying connected to our statewide movement and the national network of College Democrats. The more chapters we have, the stronger our collective voice becomes."
+    },
+    {
+      "itemId": "2df38901",
+      "title": "Name of University/College",
+      "description": "Please do not abbreviate.",
+      "questionItem": {
+        "question": {
+          "questionId": "372284d0",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "469c7cce",
+      "title": "City of University/College",
+      "questionItem": {
+        "question": {
+          "questionId": "3c52bb6d",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "59beecab",
+      "title": "Zip Code of University/College",
+      "questionItem": {
+        "question": {
+          "questionId": "584b2ecb",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "21a16483",
+      "title": "Street Address of University/College",
+      "questionItem": {
+        "question": {
+          "questionId": "39111d19",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "7d5e9063",
+      "title": "College Chapter - Governing Documents",
+      "description": "Please Upload Your Governing Documents (Bylaws)\n\nIf you need help getting started, feel free to use the template in the College Chapter Charting Guide.",
+      "questionItem": {
+        "question": {
+          "questionId": "2ad27b4d",
+          "required": true,
+          "fileUploadQuestion": {
+            "folderId": "1X3vuLJAnpQjp4ER3088rvf0DKwfRcP29c_Oju0ihPahD9bNgDaC7H8qXnyY9U1Wjsmp7J-zK",
+            "types": [
+              "ANY"
+            ],
+            "maxFiles": 5,
+            "maxFileSize": "1073741824"
+          }
+        }
+      }
+    },
+    {
+      "itemId": "7fe655d6",
+      "title": "College Chapter - Officers List",
+      "description": "Upload Your Officers List (Google Sheets or Excel files only, please)\n\nPlease use this template or a similar one, as long as it includes the following information: first name, last name, address, city, state, zip code, date of birth, email address, phone number, position, date of election (if applicable), and date of term expiration.",
+      "questionItem": {
+        "question": {
+          "questionId": "5ae395a5",
+          "required": true,
+          "fileUploadQuestion": {
+            "folderId": "1cwa6Znk4I1-TI6-13XFAJ4gbcqqxOVWo7eI61TsIdR2yNKKeXG4yomIzX4hgzj2zHhYwUqV9",
+            "types": [
+              "ANY"
+            ],
+            "maxFiles": 5,
+            "maxFileSize": "1073741824"
+          }
+        }
+      }
+    },
+    {
+      "itemId": "7d4e11e2",
+      "title": "College Chapter - Membership List",
+      "description": "Upload Your Membership List (Google Sheets or Excel files only, please)\n\nPlease use this template or a similar one, as long as it includes the following information: first name, last name, city, state, zip code, date of birth, email address, and phone number.",
+      "questionItem": {
+        "question": {
+          "questionId": "0d13fb3a",
+          "required": true,
+          "fileUploadQuestion": {
+            "folderId": "14J43ydZU1ypXqdXbF-vcVaF0inMhCjeW582o0YEFqAcFbHH-oXS23lx3OEsjjZUpI6e35zAX",
+            "types": [
+              "ANY"
+            ],
+            "maxFiles": 1,
+            "maxFileSize": "10485760"
+          }
+        }
+      }
+    },
+    {
+      "itemId": "52738c17",
+      "pageBreakItem": {},
+      "title": "Chapter Social Media",
+      "description": "Please share your chapter\u2019s official social media/digital accounts so we can tag, promote, and stay connected with your work. \n\nInclude links or handles for any of the platforms you use."
+    },
+    {
+      "itemId": "0f774e59",
+      "title": "Facebook",
+      "questionItem": {
+        "question": {
+          "questionId": "24206e2d",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "6f8527e8",
+      "title": "Instagram",
+      "questionItem": {
+        "question": {
+          "questionId": "35e0a9bc",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "236019c2",
+      "title": "Threads",
+      "questionItem": {
+        "question": {
+          "questionId": "38068293",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "1fe03abe",
+      "title": "TikTok",
+      "questionItem": {
+        "question": {
+          "questionId": "7083269b",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "04e05388",
+      "title": "Twitter (X)",
+      "questionItem": {
+        "question": {
+          "questionId": "44a72edd",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "0be33969",
+      "title": "Bluesky",
+      "questionItem": {
+        "question": {
+          "questionId": "66409563",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "779247b3",
+      "title": "Website",
+      "questionItem": {
+        "question": {
+          "questionId": "5ff15ba5",
+          "textQuestion": {}
+        }
+      }
+    }
+  ],
+  "linkedSheetId": "1PKH96W2G6lf1sve-q_2ZHTQjQGU_OHekFZJwzFpjqA0",
+  "publishSettings": {
+    "publishState": {
+      "isPublished": true,
+      "isAcceptingResponses": true
+    }
+  }
+}

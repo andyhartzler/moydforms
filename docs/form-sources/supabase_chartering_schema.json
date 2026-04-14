@@ -1,0 +1,1231 @@
+{
+  "id": "e819146a-11e8-4f1d-a209-b01ee42869bc",
+  "created_at": "2025-12-18T19:46:33.579509+00:00",
+  "updated_at": "2025-12-22T06:27:46.506641+00:00",
+  "created_by": null,
+  "title": "Chapter Chartering Application",
+  "description": "<div style=\"margin: 0; line-height: 1.6;\">\n    <p><strong>This form is the first step to officially chartering your local chapter with the Missouri Young Democrats.</strong></p>\n    <p>Be sure to review the <a href=\"https://docs.google.com/document/d/1234567890/edit\" target=\"_blank\">Chapter Guide</a> for an overview of the chartering process.</p>\n    <p>By completing it, you'll help us recognize your chapter, connect you with statewide resources, and ensure your members are part of a growing network of young leaders across Missouri.</p>\n  </div>",
+  "form_type": "registration",
+  "schema": {
+    "questions": [
+      {
+        "id": "section_contact_info",
+        "page": 1,
+        "text": "Chartering Contact Information",
+        "description": "Please enter the contact information for who is submitting this chartering application. This person will serve as the point of contact throughout the chartering process.",
+        "question_type": "section_header"
+      },
+      {
+        "id": "contact_name",
+        "page": 1,
+        "text": "Full Name",
+        "required": true,
+        "validation": {
+          "max_length": 200,
+          "min_length": 3
+        },
+        "placeholder": "First and Last Name",
+        "question_type": "short_answer"
+      },
+      {
+        "id": "contact_phone",
+        "page": 1,
+        "text": "Phone Number",
+        "required": true,
+        "question_type": "phone"
+      },
+      {
+        "id": "contact_email",
+        "page": 1,
+        "text": "Email Address",
+        "required": true,
+        "helper_text": "Please use your personal email\u2014NOT your school or work email.",
+        "question_type": "email"
+      },
+      {
+        "id": "chapter_type",
+        "page": 1,
+        "text": "Please Select the Type of Unit to be Chartered",
+        "options": [
+          {
+            "id": "county",
+            "label": "County Chapter",
+            "value": "county"
+          },
+          {
+            "id": "highschool",
+            "label": "High School Chapter",
+            "value": "highschool"
+          },
+          {
+            "id": "college",
+            "label": "College Chapter",
+            "value": "college"
+          }
+        ],
+        "required": true,
+        "question_type": "radio"
+      },
+      {
+        "id": "chapter_name",
+        "page": 1,
+        "text": "What is the official name of your Chartered Unit?",
+        "required": true,
+        "validation": {
+          "max_length": 200,
+          "min_length": 5
+        },
+        "helper_text": "Examples: \"Cole County Young Democrats\", \"University of Missouri Democrats\", \"Central High School Democrats\"",
+        "question_type": "short_answer"
+      },
+      {
+        "id": "section_county",
+        "page": 2,
+        "text": "County Chapter",
+        "condition": {
+          "field": "chapter_type",
+          "value": "county"
+        },
+        "description": "Missouri is made up of 114 counties. Each county chapter of the Missouri Young Democrats represents young people within that county.",
+        "question_type": "section_header"
+      },
+      {
+        "id": "county_selection",
+        "page": 2,
+        "text": "Please Select Your County",
+        "options": [
+          {
+            "id": "adair",
+            "label": "Adair",
+            "value": "Adair"
+          },
+          {
+            "id": "andrew",
+            "label": "Andrew",
+            "value": "Andrew"
+          },
+          {
+            "id": "atchison",
+            "label": "Atchison",
+            "value": "Atchison"
+          },
+          {
+            "id": "audrain",
+            "label": "Audrain",
+            "value": "Audrain"
+          },
+          {
+            "id": "barry",
+            "label": "Barry",
+            "value": "Barry"
+          },
+          {
+            "id": "barton",
+            "label": "Barton",
+            "value": "Barton"
+          },
+          {
+            "id": "bates",
+            "label": "Bates",
+            "value": "Bates"
+          },
+          {
+            "id": "benton",
+            "label": "Benton",
+            "value": "Benton"
+          },
+          {
+            "id": "bollinger",
+            "label": "Bollinger",
+            "value": "Bollinger"
+          },
+          {
+            "id": "boone",
+            "label": "Boone",
+            "value": "Boone"
+          },
+          {
+            "id": "buchanan",
+            "label": "Buchanan",
+            "value": "Buchanan"
+          },
+          {
+            "id": "butler",
+            "label": "Butler",
+            "value": "Butler"
+          },
+          {
+            "id": "caldwell",
+            "label": "Caldwell",
+            "value": "Caldwell"
+          },
+          {
+            "id": "callaway",
+            "label": "Callaway",
+            "value": "Callaway"
+          },
+          {
+            "id": "camden",
+            "label": "Camden",
+            "value": "Camden"
+          },
+          {
+            "id": "cape_girardeau",
+            "label": "Cape Girardeau",
+            "value": "Cape Girardeau"
+          },
+          {
+            "id": "carroll",
+            "label": "Carroll",
+            "value": "Carroll"
+          },
+          {
+            "id": "carter",
+            "label": "Carter",
+            "value": "Carter"
+          },
+          {
+            "id": "cass",
+            "label": "Cass",
+            "value": "Cass"
+          },
+          {
+            "id": "cedar",
+            "label": "Cedar",
+            "value": "Cedar"
+          },
+          {
+            "id": "chariton",
+            "label": "Chariton",
+            "value": "Chariton"
+          },
+          {
+            "id": "christian",
+            "label": "Christian",
+            "value": "Christian"
+          },
+          {
+            "id": "clark",
+            "label": "Clark",
+            "value": "Clark"
+          },
+          {
+            "id": "clay",
+            "label": "Clay",
+            "value": "Clay"
+          },
+          {
+            "id": "clinton",
+            "label": "Clinton",
+            "value": "Clinton"
+          },
+          {
+            "id": "cole",
+            "label": "Cole",
+            "value": "Cole"
+          },
+          {
+            "id": "cooper",
+            "label": "Cooper",
+            "value": "Cooper"
+          },
+          {
+            "id": "crawford",
+            "label": "Crawford",
+            "value": "Crawford"
+          },
+          {
+            "id": "dade",
+            "label": "Dade",
+            "value": "Dade"
+          },
+          {
+            "id": "dallas",
+            "label": "Dallas",
+            "value": "Dallas"
+          },
+          {
+            "id": "daviess",
+            "label": "Daviess",
+            "value": "Daviess"
+          },
+          {
+            "id": "dekalb",
+            "label": "DeKalb",
+            "value": "DeKalb"
+          },
+          {
+            "id": "dent",
+            "label": "Dent",
+            "value": "Dent"
+          },
+          {
+            "id": "douglas",
+            "label": "Douglas",
+            "value": "Douglas"
+          },
+          {
+            "id": "dunklin",
+            "label": "Dunklin",
+            "value": "Dunklin"
+          },
+          {
+            "id": "franklin",
+            "label": "Franklin",
+            "value": "Franklin"
+          },
+          {
+            "id": "gasconade",
+            "label": "Gasconade",
+            "value": "Gasconade"
+          },
+          {
+            "id": "gentry",
+            "label": "Gentry",
+            "value": "Gentry"
+          },
+          {
+            "id": "greene",
+            "label": "Greene",
+            "value": "Greene"
+          },
+          {
+            "id": "grundy",
+            "label": "Grundy",
+            "value": "Grundy"
+          },
+          {
+            "id": "harrison",
+            "label": "Harrison",
+            "value": "Harrison"
+          },
+          {
+            "id": "henry",
+            "label": "Henry",
+            "value": "Henry"
+          },
+          {
+            "id": "hickory",
+            "label": "Hickory",
+            "value": "Hickory"
+          },
+          {
+            "id": "holt",
+            "label": "Holt",
+            "value": "Holt"
+          },
+          {
+            "id": "howard",
+            "label": "Howard",
+            "value": "Howard"
+          },
+          {
+            "id": "howell",
+            "label": "Howell",
+            "value": "Howell"
+          },
+          {
+            "id": "iron",
+            "label": "Iron",
+            "value": "Iron"
+          },
+          {
+            "id": "jackson",
+            "label": "Jackson",
+            "value": "Jackson"
+          },
+          {
+            "id": "jasper",
+            "label": "Jasper",
+            "value": "Jasper"
+          },
+          {
+            "id": "jefferson",
+            "label": "Jefferson",
+            "value": "Jefferson"
+          },
+          {
+            "id": "johnson",
+            "label": "Johnson",
+            "value": "Johnson"
+          },
+          {
+            "id": "knox",
+            "label": "Knox",
+            "value": "Knox"
+          },
+          {
+            "id": "laclede",
+            "label": "Laclede",
+            "value": "Laclede"
+          },
+          {
+            "id": "lafayette",
+            "label": "Lafayette",
+            "value": "Lafayette"
+          },
+          {
+            "id": "lawrence",
+            "label": "Lawrence",
+            "value": "Lawrence"
+          },
+          {
+            "id": "lewis",
+            "label": "Lewis",
+            "value": "Lewis"
+          },
+          {
+            "id": "lincoln",
+            "label": "Lincoln",
+            "value": "Lincoln"
+          },
+          {
+            "id": "linn",
+            "label": "Linn",
+            "value": "Linn"
+          },
+          {
+            "id": "livingston",
+            "label": "Livingston",
+            "value": "Livingston"
+          },
+          {
+            "id": "macon",
+            "label": "Macon",
+            "value": "Macon"
+          },
+          {
+            "id": "madison",
+            "label": "Madison",
+            "value": "Madison"
+          },
+          {
+            "id": "maries",
+            "label": "Maries",
+            "value": "Maries"
+          },
+          {
+            "id": "marion",
+            "label": "Marion",
+            "value": "Marion"
+          },
+          {
+            "id": "mcdonald",
+            "label": "McDonald",
+            "value": "McDonald"
+          },
+          {
+            "id": "mercer",
+            "label": "Mercer",
+            "value": "Mercer"
+          },
+          {
+            "id": "miller",
+            "label": "Miller",
+            "value": "Miller"
+          },
+          {
+            "id": "mississippi",
+            "label": "Mississippi",
+            "value": "Mississippi"
+          },
+          {
+            "id": "moniteau",
+            "label": "Moniteau",
+            "value": "Moniteau"
+          },
+          {
+            "id": "monroe",
+            "label": "Monroe",
+            "value": "Monroe"
+          },
+          {
+            "id": "montgomery",
+            "label": "Montgomery",
+            "value": "Montgomery"
+          },
+          {
+            "id": "morgan",
+            "label": "Morgan",
+            "value": "Morgan"
+          },
+          {
+            "id": "new_madrid",
+            "label": "New Madrid",
+            "value": "New Madrid"
+          },
+          {
+            "id": "newton",
+            "label": "Newton",
+            "value": "Newton"
+          },
+          {
+            "id": "nodaway",
+            "label": "Nodaway",
+            "value": "Nodaway"
+          },
+          {
+            "id": "oregon",
+            "label": "Oregon",
+            "value": "Oregon"
+          },
+          {
+            "id": "osage",
+            "label": "Osage",
+            "value": "Osage"
+          },
+          {
+            "id": "ozark",
+            "label": "Ozark",
+            "value": "Ozark"
+          },
+          {
+            "id": "pemiscot",
+            "label": "Pemiscot",
+            "value": "Pemiscot"
+          },
+          {
+            "id": "perry",
+            "label": "Perry",
+            "value": "Perry"
+          },
+          {
+            "id": "pettis",
+            "label": "Pettis",
+            "value": "Pettis"
+          },
+          {
+            "id": "phelps",
+            "label": "Phelps",
+            "value": "Phelps"
+          },
+          {
+            "id": "pike",
+            "label": "Pike",
+            "value": "Pike"
+          },
+          {
+            "id": "platte",
+            "label": "Platte",
+            "value": "Platte"
+          },
+          {
+            "id": "polk",
+            "label": "Polk",
+            "value": "Polk"
+          },
+          {
+            "id": "pulaski",
+            "label": "Pulaski",
+            "value": "Pulaski"
+          },
+          {
+            "id": "putnam",
+            "label": "Putnam",
+            "value": "Putnam"
+          },
+          {
+            "id": "ralls",
+            "label": "Ralls",
+            "value": "Ralls"
+          },
+          {
+            "id": "randolph",
+            "label": "Randolph",
+            "value": "Randolph"
+          },
+          {
+            "id": "ray",
+            "label": "Ray",
+            "value": "Ray"
+          },
+          {
+            "id": "reynolds",
+            "label": "Reynolds",
+            "value": "Reynolds"
+          },
+          {
+            "id": "ripley",
+            "label": "Ripley",
+            "value": "Ripley"
+          },
+          {
+            "id": "saline",
+            "label": "Saline",
+            "value": "Saline"
+          },
+          {
+            "id": "schuyler",
+            "label": "Schuyler",
+            "value": "Schuyler"
+          },
+          {
+            "id": "scotland",
+            "label": "Scotland",
+            "value": "Scotland"
+          },
+          {
+            "id": "scott",
+            "label": "Scott",
+            "value": "Scott"
+          },
+          {
+            "id": "shannon",
+            "label": "Shannon",
+            "value": "Shannon"
+          },
+          {
+            "id": "shelby",
+            "label": "Shelby",
+            "value": "Shelby"
+          },
+          {
+            "id": "st_charles",
+            "label": "St. Charles",
+            "value": "St. Charles"
+          },
+          {
+            "id": "st_clair",
+            "label": "St. Clair",
+            "value": "St. Clair"
+          },
+          {
+            "id": "st_francois",
+            "label": "St. Francois",
+            "value": "St. Francois"
+          },
+          {
+            "id": "st_louis_county",
+            "label": "St. Louis County",
+            "value": "St. Louis County"
+          },
+          {
+            "id": "st_louis_city",
+            "label": "St. Louis City",
+            "value": "St. Louis City"
+          },
+          {
+            "id": "ste_genevieve",
+            "label": "Ste. Genevieve",
+            "value": "Ste. Genevieve"
+          },
+          {
+            "id": "stoddard",
+            "label": "Stoddard",
+            "value": "Stoddard"
+          },
+          {
+            "id": "stone",
+            "label": "Stone",
+            "value": "Stone"
+          },
+          {
+            "id": "sullivan",
+            "label": "Sullivan",
+            "value": "Sullivan"
+          },
+          {
+            "id": "taney",
+            "label": "Taney",
+            "value": "Taney"
+          },
+          {
+            "id": "texas",
+            "label": "Texas",
+            "value": "Texas"
+          },
+          {
+            "id": "vernon",
+            "label": "Vernon",
+            "value": "Vernon"
+          },
+          {
+            "id": "warren",
+            "label": "Warren",
+            "value": "Warren"
+          },
+          {
+            "id": "washington",
+            "label": "Washington",
+            "value": "Washington"
+          },
+          {
+            "id": "wayne",
+            "label": "Wayne",
+            "value": "Wayne"
+          },
+          {
+            "id": "webster",
+            "label": "Webster",
+            "value": "Webster"
+          },
+          {
+            "id": "worth",
+            "label": "Worth",
+            "value": "Worth"
+          },
+          {
+            "id": "wright",
+            "label": "Wright",
+            "value": "Wright"
+          },
+          {
+            "id": "other",
+            "label": "Other",
+            "value": "other"
+          }
+        ],
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "county"
+        },
+        "question_type": "dropdown"
+      },
+      {
+        "id": "county_other_specify",
+        "page": 2,
+        "text": "If you selected \"Other\", please specify the geographic region.",
+        "required": false,
+        "condition": {
+          "field": "county_selection",
+          "value": "other"
+        },
+        "question_type": "short_answer"
+      },
+      {
+        "id": "county_governing_documents",
+        "page": 2,
+        "text": "Please Upload Your Governing Documents (Bylaws)",
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "county"
+        },
+        "file_config": {
+          "accept": [
+            ".pdf",
+            ".doc",
+            ".docx"
+          ],
+          "max_size_mb": 25,
+          "storage_path": "chartering/county/governing-documents",
+          "storage_bucket": "form-uploads"
+        },
+        "helper_text": "Accepted formats: PDF, Word documents",
+        "question_type": "file_upload"
+      },
+      {
+        "id": "county_officers_list",
+        "page": 2,
+        "text": "Upload Your Officers List",
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "county"
+        },
+        "file_config": {
+          "accept": [
+            ".xlsx",
+            ".xls",
+            ".csv",
+            ".docx",
+            ".doc",
+            ".pdf"
+          ],
+          "max_size_mb": 10,
+          "storage_path": "chartering/county/officers",
+          "storage_bucket": "form-uploads"
+        },
+        "helper_text": "Accepted formats: Excel, CSV, Word, PDF, Google Sheets. Include: full name, address, city, state, zip, DOB, email, phone, position, date elected, term expiration. Minimum 2 officers required.",
+        "question_type": "file_upload"
+      },
+      {
+        "id": "county_membership_upload_choice",
+        "page": 2,
+        "text": "Would you like to upload your membership list now?",
+        "options": [
+          {
+            "id": "upload_now",
+            "label": "Yes, I will upload a membership list now",
+            "value": "upload_now"
+          },
+          {
+            "id": "upload_later",
+            "label": "No, I will have members sign up individually",
+            "value": "upload_later"
+          }
+        ],
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "county"
+        },
+        "helper_text": "At minimum, you need five members (officers count towards this total).",
+        "question_type": "radio"
+      },
+      {
+        "id": "county_membership_list",
+        "page": 2,
+        "text": "Upload Your Membership List",
+        "required": false,
+        "condition": {
+          "and": [
+            {
+              "field": "chapter_type",
+              "value": "county"
+            },
+            {
+              "field": "county_membership_upload_choice",
+              "value": "upload_now"
+            }
+          ]
+        },
+        "file_config": {
+          "accept": [
+            ".xlsx",
+            ".xls",
+            ".csv",
+            ".docx",
+            ".doc",
+            ".pdf"
+          ],
+          "max_size_mb": 10,
+          "storage_path": "chartering/county/members",
+          "storage_bucket": "form-uploads"
+        },
+        "helper_text": "Accepted formats: Excel, CSV, Word, PDF, Google Sheets. Include: full name, city, state, zip, DOB, email, phone.",
+        "question_type": "file_upload"
+      },
+      {
+        "id": "section_highschool",
+        "page": 2,
+        "text": "High School Chapter",
+        "condition": {
+          "field": "chapter_type",
+          "value": "highschool"
+        },
+        "description": "There are 618 high schools across Missouri! Each High School Chapter represents students at that school.",
+        "question_type": "section_header"
+      },
+      {
+        "id": "hs_school_name",
+        "page": 2,
+        "text": "Name of High School",
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "highschool"
+        },
+        "validation": {
+          "max_length": 200,
+          "min_length": 3
+        },
+        "helper_text": "Please do not abbreviate.",
+        "question_type": "short_answer"
+      },
+      {
+        "id": "hs_city",
+        "page": 2,
+        "text": "City of High School",
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "highschool"
+        },
+        "question_type": "short_answer"
+      },
+      {
+        "id": "hs_zip",
+        "page": 2,
+        "text": "Zip Code of High School",
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "highschool"
+        },
+        "validation": {
+          "pattern": "^[0-9]{5}(-[0-9]{4})?$",
+          "error_message": "Please enter a valid 5-digit zip code"
+        },
+        "question_type": "short_answer"
+      },
+      {
+        "id": "hs_street_address",
+        "page": 2,
+        "text": "Street Address of High School",
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "highschool"
+        },
+        "question_type": "short_answer"
+      },
+      {
+        "id": "hs_governing_documents",
+        "page": 2,
+        "text": "Please Upload Your Governing Documents (Bylaws)",
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "highschool"
+        },
+        "file_config": {
+          "accept": [
+            ".pdf",
+            ".doc",
+            ".docx"
+          ],
+          "max_size_mb": 25,
+          "storage_path": "chartering/highschool/governing-documents",
+          "storage_bucket": "form-uploads"
+        },
+        "helper_text": "Accepted formats: PDF, Word documents",
+        "question_type": "file_upload"
+      },
+      {
+        "id": "hs_officers_list",
+        "page": 2,
+        "text": "Upload your Officers List",
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "highschool"
+        },
+        "file_config": {
+          "accept": [
+            ".xlsx",
+            ".xls",
+            ".csv",
+            ".docx",
+            ".doc",
+            ".pdf"
+          ],
+          "max_size_mb": 10,
+          "storage_path": "chartering/highschool/officers",
+          "storage_bucket": "form-uploads"
+        },
+        "helper_text": "Accepted formats: Excel, CSV, Word, PDF, Google Sheets. Include: full name, address, city, state, zip, DOB, email, phone, position, date elected, term expiration.",
+        "question_type": "file_upload"
+      },
+      {
+        "id": "hs_membership_upload_choice",
+        "page": 2,
+        "text": "Would you like to upload your membership list now?",
+        "options": [
+          {
+            "id": "upload_now",
+            "label": "Yes, I will upload a membership list now",
+            "value": "upload_now"
+          },
+          {
+            "id": "upload_later",
+            "label": "No, I will have members sign up individually",
+            "value": "upload_later"
+          }
+        ],
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "highschool"
+        },
+        "question_type": "radio"
+      },
+      {
+        "id": "hs_membership_list",
+        "page": 2,
+        "text": "Upload your Membership List",
+        "required": false,
+        "condition": {
+          "and": [
+            {
+              "field": "chapter_type",
+              "value": "highschool"
+            },
+            {
+              "field": "hs_membership_upload_choice",
+              "value": "upload_now"
+            }
+          ]
+        },
+        "file_config": {
+          "accept": [
+            ".xlsx",
+            ".xls",
+            ".csv",
+            ".docx",
+            ".doc",
+            ".pdf"
+          ],
+          "max_size_mb": 10,
+          "storage_path": "chartering/highschool/members",
+          "storage_bucket": "form-uploads"
+        },
+        "helper_text": "Accepted formats: Excel, CSV, Word, PDF, Google Sheets. Include: full name, city, state, zip, DOB, email, phone.",
+        "question_type": "file_upload"
+      },
+      {
+        "id": "section_college",
+        "page": 2,
+        "text": "College Chapter",
+        "condition": {
+          "field": "chapter_type",
+          "value": "college"
+        },
+        "description": "Missouri is home to 67 post-secondary institutions. Each campus chapter organizes democratic students at their institution.",
+        "question_type": "section_header"
+      },
+      {
+        "id": "college_name",
+        "page": 2,
+        "text": "Name of University/College",
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "college"
+        },
+        "validation": {
+          "max_length": 200,
+          "min_length": 3
+        },
+        "helper_text": "Please do not abbreviate.",
+        "question_type": "short_answer"
+      },
+      {
+        "id": "college_city",
+        "page": 2,
+        "text": "City of University/College",
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "college"
+        },
+        "question_type": "short_answer"
+      },
+      {
+        "id": "college_zip",
+        "page": 2,
+        "text": "Zip Code of University/College",
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "college"
+        },
+        "validation": {
+          "pattern": "^[0-9]{5}(-[0-9]{4})?$",
+          "error_message": "Please enter a valid 5-digit zip code"
+        },
+        "question_type": "short_answer"
+      },
+      {
+        "id": "college_street_address",
+        "page": 2,
+        "text": "Street Address of University/College",
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "college"
+        },
+        "question_type": "short_answer"
+      },
+      {
+        "id": "college_governing_documents",
+        "page": 2,
+        "text": "Please Upload Your Governing Documents (Bylaws)",
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "college"
+        },
+        "file_config": {
+          "accept": [
+            ".pdf",
+            ".doc",
+            ".docx"
+          ],
+          "max_size_mb": 25,
+          "storage_path": "chartering/college/governing-documents",
+          "storage_bucket": "form-uploads"
+        },
+        "helper_text": "Accepted formats: PDF, Word documents",
+        "question_type": "file_upload"
+      },
+      {
+        "id": "college_officers_list",
+        "page": 2,
+        "text": "Upload Your Officers List",
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "college"
+        },
+        "file_config": {
+          "accept": [
+            ".xlsx",
+            ".xls",
+            ".csv",
+            ".docx",
+            ".doc",
+            ".pdf"
+          ],
+          "max_size_mb": 10,
+          "storage_path": "chartering/college/officers",
+          "storage_bucket": "form-uploads"
+        },
+        "helper_text": "Accepted formats: Excel, CSV, Word, PDF, Google Sheets. Include: full name, address, city, state, zip, DOB, email, phone, position, date elected, term expiration.",
+        "question_type": "file_upload"
+      },
+      {
+        "id": "college_membership_upload_choice",
+        "page": 2,
+        "text": "Would you like to upload your membership list now?",
+        "options": [
+          {
+            "id": "upload_now",
+            "label": "Yes, I will upload a membership list now",
+            "value": "upload_now"
+          },
+          {
+            "id": "upload_later",
+            "label": "No, I will have members sign up individually",
+            "value": "upload_later"
+          }
+        ],
+        "required": true,
+        "condition": {
+          "field": "chapter_type",
+          "value": "college"
+        },
+        "question_type": "radio"
+      },
+      {
+        "id": "college_membership_list",
+        "page": 2,
+        "text": "Upload Your Membership List",
+        "required": false,
+        "condition": {
+          "and": [
+            {
+              "field": "chapter_type",
+              "value": "college"
+            },
+            {
+              "field": "college_membership_upload_choice",
+              "value": "upload_now"
+            }
+          ]
+        },
+        "file_config": {
+          "accept": [
+            ".xlsx",
+            ".xls",
+            ".csv",
+            ".docx",
+            ".doc",
+            ".pdf"
+          ],
+          "max_size_mb": 10,
+          "storage_path": "chartering/college/members",
+          "storage_bucket": "form-uploads"
+        },
+        "helper_text": "Accepted formats: Excel, CSV, Word, PDF, Google Sheets. Include: full name, city, state, zip, DOB, email, phone.",
+        "question_type": "file_upload"
+      },
+      {
+        "id": "section_social_media",
+        "page": 3,
+        "text": "Chapter Social Media",
+        "description": "Share your chapter's social media accounts so we can tag and promote your work.",
+        "question_type": "section_header"
+      },
+      {
+        "id": "social_facebook",
+        "page": 3,
+        "text": "Facebook",
+        "required": false,
+        "placeholder": "facebook.com/yourchapter or @yourchapter",
+        "question_type": "short_answer"
+      },
+      {
+        "id": "social_instagram",
+        "page": 3,
+        "text": "Instagram",
+        "required": false,
+        "placeholder": "@yourchapter",
+        "question_type": "short_answer"
+      },
+      {
+        "id": "social_threads",
+        "page": 3,
+        "text": "Threads",
+        "required": false,
+        "placeholder": "@yourchapter",
+        "question_type": "short_answer"
+      },
+      {
+        "id": "social_tiktok",
+        "page": 3,
+        "text": "TikTok",
+        "required": false,
+        "placeholder": "@yourchapter",
+        "question_type": "short_answer"
+      },
+      {
+        "id": "social_twitter",
+        "page": 3,
+        "text": "Twitter (X)",
+        "required": false,
+        "placeholder": "@yourchapter",
+        "question_type": "short_answer"
+      },
+      {
+        "id": "social_bluesky",
+        "page": 3,
+        "text": "Bluesky",
+        "required": false,
+        "placeholder": "@yourchapter.bsky.social",
+        "question_type": "short_answer"
+      },
+      {
+        "id": "social_website",
+        "page": 3,
+        "text": "Website",
+        "required": false,
+        "placeholder": "https://yourchapter.org",
+        "question_type": "short_answer"
+      }
+    ]
+  },
+  "settings": {
+    "notification_emails": [
+      "chartering@moyoungdemocrats.org",
+      "andrew@moyoungdemocrats.org"
+    ],
+    "confirmation_message": "Thank you for submitting your chapter chartering application! We will review your materials and contact you within 5-7 business days.",
+    "auto_process_chartering": true,
+    "generate_membership_links": true
+  },
+  "status": "active",
+  "voting_starts_at": null,
+  "voting_ends_at": null,
+  "eligible_members": null,
+  "results_public": false,
+  "results_data": null,
+  "page_count": 1,
+  "template_id": null,
+  "slug": "chapter-chartering",
+  "submission_count": 5,
+  "closes_at": null,
+  "opens_at": null,
+  "max_submissions": null,
+  "require_login": false,
+  "one_submission_per_user": false,
+  "confirmation_email_template": null,
+  "notification_emails": null,
+  "show_back_button": true,
+  "supporting_documents": null,
+  "executive_only": null,
+  "committee": null,
+  "public_form": true,
+  "preview_text": null
+}

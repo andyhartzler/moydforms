@@ -1,0 +1,1519 @@
+{
+  "formId": "1EpSgVcYbELNRSh_SSZpV9zqa5OrtcMwPc80iDss0bTQ",
+  "info": {
+    "title": "Membership Form",
+    "description": "Welcome!\n\nThank you for your interest in joining the Missouri Young Democrats.\nPlease complete this form to help us get to know you.\n\n(Please do not use a work, university, or school email address.)",
+    "documentTitle": "Interest Form"
+  },
+  "settings": {
+    "emailCollectionType": "RESPONDER_INPUT"
+  },
+  "revisionId": "000004bc",
+  "responderUri": "https://docs.google.com/forms/d/e/1FAIpQLSd5Hd_cgdFmgE7f9gdIxmwXSAdxkuFuITENO_x5VkhDrtR8Ag/viewform",
+  "items": [
+    {
+      "itemId": "461cce30",
+      "title": "First Name",
+      "questionItem": {
+        "question": {
+          "questionId": "7ef3d9a0",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "796fbfae",
+      "title": "Last Name",
+      "questionItem": {
+        "question": {
+          "questionId": "7221a225",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "1b7800a7",
+      "pageBreakItem": {},
+      "title": "About You",
+      "description": "The more we understand the people involved, the better we can connect, organize, and grow a movement that reflects all of us."
+    },
+    {
+      "itemId": "16653831",
+      "title": "Preferred Pronouns (Select all that apply):",
+      "questionItem": {
+        "question": {
+          "questionId": "3a456eeb",
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "She/her"
+              },
+              {
+                "value": "He/him"
+              },
+              {
+                "value": "They/them"
+              },
+              {
+                "value": "Ze/zir"
+              },
+              {
+                "value": "Xe/xem"
+              },
+              {
+                "value": "Any pronouns"
+              },
+              {
+                "value": "Prefer not to say"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "7cff5a99",
+      "title": "Date of Birth:",
+      "questionItem": {
+        "question": {
+          "questionId": "562e6d09",
+          "required": true,
+          "dateQuestion": {
+            "includeYear": true
+          }
+        }
+      }
+    },
+    {
+      "itemId": "2374a695",
+      "title": "Are you registered to vote in the state of Missouri? \n(Check Your Status Here)",
+      "questionItem": {
+        "question": {
+          "questionId": "559c0f96",
+          "required": true,
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "Yes"
+              },
+              {
+                "value": "No"
+              },
+              {
+                "value": "Unsure"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "3e5fe57f",
+      "title": "City/Town of Residence:",
+      "questionItem": {
+        "question": {
+          "questionId": "73400ed5",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "698c9b8f",
+      "title": "Phone Number:",
+      "questionItem": {
+        "question": {
+          "questionId": "458e9ec2",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "5d8edc42",
+      "pageBreakItem": {},
+      "title": "Social Media",
+      "description": "Social media is one of the most effective ways to reach young people and build momentum around the issues we care about. If you're comfortable, share your handles below so we can easily connect and share relevant updates, content, and opportunities with you. \nIf you\u2019re comfortable, please share your handles for the following platforms:"
+    },
+    {
+      "itemId": "2459b9b1",
+      "title": "Instagram:",
+      "questionItem": {
+        "question": {
+          "questionId": "596e8a46",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "73ceeefa",
+      "title": "TikTok:",
+      "questionItem": {
+        "question": {
+          "questionId": "6428fdf1",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "4a0f6a80",
+      "title": "X (formerly Twitter):",
+      "questionItem": {
+        "question": {
+          "questionId": "417477cd",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "4d486961",
+      "title": "Bluesky:",
+      "questionItem": {
+        "question": {
+          "questionId": "011b2200",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "42fcc0e3",
+      "pageBreakItem": {},
+      "title": "Officer & Leadership Interest",
+      "description": "Whether you're a seasoned organizer or just getting started, we welcome new leaders and fresh energy. "
+    },
+    {
+      "itemId": "5a75a2bb",
+      "title": "Are you interested in serving as an officer, committee member, or leader with Missouri Young Democrats?",
+      "questionItem": {
+        "question": {
+          "questionId": "17d3907b",
+          "required": true,
+          "choiceQuestion": {
+            "type": "RADIO",
+            "options": [
+              {
+                "value": "Yes",
+                "goToSectionId": "269cde2c"
+              },
+              {
+                "value": "Maybe",
+                "goToSectionId": "269cde2c"
+              },
+              {
+                "value": "No",
+                "goToSectionId": "501d90f0"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "269cde2c",
+      "pageBreakItem": {},
+      "title": "Application for Committee Leadership or Membership",
+      "description": "Please complete the form below to express your interest in one of our committees. \n\n*Per national guidelines, the High School Democrats and College Democrats Committees are only for those currently enrolled in either high school or college."
+    },
+    {
+      "itemId": "2cf4c82c",
+      "questionGroupItem": {
+        "questions": [
+          {
+            "questionId": "60d8b355",
+            "rowQuestion": {
+              "title": "1st Choice"
+            }
+          },
+          {
+            "questionId": "57b7ccec",
+            "rowQuestion": {
+              "title": "2nd Choice"
+            }
+          },
+          {
+            "questionId": "65eafa86",
+            "rowQuestion": {
+              "title": "3rd Choice"
+            }
+          },
+          {
+            "questionId": "3090e34d",
+            "rowQuestion": {
+              "title": "4th Choice"
+            }
+          },
+          {
+            "questionId": "40c20ece",
+            "rowQuestion": {
+              "title": "5th Choice"
+            }
+          },
+          {
+            "questionId": "15bbfc47",
+            "rowQuestion": {
+              "title": "6th Choice"
+            }
+          }
+        ],
+        "grid": {
+          "columns": {
+            "type": "RADIO",
+            "options": [
+              {
+                "value": "College Democrats"
+              },
+              {
+                "value": "High School Democrats"
+              },
+              {
+                "value": "Fundraising Committee"
+              },
+              {
+                "value": "Communications Committee"
+              },
+              {
+                "value": "Political Affairs Committee"
+              },
+              {
+                "value": "Policy & Advocacy Committee"
+              },
+              {
+                "value": "Membership & Outreach Committee"
+              }
+            ]
+          }
+        }
+      },
+      "title": "Position(s) You Are Interested In:"
+    },
+    {
+      "itemId": "3e1ea043",
+      "title": "How many hours per week can you commit to this role?",
+      "questionItem": {
+        "question": {
+          "questionId": "11648ea3",
+          "required": true,
+          "choiceQuestion": {
+            "type": "RADIO",
+            "options": [
+              {
+                "value": "1-2 Hours Per Week"
+              },
+              {
+                "value": "3-4 Hours Per Week"
+              },
+              {
+                "value": "4-5 Hours Per Week"
+              },
+              {
+                "value": "5-6 Hours Per Week"
+              },
+              {
+                "value": "6-8 Hours Per Week"
+              },
+              {
+                "value": "8-9 Hours Per Week"
+              },
+              {
+                "value": "10+ Hours Per Week"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "45fe03b0",
+      "title": "Why are you interested in this role, and what do you hope to accomplish?",
+      "questionItem": {
+        "question": {
+          "questionId": "54016ebb",
+          "textQuestion": {
+            "paragraph": true
+          }
+        }
+      }
+    },
+    {
+      "itemId": "13198e38",
+      "title": "What experience, skills, or perspective would you bring to this position? What makes you qualified?",
+      "description": "(Campaigning, organizing, fundraising, communications, policy, etc.)  ",
+      "questionItem": {
+        "question": {
+          "questionId": "67b2a620",
+          "textQuestion": {
+            "paragraph": true
+          }
+        }
+      }
+    },
+    {
+      "itemId": "0af67ca2",
+      "title": "What issues are you most passionate about? (Check all that apply):",
+      "questionItem": {
+        "question": {
+          "questionId": "122ee3c8",
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "Voting Rights & Election Reform"
+              },
+              {
+                "value": "Racial Justice"
+              },
+              {
+                "value": "LGBTQ+ Rights"
+              },
+              {
+                "value": "Reproductive Freedom & Abortion Access"
+              },
+              {
+                "value": "Climate Change & Environmental Justice"
+              },
+              {
+                "value": "Affordable Housing"
+              },
+              {
+                "value": "Healthcare Access & Equity"
+              },
+              {
+                "value": "Disability Rights"
+              },
+              {
+                "value": "Criminal Justice Reform"
+              },
+              {
+                "value": "Workers\u2019 Rights & Labor Protections"
+              },
+              {
+                "value": "Education Equity & Student Debt Relief"
+              },
+              {
+                "value": "Gun Violence Prevention"
+              },
+              {
+                "value": "Immigration Rights & Protections"
+              },
+              {
+                "value": "Rural Development & Agricultural Policy"
+              },
+              {
+                "value": "Native and Indigenous Rights"
+              },
+              {
+                "value": "Drug Policy Reform"
+              },
+              {
+                "value": "Youth Empowerment & Civic Engagement"
+              },
+              {
+                "value": "Economic Justice & Wealth Inequality"
+              },
+              {
+                "value": "Mental Health Awareness"
+              },
+              {
+                "value": "Transportation & Infrastructure"
+              },
+              {
+                "value": "Foreign Policy & International Solidarity"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "080d129f",
+      "title": "Why do the selected issues matter to you as a young Democrat in Missouri? ",
+      "questionItem": {
+        "question": {
+          "questionId": "5d3b6dcf",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "391c075c",
+      "title": "Have you ever held a leadership role in a student org, nonprofit, campaign, or Democratic Party body? If yes, briefly describe. ",
+      "description": " (If not, that\u2019s okay too \u2014 we value new voices!)  ",
+      "questionItem": {
+        "question": {
+          "questionId": "13f36d81",
+          "textQuestion": {
+            "paragraph": true
+          }
+        }
+      }
+    },
+    {
+      "itemId": "418ff899",
+      "title": "Are you able to attend regular statewide meetings and separate committee meetings (virtually or in person)?",
+      "questionItem": {
+        "question": {
+          "questionId": "5780de4a",
+          "required": true,
+          "choiceQuestion": {
+            "type": "RADIO",
+            "options": [
+              {
+                "value": "Yes"
+              },
+              {
+                "value": "No"
+              },
+              {
+                "value": "Maybe"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "1a2afd95",
+      "title": "Are you comfortable working as part of a team and communicating with peers across the state?",
+      "questionItem": {
+        "question": {
+          "questionId": "7949931e",
+          "required": true,
+          "choiceQuestion": {
+            "type": "RADIO",
+            "options": [
+              {
+                "value": "Yes"
+              },
+              {
+                "value": "No"
+              },
+              {
+                "value": "Maybe"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "32ad4d86",
+      "title": "Which days of the week are you generally available for a monthly virtual meeting? (Check all that apply):",
+      "questionItem": {
+        "question": {
+          "questionId": "75a2099d",
+          "required": true,
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "Monday"
+              },
+              {
+                "value": "Tuesday"
+              },
+              {
+                "value": "Wednesday"
+              },
+              {
+                "value": "Thursday"
+              },
+              {
+                "value": "Friday"
+              },
+              {
+                "value": "Saturday"
+              },
+              {
+                "value": "Sunday"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "61ed07bc",
+      "title": "What general times work best for you? \n(Check all that apply):",
+      "questionItem": {
+        "question": {
+          "questionId": "3f6c5cff",
+          "required": true,
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "Mornings"
+              },
+              {
+                "value": "Afternoons"
+              },
+              {
+                "value": "Evenings"
+              },
+              {
+                "value": "Weekends"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "748ec95c",
+      "title": "Street Address",
+      "description": "(including apartment or suite number, if applicable)\nYDA requires us to collect the addresses of all of our members in leadership positions. ",
+      "questionItem": {
+        "question": {
+          "questionId": "207879c2",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "42fdb9ce",
+      "title": "State",
+      "questionItem": {
+        "question": {
+          "questionId": "41db9d9c",
+          "required": true,
+          "choiceQuestion": {
+            "type": "RADIO",
+            "options": [
+              {
+                "value": "Missouri"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "1ee90772",
+      "title": "Zip Code",
+      "questionItem": {
+        "question": {
+          "questionId": "23cca2cb",
+          "required": true,
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "501d90f0",
+      "pageBreakItem": {},
+      "title": "Skills and Experience",
+      "description": "We believe organizing is a team effort, and it takes everyone\u2019s unique skills, passions, and strengths to make real change. Let us know what areas you're most experienced in or excited to learn more about."
+    },
+    {
+      "itemId": "514db2de",
+      "title": "Select all that you\u2019re great at (or eager to learn more about):",
+      "questionItem": {
+        "question": {
+          "questionId": "7e3d564c",
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "Community Organizing"
+              },
+              {
+                "value": "Voter Registration Drives"
+              },
+              {
+                "value": "Policy Research and Advocacy"
+              },
+              {
+                "value": "Campaign Work"
+              },
+              {
+                "value": "Communications and Social Media"
+              },
+              {
+                "value": "Graphic Design and Web Development"
+              },
+              {
+                "value": "Fundraising and Development"
+              },
+              {
+                "value": "Event Planning and Coordination"
+              },
+              {
+                "value": "Legal or Compliance Expertise"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "39f5dbd7",
+      "pageBreakItem": {},
+      "title": "Availability and Commitment",
+      "description": "We understand that life is busy and everyone has different capacities. No matter your schedule, there\u2019s a place for you in helping us advance Democratic values in Missouri. Let us know what works for you."
+    },
+    {
+      "itemId": "755645ac",
+      "title": "How many hours per week can you dedicate?",
+      "questionItem": {
+        "question": {
+          "questionId": "226743e3",
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "Less than 2 hours"
+              },
+              {
+                "value": "2-5 hours"
+              },
+              {
+                "value": "5-10 hours"
+              },
+              {
+                "value": "More than 10 hours"
+              },
+              {
+                "value": "None"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "7c926ef4",
+      "title": "Which days of the week are you generally available for a monthly virtual meeting? (Check all that apply):",
+      "questionItem": {
+        "question": {
+          "questionId": "1de09937",
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "Monday"
+              },
+              {
+                "value": "Tuesday"
+              },
+              {
+                "value": "Wednesday"
+              },
+              {
+                "value": "Thursday"
+              },
+              {
+                "value": "Friday"
+              },
+              {
+                "value": "Saturday"
+              },
+              {
+                "value": "Sunday"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "78bb4779",
+      "title": "What general times work best for you? \n(Check all that apply):",
+      "questionItem": {
+        "question": {
+          "questionId": "1af21ffa",
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "Mornings"
+              },
+              {
+                "value": "Afternoons"
+              },
+              {
+                "value": "Evenings"
+              },
+              {
+                "value": "Weekends"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "5dd43387",
+      "pageBreakItem": {},
+      "title": "Political & Community Involvement",
+      "description": "We value the diverse perspectives that each person brings and recognize that meaningful change comes from engaging in both political and community spaces. Feel free to share as much or as little as you're comfortable with, and remember, there's no \"right\" level of experience."
+    },
+    {
+      "itemId": "7e974aba",
+      "title": "Are you a member of a Young Democrats Chapter at your school or in your local area?   ",
+      "questionItem": {
+        "question": {
+          "questionId": "016ae30f",
+          "required": true,
+          "choiceQuestion": {
+            "type": "RADIO",
+            "options": [
+              {
+                "value": "Yes"
+              },
+              {
+                "value": "No"
+              },
+              {
+                "value": "Maybe"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "1b267ba3",
+      "title": "If yes what is the name of the Chapter?",
+      "questionItem": {
+        "question": {
+          "questionId": "3b88c54f",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "49a916ef",
+      "title": "Are you currently involved with any other political or community organizations? Please list and briefly describe your role.",
+      "questionItem": {
+        "question": {
+          "questionId": "3f84c11f",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "26a67005",
+      "title": "What issues are you most passionate about? (Check all that apply):",
+      "questionItem": {
+        "question": {
+          "questionId": "51e12843",
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "Voting Rights & Election Reform"
+              },
+              {
+                "value": "Racial Justice"
+              },
+              {
+                "value": "LGBTQ+ Rights"
+              },
+              {
+                "value": "Reproductive Freedom & Abortion Access"
+              },
+              {
+                "value": "Climate Change & Environmental Justice"
+              },
+              {
+                "value": "Affordable Housing"
+              },
+              {
+                "value": "Healthcare Access & Equity"
+              },
+              {
+                "value": "Disability Rights"
+              },
+              {
+                "value": "Criminal Justice Reform"
+              },
+              {
+                "value": "Workers\u2019 Rights & Labor Protections"
+              },
+              {
+                "value": "Education Equity & Student Debt Relief"
+              },
+              {
+                "value": "Gun Violence Prevention"
+              },
+              {
+                "value": "Immigration Rights & Protections"
+              },
+              {
+                "value": "Rural Development & Agricultural Policy"
+              },
+              {
+                "value": "Native and Indigenous Rights"
+              },
+              {
+                "value": "Drug Policy Reform"
+              },
+              {
+                "value": "Youth Empowerment & Civic Engagement"
+              },
+              {
+                "value": "Economic Justice & Wealth Inequality"
+              },
+              {
+                "value": "Mental Health Awareness"
+              },
+              {
+                "value": "Transportation & Infrastructure"
+              },
+              {
+                "value": "Foreign Policy & International Solidarity"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "034b9b6c",
+      "title": "Do you have experience engaging with elected officials or advocating for policy changes? If so, briefly describe:",
+      "questionItem": {
+        "question": {
+          "questionId": "2f1adc8c",
+          "textQuestion": {
+            "paragraph": true
+          }
+        }
+      }
+    },
+    {
+      "itemId": "096cd70a",
+      "pageBreakItem": {},
+      "title": "Education & Employment Status",
+      "description": "Everyone\u2019s journey looks different, and we welcome people from all walks of life. This section helps us understand your background a bit better so we can better support you and shape opportunities that reflect the diversity of our community."
+    },
+    {
+      "itemId": "2d83725b",
+      "title": "Are you currently enrolled in school?",
+      "questionItem": {
+        "question": {
+          "questionId": "69d07773",
+          "required": true,
+          "choiceQuestion": {
+            "type": "RADIO",
+            "options": [
+              {
+                "value": "Yes"
+              },
+              {
+                "value": "No"
+              },
+              {
+                "value": "Prefer not to say"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "54a0d6f3",
+      "title": "If yes, please specify the name of your school:",
+      "questionItem": {
+        "question": {
+          "questionId": "4a9c0213",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "01d13e24",
+      "title": "If in school, what is your expected graduation year?",
+      "questionItem": {
+        "question": {
+          "questionId": "706b4e0b",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "116c4c83",
+      "title": "What is the highest level of education you have completed?",
+      "questionItem": {
+        "question": {
+          "questionId": "51cff5db",
+          "choiceQuestion": {
+            "type": "RADIO",
+            "options": [
+              {
+                "value": "I\u2019m currently in high school"
+              },
+              {
+                "value": "High school diploma or GED"
+              },
+              {
+                "value": "Some college or trade school"
+              },
+              {
+                "value": "Associate degree (AA/AS)"
+              },
+              {
+                "value": "Bachelor\u2019s degree (BA/BS)"
+              },
+              {
+                "value": "Some graduate school"
+              },
+              {
+                "value": "Master\u2019s degree (MA/MS)"
+              },
+              {
+                "value": "Professional degree (JD, MD, etc.)"
+              },
+              {
+                "value": "Doctorate (PhD or equivalent)"
+              },
+              {
+                "value": "Prefer not to say"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "3b893900",
+      "title": "Are you currently employed?",
+      "questionItem": {
+        "question": {
+          "questionId": "6fa4f34c",
+          "choiceQuestion": {
+            "type": "RADIO",
+            "options": [
+              {
+                "value": "Yes"
+              },
+              {
+                "value": "No"
+              },
+              {
+                "value": "Prefer not to say"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "7bae994a",
+      "title": "If yes, please select your industry (choose the one that best fits):",
+      "questionItem": {
+        "question": {
+          "questionId": "2585235b",
+          "choiceQuestion": {
+            "type": "DROP_DOWN",
+            "options": [
+              {
+                "value": "Agriculture"
+              },
+              {
+                "value": "Arts, Entertainment, and Recreation"
+              },
+              {
+                "value": "Construction"
+              },
+              {
+                "value": "Education"
+              },
+              {
+                "value": "Energy & Utilities"
+              },
+              {
+                "value": "Finance & Insurance"
+              },
+              {
+                "value": "Government & Public Administration"
+              },
+              {
+                "value": "Healthcare & Social Assistance"
+              },
+              {
+                "value": "Hospitality & Food Services"
+              },
+              {
+                "value": "Information Technology & Services"
+              },
+              {
+                "value": "Legal Services"
+              },
+              {
+                "value": "Manufacturing"
+              },
+              {
+                "value": "Marketing, Advertising & PR"
+              },
+              {
+                "value": "Media & Journalism"
+              },
+              {
+                "value": "Nonprofit & Advocacy"
+              },
+              {
+                "value": "Real Estate"
+              },
+              {
+                "value": "Retail"
+              },
+              {
+                "value": "Science, Research & Development"
+              },
+              {
+                "value": "Telecommunications"
+              },
+              {
+                "value": "Transportation & Warehousing"
+              },
+              {
+                "value": "Wholesale Trade"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "03bd6a52",
+      "pageBreakItem": {},
+      "title": "Demographic Information",
+      "description": "These questions help us understand who\u2019s filling out this form so we can keep inclusivity and accessibility at the heart of everything we build. All questions are optional, and your answers will be kept confidential."
+    },
+    {
+      "itemId": "72a66b91",
+      "title": "Gender Identity (Select all that apply):",
+      "questionItem": {
+        "question": {
+          "questionId": "60686161",
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "Cisgender man"
+              },
+              {
+                "value": "Transgender man"
+              },
+              {
+                "value": "Cisgender woman"
+              },
+              {
+                "value": "Transgender woman"
+              },
+              {
+                "value": "Non-binary"
+              },
+              {
+                "value": "Genderqueer"
+              },
+              {
+                "value": "Agender"
+              },
+              {
+                "value": "Two-Spirit"
+              },
+              {
+                "value": "Prefer not to say"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "0e793dde",
+      "title": "Sexual Orientation (Select all that apply):",
+      "questionItem": {
+        "question": {
+          "questionId": "3c7a8a3d",
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "Straight/Heterosexual"
+              },
+              {
+                "value": "Gay"
+              },
+              {
+                "value": "Lesbian"
+              },
+              {
+                "value": "Bisexual"
+              },
+              {
+                "value": "Queer"
+              },
+              {
+                "value": "Asexual"
+              },
+              {
+                "value": "Pansexual"
+              },
+              {
+                "value": "Prefer not to say"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "6c0d888c",
+      "title": "Are you of Hispanic, Latino/a, or Spanish origin?",
+      "questionItem": {
+        "question": {
+          "questionId": "2238ba58",
+          "choiceQuestion": {
+            "type": "RADIO",
+            "options": [
+              {
+                "value": "Yes"
+              },
+              {
+                "value": "No"
+              },
+              {
+                "value": "Prefer not to say"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "54ed4074",
+      "title": "Race (Select all that apply):",
+      "questionItem": {
+        "question": {
+          "questionId": "4a6d1b7f",
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "American Indian or Alaska Native"
+              },
+              {
+                "value": "Asian"
+              },
+              {
+                "value": "Black or African American"
+              },
+              {
+                "value": "Native Hawaiian or Other Pacific Islander"
+              },
+              {
+                "value": "White"
+              },
+              {
+                "value": "Prefer not to say"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "1293a6ec",
+      "title": "Do you identify as a person with a disability, chronic illness, or neurodivergence (whether visible or not)? ",
+      "description": "We ask this to ensure our programming is inclusive and accessible to all.",
+      "questionItem": {
+        "question": {
+          "questionId": "66a5f51e",
+          "choiceQuestion": {
+            "type": "RADIO",
+            "options": [
+              {
+                "value": "Yes"
+              },
+              {
+                "value": "No"
+              },
+              {
+                "value": "Unsure or questioning"
+              },
+              {
+                "value": "Prefer not to say"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "1689fe7a",
+      "title": "Do you require any accommodations to fully participate in meetings, events, or activities?This could include things like ASL interpretation, accessible materials, flexible scheduling, or other support that would help you engage more fully.",
+      "description": "Your response helps us create a more accessible and supportive experience for everyone.",
+      "questionItem": {
+        "question": {
+          "questionId": "331915b2",
+          "textQuestion": {
+            "paragraph": true
+          }
+        }
+      }
+    },
+    {
+      "itemId": "17cb40ed",
+      "title": "Type of Community You Live In:",
+      "questionItem": {
+        "question": {
+          "questionId": "32bfab74",
+          "choiceQuestion": {
+            "type": "RADIO",
+            "options": [
+              {
+                "value": "Urban"
+              },
+              {
+                "value": "Suburban"
+              },
+              {
+                "value": "Rural"
+              },
+              {
+                "value": "Prefer not to say"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "09df6936",
+      "title": "Religious Affiliation:",
+      "questionItem": {
+        "question": {
+          "questionId": "442d6c18",
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "No religious affiliation"
+              },
+              {
+                "value": "Christian"
+              },
+              {
+                "value": "Catholic"
+              },
+              {
+                "value": "Jewish"
+              },
+              {
+                "value": "Muslim"
+              },
+              {
+                "value": "Hindu"
+              },
+              {
+                "value": "Buddhist"
+              },
+              {
+                "value": "Sikh"
+              },
+              {
+                "value": "Jain"
+              },
+              {
+                "value": "Baha\u2019i"
+              },
+              {
+                "value": "Pagan"
+              },
+              {
+                "value": "Wiccan"
+              },
+              {
+                "value": "Unitarian Universalist"
+              },
+              {
+                "value": "Spiritual but not religious"
+              },
+              {
+                "value": "Agnostic"
+              },
+              {
+                "value": "Atheist"
+              },
+              {
+                "value": "Prefer not to say"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "73481cc7",
+      "title": "Languages Spoken Fluently",
+      "questionItem": {
+        "question": {
+          "questionId": "40602e67",
+          "textQuestion": {}
+        }
+      }
+    },
+    {
+      "itemId": "5cde33be",
+      "pageBreakItem": {},
+      "title": "Final Insights",
+      "description": "Here\u2019s your chance to share anything else that didn\u2019t come up earlier."
+    },
+    {
+      "itemId": "0928baab",
+      "title": "Why do you want to join the Missouri Young Democrats?",
+      "questionItem": {
+        "question": {
+          "questionId": "280f5f06",
+          "textQuestion": {
+            "paragraph": true
+          }
+        }
+      }
+    },
+    {
+      "itemId": "4e6dedfd",
+      "title": "Any other information, suggestions, or ideas you'd like to share?",
+      "questionItem": {
+        "question": {
+          "questionId": "6cf26feb",
+          "textQuestion": {
+            "paragraph": true
+          }
+        }
+      }
+    },
+    {
+      "itemId": "1833320d",
+      "title": "How did you hear about us? (Select all that apply):",
+      "questionItem": {
+        "question": {
+          "questionId": "6c6d967c",
+          "choiceQuestion": {
+            "type": "CHECKBOX",
+            "options": [
+              {
+                "value": "Instagram"
+              },
+              {
+                "value": "TikTok"
+              },
+              {
+                "value": "X (formerly Twitter)"
+              },
+              {
+                "value": "Bluesky"
+              },
+              {
+                "value": "Facebook"
+              },
+              {
+                "value": "Email"
+              },
+              {
+                "value": "Website"
+              },
+              {
+                "value": "Word of mouth"
+              },
+              {
+                "value": "A friend or peer"
+              },
+              {
+                "value": "A school or university group"
+              },
+              {
+                "value": "A local political or advocacy organization"
+              },
+              {
+                "value": "A public event or rally"
+              },
+              {
+                "value": "A community center or public library"
+              },
+              {
+                "value": "A Young Democrats chapter in another state"
+              },
+              {
+                "value": "A local elected official or candidate"
+              },
+              {
+                "value": "A student government or youth council"
+              },
+              {
+                "value": "A podcast or livestream"
+              },
+              {
+                "value": "A flyer or printed material"
+              },
+              {
+                "value": "A news article or op-ed"
+              },
+              {
+                "isOther": true
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "linkedSheetId": "13YznU1lEJSbqrXxIxK_jWTddY8VUxCXtPNqv-i_wpEs",
+  "publishSettings": {
+    "publishState": {
+      "isPublished": true,
+      "isAcceptingResponses": true
+    }
+  }
+}
