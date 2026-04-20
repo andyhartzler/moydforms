@@ -107,10 +107,19 @@ export default function PlacesAutocomplete({
           return;
         }
 
+        // Bias toward Missouri (where most MOYD members are) without
+        // hard-restricting — suggestions outside MO still surface so an
+        // out-of-state move or interstate family doesn't get boxed out.
+        // The locationBias is a rough bounding circle centered on
+        // Jefferson City with a ~350 km radius covering all of Missouri.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const pac: any = new places.PlaceAutocompleteElement({
           includedRegionCodes: ['us'],
-          // "address" type returns precise street addresses only
+          locationBias: {
+            center: { lat: 38.5767, lng: -92.1735 },
+            radius: 350000, // meters
+          },
+          // "address" returns precise street addresses only (no POIs)
           types: ['address'],
         });
 
