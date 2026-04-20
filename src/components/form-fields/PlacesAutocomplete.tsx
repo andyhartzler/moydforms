@@ -27,10 +27,15 @@ declare global {
 }
 
 const PLACES_SCRIPT_ID = 'moyd-google-places-script';
-// Bias circle: Jefferson City + 350km ~= covers all of Missouri.
-const MO_BIAS = {
-  center: { lat: 38.5767, lng: -92.1735 },
-  radius: 350000,
+// Places API caps locationBias circles at 50km, which isn't enough to cover
+// Missouri. Use a rectangle bounding box instead — SW and NE corners that
+// enclose the whole state with a small buffer. Out-of-state addresses still
+// surface (bias, not restriction).
+const MO_BIAS_RECT = {
+  south: 35.99,
+  west: -95.78,
+  north: 40.62,
+  east: -89.10,
 };
 
 function loadMapsScript(): Promise<void> {
@@ -129,14 +134,14 @@ export default function PlacesAutocomplete({
       try {
         const req = {
           input: query,
-          // Places API (New) does NOT allow more than 5 includedPrimaryTypes
-          // and they must be valid per its schema. Safest: don't filter by
-          // type here — the user input itself narrows to addresses. The
-          // locationBias + region keep results relevant.
           includedRegionCodes: ['us'],
+          // Rectangle bias covering Missouri; Places API circle bias is
+          // capped at 50km which can't reach state-wide.
           locationBias: {
-            radius: MO_BIAS.radius,
-            center: MO_BIAS.center,
+            south: MO_BIAS_RECT.south,
+            west: MO_BIAS_RECT.west,
+            north: MO_BIAS_RECT.north,
+            east: MO_BIAS_RECT.east,
           },
           sessionToken: sessionTokenRef.current,
         };
