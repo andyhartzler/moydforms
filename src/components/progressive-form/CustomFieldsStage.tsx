@@ -25,6 +25,7 @@ import {
   FileUpload,
   ImageUpload,
   Autocomplete,
+  PlacesAutocomplete,
 } from '@/components/form-fields';
 import { Check, Loader2, Send, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AnimatedProgressBar, PageDots, StepCounter } from '@/components/motion/AnimatedProgress';
@@ -546,6 +547,9 @@ export function CustomFieldsStage({
       case 'url':
       case 'number':
       case 'cupertino_text_field':
+        if (field.places_autocomplete) {
+          return <PlacesAutocomplete key={field.id} {...commonProps} />;
+        }
         return <TextInput key={field.id} {...commonProps} />;
 
       case 'textarea':

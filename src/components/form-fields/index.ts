@@ -26,3 +26,4 @@ export { default as SignaturePad } from './SignaturePad';
 export { default as FileUpload } from './FileUpload';
 export { default as ImageUpload } from './ImageUpload';
 export { default as Autocomplete } from './Autocomplete';
+export { default as PlacesAutocomplete } from './PlacesAutocomplete';

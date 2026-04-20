@@ -163,12 +163,14 @@ export async function POST(request: NextRequest) {
 
     // ── Address ───────────────────────────────────────────────
     const street = String(form_data['207879c2'] || '').trim();
+    const line2 = String(form_data['address_line2'] || '').trim();
+    const streetWithApt = line2 ? `${street} ${line2}` : street;
     const city = String(form_data['73400ed5'] || '').trim();
     const state = String(form_data['41db9d9c'] || 'Missouri').trim();
     // Zip comes from the IdentityFieldsStage by default (form_data.zip_code);
     // 23cca2cb only survives on legacy forms that kept the dedicated Zip field on page 2.
     const zip = String(form_data['23cca2cb'] || form_data['zip_code'] || '').trim();
-    const fullAddress = [street, city, state, zip].filter(Boolean).join(', ');
+    const fullAddress = [streetWithApt, city, state, zip].filter(Boolean).join(', ');
 
     // ── Boolean conversions ──────────────────────────────────
     const registeredVoterRaw = form_data['559c0f96'];

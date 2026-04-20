@@ -159,6 +159,12 @@ export interface FormFieldConfig {
   // reveals a free-text input. The typed value is stored as a sibling
   // form_data entry under `<fieldId>_other_text`.
   allow_other?: boolean;
+
+  // When true on a text field, render a Google Places Autocomplete
+  // dropdown below the input. Selecting a suggestion fills the value
+  // with the street-address portion (number + route). Only useful on the
+  // Street Address field today; opt-in per schema.
+  places_autocomplete?: boolean;
 }
 
 // Form styling configuration
