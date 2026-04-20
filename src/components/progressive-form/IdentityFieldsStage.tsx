@@ -188,6 +188,9 @@ export function IdentityFieldsStage({
           {mergedConfig.email_label}
           {mergedConfig.email_required && <span className="text-red-500 ml-1">*</span>}
         </label>
+        <p className="text-xs text-gray-500 mb-1 italic">
+          Please use a personal email — not a work or school address.
+        </p>
         <input
           type="email"
           value={(values.email as string) || ''}

@@ -27,11 +27,11 @@ export default function CheckboxGroup({ field, value, onChange, error, onBlur, o
 
   return (
     <div className="mb-5">
-      <label className="block text-sm font-semibold text-gray-800 mb-3">
+      <label className="block text-sm font-semibold text-gray-800 mb-1.5">
         {field.label}
         {field.required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      <FieldHelp html={field.help} className="text-sm text-gray-500 mb-3" />
+      <FieldHelp html={field.help} className="text-sm text-gray-500 mb-2" />
       <div className="space-y-2">
         {options.map((option, index) => {
           const isChecked = selectedValues.includes(option.value);

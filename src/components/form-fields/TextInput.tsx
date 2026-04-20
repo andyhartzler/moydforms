@@ -58,7 +58,7 @@ export default function TextInput({ field, value, onChange, error, onBlur, onFoc
     <div className="mb-5">
       <label
         htmlFor={field.id}
-        className="block text-sm font-semibold text-gray-800 mb-2"
+        className="block text-sm font-semibold text-gray-800 mb-1.5"
       >
         {field.label}
         {field.required && <span className="text-red-500 ml-1">*</span>}

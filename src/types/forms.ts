@@ -165,6 +165,12 @@ export interface FormFieldConfig {
   // with the street-address portion (number + route). Only useful on the
   // Street Address field today; opt-in per schema.
   places_autocomplete?: boolean;
+
+  // Map from Google address-component type (locality, administrative_area
+  // _level_1, postal_code, etc) to the form field id that should receive
+  // that component's long name when the user selects a place. Used with
+  // places_autocomplete to auto-populate city/state/zip from the address.
+  places_fill_map?: Record<string, string>;
 }
 
 // Form styling configuration

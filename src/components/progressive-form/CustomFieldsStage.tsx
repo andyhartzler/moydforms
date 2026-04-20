@@ -574,7 +574,13 @@ export function CustomFieldsStage({
       case 'number':
       case 'cupertino_text_field':
         if (field.places_autocomplete) {
-          return <PlacesAutocomplete key={field.id} {...commonProps} />;
+          return (
+            <PlacesAutocomplete
+              key={field.id}
+              {...commonProps}
+              setField={(id, v) => handleFieldChange(id, v)}
+            />
+          );
         }
         return <TextInput key={field.id} {...commonProps} />;
 

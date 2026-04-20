@@ -80,6 +80,11 @@ interface PlacesAutocompleteProps {
   error?: string;
   onBlur?: () => void;
   onFocus?: () => void;
+  // Optional setter the parent form provides so we can auto-fill sibling
+  // fields (city, state, etc) from the selected place's address components.
+  // The mapping from Google component-type → field id is declared on the
+  // schema as `places_fill_map`.
+  setField?: (fieldId: string, value: unknown) => void;
 }
 
 export default function PlacesAutocomplete({
@@ -89,6 +94,7 @@ export default function PlacesAutocomplete({
   error,
   onBlur,
   onFocus,
+  setField,
 }: PlacesAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const sessionTokenRef = useRef<unknown>(null);
@@ -204,6 +210,25 @@ export default function PlacesAutocomplete({
           .trim();
         onChange(street || s.mainText);
         onBlur?.();
+
+        // Auto-populate sibling fields declared in places_fill_map. For the
+        // membership form that's locality → city field + administrative_area
+        // _level_1 → state radio. State only has Missouri / Other options,
+        // so we translate any non-MO state to "Other".
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fillMap = (field as any).places_fill_map as Record<string, string> | undefined;
+        if (fillMap && setField) {
+          Object.entries(fillMap).forEach(([componentType, targetFieldId]) => {
+            const raw = by(componentType);
+            if (!raw) return;
+            // State radio only has Missouri/Other; anything else collapses to Other
+            if (componentType === 'administrative_area_level_1') {
+              setField(targetFieldId, raw === 'Missouri' ? 'Missouri' : 'Other');
+            } else {
+              setField(targetFieldId, raw);
+            }
+          });
+        }
         // Rotate the session token — a completed Autocomplete session
         // should use a fresh token per Google docs.
         if (places.AutocompleteSessionToken) {
@@ -245,7 +270,7 @@ export default function PlacesAutocomplete({
     <div className="mb-5 relative">
       <label
         htmlFor={field.id}
-        className="block text-sm font-semibold text-gray-800 mb-2"
+        className="block text-sm font-semibold text-gray-800 mb-1.5"
       >
         {field.label}
         {field.required && <span className="text-red-500 ml-1">*</span>}
