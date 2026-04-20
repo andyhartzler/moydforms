@@ -35,7 +35,7 @@ const PLACES_SCRIPT_ID = 'moyd-google-places-script';
 
 function loadMapsScript(): Promise<void> {
   if (typeof window === 'undefined') return Promise.resolve();
-  if (window.google?.maps?.importLibrary) return Promise.resolve();
+  if (window.google?.maps?.places) return Promise.resolve();
   if (window.__moydPlacesScriptLoading) return window.__moydPlacesScriptLoading;
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
@@ -52,8 +52,11 @@ function loadMapsScript(): Promise<void> {
     }
     const script = document.createElement('script');
     script.id = PLACES_SCRIPT_ID;
-    // loading=async is the recommended mode for Places API (New).
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly&loading=async&libraries=places`;
+    // Load with libraries=places + v=weekly so BOTH the legacy
+    // places.Autocomplete AND the new PlaceAutocompleteElement are
+    // available on window.google.maps.places. (loading=async is
+    // mutually exclusive with libraries=places in this loader mode.)
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly&libraries=places`;
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();
@@ -93,10 +96,10 @@ export default function PlacesAutocomplete({
         await loadMapsScript();
         if (cancelled || !hostRef.current) return;
 
-        // Dynamically import the Places library so the new loading mode
-        // resolves cleanly.
+        // With libraries=places the bundle exposes both the legacy
+        // Autocomplete (deprecated) and the new PlaceAutocompleteElement.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const places = await (window as any).google.maps.importLibrary('places');
+        const places = (window as any).google?.maps?.places;
         if (cancelled || !places?.PlaceAutocompleteElement) {
           // Library loaded but the new element isn't available — use
           // plain text fallback so the field still works.
