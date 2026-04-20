@@ -1,6 +1,7 @@
 'use client';
 
 import { FormFieldConfig } from '@/types/forms';
+import FieldHelp from './FieldHelp';
 
 interface RangeSliderProps {
   field: FormFieldConfig;
@@ -36,7 +37,7 @@ export default function RangeSlider({ field, value, onChange, error, onBlur, onF
           {range.min} - {range.max}
         </span>
       </div>
-      {field.help && <p className="mb-2 text-sm text-gray-500">{field.help}</p>}
+      <FieldHelp html={field.help} className="mb-2 text-sm text-gray-500" />
 
       <div className="relative pt-6 pb-2">
         {/* Track background */}

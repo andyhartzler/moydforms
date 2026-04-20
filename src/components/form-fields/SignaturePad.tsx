@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { FormFieldConfig } from '@/types/forms';
+import FieldHelp from './FieldHelp';
 import { Trash2 } from 'lucide-react';
 
 interface SignaturePadProps {
@@ -137,7 +138,7 @@ export default function SignaturePad({ field, value, onChange, error, onBlur, on
           </button>
         )}
       </div>
-      {field.help && <p className="mb-2 text-sm text-gray-500">{field.help}</p>}
+      <FieldHelp html={field.help} className="mb-2 text-sm text-gray-500" />
 
       <div
         className={`relative border-2 rounded-lg bg-white ${

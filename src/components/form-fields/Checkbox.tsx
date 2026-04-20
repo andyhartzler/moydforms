@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormFieldConfig } from '@/types/forms';
+import FieldHelp from './FieldHelp';
 import { Check } from 'lucide-react';
 
 interface CheckboxProps {
@@ -75,9 +76,7 @@ export default function Checkbox({ field, value, onChange, error, onBlur, onFocu
             {field.label}
             {field.required && <span className="text-red-500 ml-1">*</span>}
           </span>
-          {field.help && (
-            <p className="text-sm text-gray-500 mt-1">{field.help}</p>
-          )}
+          <FieldHelp html={field.help} className="text-sm text-gray-500 mt-1" />
         </div>
       </motion.label>
       <AnimatePresence mode="wait">

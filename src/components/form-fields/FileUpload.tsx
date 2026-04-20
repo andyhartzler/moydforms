@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { FormFieldConfig, FileUploadResult } from '@/types/forms';
+import FieldHelp from './FieldHelp';
 import { Upload, X, File, FileText, FileImage, FileVideo, FileAudio, HardDrive, Monitor } from 'lucide-react';
 
 // Google Drive icon component using actual logo
@@ -373,7 +374,7 @@ export default function FileUpload({ field, value, onChange, error, onBlur, onFo
         {field.label}
         {field.required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      {field.help && <p className="mb-2 text-sm text-gray-500">{field.help}</p>}
+      <FieldHelp html={field.help} className="mb-2 text-sm text-gray-500" />
 
       {/* Upload source tabs - only show if Google Drive is enabled */}
       {googleDriveEnabled && (

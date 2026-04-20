@@ -1,6 +1,7 @@
 'use client';
 
 import { FormFieldConfig } from '@/types/forms';
+import FieldHelp from './FieldHelp';
 
 interface SliderProps {
   field: FormFieldConfig;
@@ -26,7 +27,7 @@ export default function Slider({ field, value, onChange, error, onBlur, onFocus 
         </label>
         <span className="text-sm font-semibold text-blue-600">{currentValue}</span>
       </div>
-      {field.help && <p className="mb-2 text-sm text-gray-500">{field.help}</p>}
+      <FieldHelp html={field.help} className="mb-2 text-sm text-gray-500" />
       <input
         type="range"
         id={field.id}

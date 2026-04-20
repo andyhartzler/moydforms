@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormFieldConfig } from '@/types/forms';
+import FieldHelp from './FieldHelp';
 
 interface RadioGroupProps {
   field: FormFieldConfig;
@@ -21,9 +22,7 @@ export default function RadioGroup({ field, value, onChange, error, onBlur, onFo
         {field.label}
         {field.required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      {field.help && (
-        <p className="text-sm text-gray-500 mb-3">{field.help}</p>
-      )}
+      <FieldHelp html={field.help} className="text-sm text-gray-500 mb-3" />
       <div className="space-y-2">
         {options.map((option, index) => {
           const isSelected = value === option.value;

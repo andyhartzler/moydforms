@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { FormFieldConfig } from '@/types/forms';
+import FieldHelp from './FieldHelp';
 import { Star } from 'lucide-react';
 
 interface StarRatingProps {
@@ -29,7 +30,7 @@ export default function StarRating({ field, value, onChange, error, onBlur, onFo
         {field.label}
         {field.required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      {field.help && <p className="mb-2 text-sm text-gray-500">{field.help}</p>}
+      <FieldHelp html={field.help} className="mb-2 text-sm text-gray-500" />
 
       <div
         className="flex gap-1"

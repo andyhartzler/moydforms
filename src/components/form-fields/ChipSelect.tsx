@@ -1,6 +1,7 @@
 'use client';
 
 import { FormFieldConfig } from '@/types/forms';
+import FieldHelp from './FieldHelp';
 import { Check } from 'lucide-react';
 
 interface ChipSelectProps {
@@ -39,7 +40,7 @@ export default function ChipSelect({ field, value, onChange, error, multiple = f
         {field.label}
         {field.required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      {field.help && <p className="mb-2 text-sm text-gray-500">{field.help}</p>}
+      <FieldHelp html={field.help} className="mb-2 text-sm text-gray-500" />
       <div className="flex flex-wrap gap-2" onBlur={onBlur} onFocus={onFocus}>
         {options.map((option) => {
           const isSelected = selectedValues.includes(option.value);

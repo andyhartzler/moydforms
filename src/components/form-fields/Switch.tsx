@@ -1,6 +1,7 @@
 'use client';
 
 import { FormFieldConfig } from '@/types/forms';
+import FieldHelp from './FieldHelp';
 
 interface SwitchProps {
   field: FormFieldConfig;
@@ -32,9 +33,7 @@ export default function Switch({ field, value, onChange, error, onBlur, onFocus 
             {field.label}
             {field.required && <span className="text-red-500 ml-1">*</span>}
           </label>
-          {field.help && (
-            <p className="text-sm text-gray-500 mt-0.5">{field.help}</p>
-          )}
+          <FieldHelp html={field.help} className="text-sm text-gray-500 mt-0.5" />
         </div>
         <button
           type="button"

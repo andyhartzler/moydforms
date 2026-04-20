@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { FormFieldConfig } from '@/types/forms';
+import FieldHelp from './FieldHelp';
 import { Search, X } from 'lucide-react';
 
 interface AutocompleteProps {
@@ -77,7 +78,7 @@ export default function Autocomplete({ field, value, onChange, error, onBlur, on
         {field.label}
         {field.required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      {field.help && <p className="mt-1 text-sm text-gray-500">{field.help}</p>}
+      <FieldHelp html={field.help} className="mt-1 text-sm text-gray-500" />
 
       <div className="mt-1 relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

@@ -1,6 +1,7 @@
 'use client';
 
 import { FormFieldConfig } from '@/types/forms';
+import FieldHelp from './FieldHelp';
 import { Minus, Plus } from 'lucide-react';
 
 interface NumberStepperProps {
@@ -41,7 +42,7 @@ export default function NumberStepper({ field, value, onChange, error, onBlur, o
         {field.label}
         {field.required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      {field.help && <p className="mt-1 text-sm text-gray-500">{field.help}</p>}
+      <FieldHelp html={field.help} className="mt-1 text-sm text-gray-500" />
 
       <div className="mt-2 flex items-center">
         <button

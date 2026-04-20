@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormFieldConfig } from '@/types/forms';
+import FieldHelp from './FieldHelp';
 
 interface TextAreaProps {
   field: FormFieldConfig;
@@ -48,9 +49,7 @@ export default function TextArea({ field, value, onChange, error, onBlur, onFocu
         {field.label}
         {field.required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      {field.help && (
-        <p className="text-sm text-gray-500 mb-2">{field.help}</p>
-      )}
+      <FieldHelp html={field.help} className="text-sm text-gray-500 mb-2" />
       <motion.div
         animate={isFocused ? {
           boxShadow: '0 0 0 3px rgba(11, 77, 184, 0.12), 0 4px 16px rgba(11, 77, 184, 0.08)',

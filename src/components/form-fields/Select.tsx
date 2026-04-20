@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { FormFieldConfig } from '@/types/forms';
+import FieldHelp from './FieldHelp';
 import { ChevronDown, Search, X, Check } from 'lucide-react';
 
 interface SelectProps {
@@ -49,9 +50,7 @@ export default function Select({ field, value, onChange, error, onBlur, onFocus 
           {field.label}
           {field.required && <span className="text-red-500 ml-1">*</span>}
         </label>
-        {field.help && (
-          <p className="text-sm text-gray-500 mb-2">{field.help}</p>
-        )}
+        <FieldHelp html={field.help} className="text-sm text-gray-500 mb-2" />
         <div className="relative">
           <select
             id={field.id}
@@ -107,9 +106,7 @@ export default function Select({ field, value, onChange, error, onBlur, onFocus 
         {field.label}
         {field.required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      {field.help && (
-        <p className="text-sm text-gray-500 mb-2">{field.help}</p>
-      )}
+      <FieldHelp html={field.help} className="text-sm text-gray-500 mb-2" />
 
       <div className="relative">
         <button
