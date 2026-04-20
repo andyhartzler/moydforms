@@ -213,6 +213,19 @@ export async function POST(request: NextRequest) {
     if (form_data['6cf26feb']) notesParts.push(`Additional info: ${form_data['6cf26feb']}`);
     if (form_data['1de09937']) notesParts.push(`Meeting days: ${arrayToString(form_data['1de09937'])}`);
     if (form_data['1af21ffa']) notesParts.push(`Meeting times: ${arrayToString(form_data['1af21ffa'])}`);
+    // No dedicated columns for these — write to notes so the data doesn't
+    // get dropped on the floor. User-visible columns on the members table
+    // stay untouched.
+    if (form_data['major_field']) notesParts.push(`Major / area of study: ${form_data['major_field']}`);
+    if (form_data['experience_advocacy']) notesParts.push(`Advocacy experience: ${form_data['experience_advocacy']}`);
+    // Capture any "Other (please specify)" free-text the user typed when
+    // they selected the Other option on radio/checkbox fields.
+    Object.keys(form_data).forEach((k) => {
+      if (k.endsWith('_other_text') && form_data[k]) {
+        const parent = k.replace(/_other_text$/, '');
+        notesParts.push(`Other (${parent}): ${form_data[k]}`);
+      }
+    });
 
     // Leadership application notes
     if (form_data['17d3907b'] === 'Yes' || form_data['17d3907b'] === 'Maybe') {
@@ -271,7 +284,9 @@ export async function POST(request: NextRequest) {
       qualified_experience: form_data['67b2a620'] || null,
       leadership_experience: form_data['13f36d81'] || null,
       political_experience: form_data['2f1adc8c'] || null,
-      why_issues_matter: form_data['5d3b6dcf'] || null,
+      // Schema stores this under its own field id now; keep the legacy
+      // 5d3b6dcf as fallback so existing in-flight submissions don't lose it.
+      why_issues_matter: form_data['why_issues_matter'] || form_data['5d3b6dcf'] || null,
       zodiac_sign: zodiacSign,
       notes: notesParts.length > 0 ? notesParts.join('\n') : null,
       date_joined: new Date().toISOString().split('T')[0],
@@ -385,7 +400,7 @@ export async function POST(request: NextRequest) {
           // Involvement
           hours_per_week: arrayToString(form_data['226743e3']) || null,
           passionate_issues: arrayToString(form_data['51e12843']) || null,
-          why_issues_matter: form_data['5d3b6dcf'] || null,
+          why_issues_matter: form_data['why_issues_matter'] || form_data['5d3b6dcf'] || null,
           current_chapter_member: form_data['016ae30f'] || null,
           chapter_name: form_data['3b88c54f'] || null,
           current_involvement: form_data['3f84c11f'] || null,
