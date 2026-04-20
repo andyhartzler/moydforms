@@ -192,6 +192,28 @@ function buildRow(
 }
 
 /**
+ * Some field IDs that the legacy Google Sheet expects were dropped from the
+ * live form schema (they duplicated what the IdentityFieldsStage already
+ * collects). Backfill the per-field keys from the session identity values
+ * before building the row, so the sheet — and any n8n workflow that triggers
+ * off it — sees the same shape it's always seen.
+ */
+function normalizeIdentityFields(slug: string, data: SubmissionData): SubmissionData {
+  if (slug !== 'membership') return data;
+  const out: SubmissionData = { ...data };
+  // Name: split "Full Name" into first/last if per-field IDs are empty.
+  if (!out['7ef3d9a0'] && !out['7221a225'] && typeof out['name'] === 'string') {
+    const parts = String(out['name']).trim().split(/\s+/);
+    out['7ef3d9a0'] = parts.shift() || '';
+    out['7221a225'] = parts.join(' ');
+  }
+  if (!out['email_field'] && typeof out['email'] === 'string') out['email_field'] = out['email'];
+  if (!out['458e9ec2'] && typeof out['phone'] === 'string') out['458e9ec2'] = out['phone'];
+  if (!out['23cca2cb'] && typeof out['zip_code'] === 'string') out['23cca2cb'] = out['zip_code'];
+  return out;
+}
+
+/**
  * Dual-write a form submission to the legacy Google Sheet for continuity.
  * Returns true on success, false on any failure. Never throws — caller should
  * fire-and-forget and not propagate errors to the submission response.
@@ -204,7 +226,7 @@ export async function dualWriteSubmission(
   const target = TARGETS[slug];
   if (!target) return false;
   try {
-    const row = buildRow(target, data, fileUrls);
+    const row = buildRow(target, normalizeIdentityFields(slug, data), fileUrls);
     return await appendRow(target.spreadsheetId, target.worksheetTitle, row);
   } catch (err) {
     console.error('[sheetsDualWrite] append failed:', err);
