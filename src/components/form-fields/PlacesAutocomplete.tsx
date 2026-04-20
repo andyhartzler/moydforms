@@ -129,7 +129,10 @@ export default function PlacesAutocomplete({
       try {
         const req = {
           input: query,
-          includedPrimaryTypes: ['street_address', 'premise', 'subpremise'],
+          // Places API (New) does NOT allow more than 5 includedPrimaryTypes
+          // and they must be valid per its schema. Safest: don't filter by
+          // type here — the user input itself narrows to addresses. The
+          // locationBias + region keep results relevant.
           includedRegionCodes: ['us'],
           locationBias: {
             radius: MO_BIAS.radius,
