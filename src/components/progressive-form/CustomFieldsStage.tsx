@@ -144,7 +144,7 @@ function normalizeSchemaToFields(schema: ExtendedSchema): ExtendedFieldConfig[] 
       if (cv && cv.conditionalFieldId && !translated.condition) {
         translated.condition = {
           field: cv.conditionalFieldId,
-          value: cv.conditionalValue,
+          value: String(cv.conditionalValue ?? ''),
         };
       }
       return translated;
