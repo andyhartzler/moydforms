@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import './places-autocomplete.css';
+
 :root {
   --primary: #0b4db8;
   --primary-dark: #0b1e37;

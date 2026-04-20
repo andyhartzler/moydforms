@@ -1,0 +1,31 @@
+/*
+ * Style the PlaceAutocompleteElement to visually match MOYD form inputs.
+ * The web component renders its own <input> inside a shadow DOM; we style
+ * via the ::part() accessors Google exposes.
+ */
+
+.moyd-places-host gmp-place-autocomplete {
+  display: block;
+  width: 100%;
+}
+
+.moyd-places-host gmp-place-autocomplete::part(input) {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #ffffff;
+}
+
+.moyd-places-host gmp-place-autocomplete::part(input):focus {
+  outline: none;
+  border-color: #0b4db8;
+  box-shadow: 0 0 0 2px rgba(11, 77, 184, 0.2);
+}
+
+.moyd-places-host gmp-place-autocomplete::part(input):hover {
+  border-color: #9ca3af;
+}
