@@ -119,11 +119,36 @@ function normalizeSchemaToFields(schema: ExtendedSchema): ExtendedFieldConfig[] 
   // If schema has fields array, use it directly.
   // Fields with type="section_header" need isSectionHeader=true so the
   // renderer treats them as page intros instead of text inputs.
+  //
+  // Fields-format schemas store conditional visibility under
+  // `conditional_visibility: {conditionalFieldId, conditionalValue, ...}`
+  // but evaluateCondition() reads `condition: {field, value}`. Without
+  // this translation, EVERY conditional field on the membership form
+  // stays visible regardless of the controlling answer — the exact bug
+  // that caused Committee Choices + School Name + Leadership fields
+  // to show when they shouldn't.
   if (schema.fields && schema.fields.length > 0) {
-    return (schema.fields as ExtendedFieldConfig[]).map((f) => ({
-      ...f,
-      isSectionHeader: f.isSectionHeader || f.type === 'section_header',
-    }));
+    return (schema.fields as ExtendedFieldConfig[]).map((f) => {
+      const cv = (f as unknown as {
+        conditional_visibility?: {
+          conditionalFieldId: string;
+          conditionalValue: unknown;
+          conditionalOperator?: string;
+          showWhenConditionMet?: boolean;
+        };
+      }).conditional_visibility;
+      const translated: ExtendedFieldConfig = {
+        ...f,
+        isSectionHeader: f.isSectionHeader || f.type === 'section_header',
+      };
+      if (cv && cv.conditionalFieldId && !translated.condition) {
+        translated.condition = {
+          field: cv.conditionalFieldId,
+          value: cv.conditionalValue,
+        };
+      }
+      return translated;
+    });
   }
 
   // If schema has questions array, convert to fields format
