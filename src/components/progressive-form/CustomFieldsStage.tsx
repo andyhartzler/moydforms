@@ -115,9 +115,14 @@ interface ExtendedSchema extends FormSchema {
 
 // Normalize questions format to fields format (including section headers)
 function normalizeSchemaToFields(schema: ExtendedSchema): ExtendedFieldConfig[] {
-  // If schema has fields array, use it directly
+  // If schema has fields array, use it directly.
+  // Fields with type="section_header" need isSectionHeader=true so the
+  // renderer treats them as page intros instead of text inputs.
   if (schema.fields && schema.fields.length > 0) {
-    return schema.fields as ExtendedFieldConfig[];
+    return (schema.fields as ExtendedFieldConfig[]).map((f) => ({
+      ...f,
+      isSectionHeader: f.isSectionHeader || f.type === 'section_header',
+    }));
   }
 
   // If schema has questions array, convert to fields format
