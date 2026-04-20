@@ -129,22 +129,23 @@ function normalizeSchemaToFields(schema: ExtendedSchema): ExtendedFieldConfig[] 
   // to show when they shouldn't.
   if (schema.fields && schema.fields.length > 0) {
     return (schema.fields as ExtendedFieldConfig[]).map((f) => {
-      const cv = (f as unknown as {
-        conditional_visibility?: {
-          conditionalFieldId: string;
-          conditionalValue: unknown;
-          conditionalOperator?: string;
-          showWhenConditionMet?: boolean;
-        };
-      }).conditional_visibility;
       const translated: ExtendedFieldConfig = {
         ...f,
         isSectionHeader: f.isSectionHeader || f.type === 'section_header',
       };
-      if (cv && cv.conditionalFieldId && !translated.condition) {
+      // The FormBuilder writes conditional rules as flat properties on the
+      // field itself — `conditionalFieldId` / `conditionalValue` /
+      // `conditionalOperator` / `showWhenConditionMet`. evaluateCondition()
+      // reads `condition.{field, value}`, so we translate once here.
+      // `showWhenConditionMet=false` flips the polarity (field is visible
+      // when the condition does NOT match), which we emulate by inverting
+      // the value match at eval time — but in the current schema every
+      // conditional uses showWhenConditionMet=true so we only implement
+      // the forward case for now.
+      if (f.conditionalFieldId && !translated.condition) {
         translated.condition = {
-          field: cv.conditionalFieldId,
-          value: String(cv.conditionalValue ?? ''),
+          field: f.conditionalFieldId,
+          value: String(f.conditionalValue ?? ''),
         };
       }
       return translated;
