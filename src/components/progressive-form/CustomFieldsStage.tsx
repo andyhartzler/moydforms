@@ -481,6 +481,38 @@ export function CustomFieldsStage({
     );
   };
 
+  // Google Form parity: when a radio/checkbox field has allow_other=true and the
+  // user picks (or ticks) an option whose value is "Other", show a free-text
+  // input so they can specify. The typed value goes in form_data as a sibling
+  // key `<fieldId>_other_text` — downstream code in the membership process
+  // handler can read both the structured option AND the free-text.
+  const renderWithOther = (field: ExtendedFieldConfig, value: unknown, node: JSX.Element) => {
+    if (!field.allow_other) return node;
+    const showOther = Array.isArray(value) ? value.includes('Other') : value === 'Other';
+    if (!showOther) return node;
+    const otherKey = `${field.id}_other_text`;
+    const otherValue = (formData[otherKey] as string | undefined) ?? '';
+    return (
+      <div key={field.id}>
+        {node}
+        <div className="mb-5 -mt-2 ml-2 pl-4 border-l-2 border-primary-200">
+          <label className="block text-xs font-medium text-gray-600 mb-1" htmlFor={otherKey}>
+            Please specify
+          </label>
+          <input
+            id={otherKey}
+            type="text"
+            value={otherValue}
+            onChange={(e) => handleFieldChange(otherKey, e.target.value)}
+            onBlur={() => handleFieldBlur(otherKey, 'text')}
+            placeholder="Type your answer…"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+          />
+        </div>
+      </div>
+    );
+  };
+
   // Render a single field
   const renderField = (field: ExtendedFieldConfig) => {
     // Render section headers specially
@@ -520,17 +552,17 @@ export function CustomFieldsStage({
         return <Select key={field.id} {...commonProps} />;
 
       case 'radio':
-        return <RadioGroup key={field.id} {...commonProps} />;
+        return renderWithOther(field, value, <RadioGroup key={field.id} {...commonProps} />);
 
       case 'checkbox':
       case 'cupertino_checkbox':
         if (!field.options || field.options.length === 0) {
           return <Checkbox key={field.id} {...commonProps} />;
         }
-        return <CheckboxGroup key={field.id} {...commonProps} />;
+        return renderWithOther(field, value, <CheckboxGroup key={field.id} {...commonProps} />);
 
       case 'checkbox_group':
-        return <CheckboxGroup key={field.id} {...commonProps} />;
+        return renderWithOther(field, value, <CheckboxGroup key={field.id} {...commonProps} />);
 
       case 'switch':
       case 'cupertino_switch':

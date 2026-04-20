@@ -154,6 +154,11 @@ export interface FormFieldConfig {
   prefixText?: string;
   suffixText?: string;
   hintText?: string;
+
+  // When true on a radio/checkbox_group, selecting the "Other" option
+  // reveals a free-text input. The typed value is stored as a sibling
+  // form_data entry under `<fieldId>_other_text`.
+  allow_other?: boolean;
 }
 
 // Form styling configuration
