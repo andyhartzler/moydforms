@@ -11,7 +11,7 @@ import { SuccessMessage } from './SuccessMessage';
 import { FormRecord, FileUploadResult } from '@/types/forms';
 import { toTitleCase } from '@/lib/utils';
 import { FileText, AlertCircle, ArrowLeft } from 'lucide-react';
-import { AnimatedProgressBar } from '../motion/AnimatedProgress';
+import DOMPurify from 'isomorphic-dompurify';
 import { pageVariants, pageTransition, fadeInUp } from '@/lib/motion';
 
 interface FormContainerProps {
@@ -88,9 +88,6 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
   const confirmation = form.schema?.confirmation;
   const showBackToFormsButton = form.show_back_button === true;
 
-  // Progress percentage based on stage
-  const progressPercent = stage === 'phone' ? 33 : stage === 'identity' ? 66 : 100;
-
   return (
     <div className="min-h-screen py-8 md:py-12 relative z-10">
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
@@ -141,24 +138,32 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
             </div>
           </div>
 
-          {form.description && (
+          {/* Description only renders on the phone/identity intro stages.
+              Once the user is in custom-fields the long pitch is stale
+              (especially the "personal email" note, which reappeared on
+              every page). Custom stage shows its step counter instead.
+              Description is admin-authored HTML; sanitized before injection. */}
+          {form.description && (stage === 'phone' || stage === 'identity') && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
               className="text-gray-600 text-base leading-relaxed [&_a]:text-primary-600 [&_a]:underline [&_a:hover]:text-primary-700 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_b]:font-semibold"
-              dangerouslySetInnerHTML={{ __html: form.description }}
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(form.description, {
+                  ALLOWED_TAGS: ['a', 'strong', 'b', 'em', 'i', 'u', 'br', 'p', 'span', 'code'],
+                  ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+                  ALLOWED_URI_REGEXP: /^(?:https?|mailto|tel):/i,
+                }),
+              }}
             />
           )}
 
-          {/* Animated progress bar — only on phone/identity stages.
-              The custom stage has its own multi-page progress so we skip it
-              here to avoid stacking two bars on top of each other. */}
-          {(stage === 'phone' || stage === 'identity') && (
-            <div className="mt-6">
-              <AnimatedProgressBar percent={progressPercent} />
-            </div>
-          )}
+          {/* No header progress bar. The phone/identity stages are
+              instantaneous and an animated 33 → 66 → 100 looked like the
+              form was finishing before the user had answered anything.
+              Once on custom fields, the step counter + page dots on the
+              stage itself are the single source of progress truth. */}
         </motion.div>
 
         {/* Error message with animation */}
