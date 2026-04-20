@@ -644,27 +644,21 @@ export function CustomFieldsStage({
         </div>
       </motion.div>
 
-      {/* Multi-page progress indicator */}
+      {/* Multi-page progress indicator — single source of truth.
+          Just the step counter + segmented page dots. The inline
+          AnimatedProgressBar + "N% complete" text that used to live here
+          were redundant with the dots and visually noisy. */}
       {isMultiPage && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 mb-6"
+          className="bg-white rounded-2xl shadow-lg border border-gray-100 px-5 py-4 mb-6"
         >
-          <div className="flex justify-between items-center text-sm mb-2">
+          <div className="flex items-center justify-between">
             <StepCounter current={currentPage} total={totalPages} />
-            <motion.span
-              key={Math.round(progressPercent)}
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-gray-500"
-            >
-              {Math.round(progressPercent)}% complete
-            </motion.span>
+            <PageDots total={totalPages} current={currentPage - 1} />
           </div>
-          <AnimatedProgressBar percent={progressPercent} />
-          <PageDots total={totalPages} current={currentPage - 1} />
         </motion.div>
       )}
 

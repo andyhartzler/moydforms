@@ -151,8 +151,10 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
             />
           )}
 
-          {/* Animated progress bar */}
-          {stage !== 'submitted' && (
+          {/* Animated progress bar — only on phone/identity stages.
+              The custom stage has its own multi-page progress so we skip it
+              here to avoid stacking two bars on top of each other. */}
+          {(stage === 'phone' || stage === 'identity') && (
             <div className="mt-6">
               <AnimatedProgressBar percent={progressPercent} />
             </div>

@@ -140,9 +140,18 @@ export async function POST(request: NextRequest) {
 
   try {
     // ── Core identity fields ──────────────────────────────────
-    const firstName = String(form_data['7ef3d9a0'] || '').trim();
-    const lastName = String(form_data['7221a225'] || '').trim();
-    const fullName = `${firstName} ${lastName}`.trim();
+    // First/last come from the IdentityFieldsStage "Full Name" by default (form_data.name).
+    // The per-field keys (7ef3d9a0 / 7221a225) are only present on legacy forms that
+    // still carry the redundant name inputs on page 1.
+    let firstName = String(form_data['7ef3d9a0'] || '').trim();
+    let lastName = String(form_data['7221a225'] || '').trim();
+    const sessionName = String(form_data['name'] || '').trim();
+    if (!firstName && !lastName && sessionName) {
+      const parts = sessionName.split(/\s+/);
+      firstName = parts.shift() || '';
+      lastName = parts.join(' ');
+    }
+    const fullName = `${firstName} ${lastName}`.trim() || sessionName;
     const email = String(
       form_data['email_field'] || form_data['respondentEmail'] || form_data['email'] || ''
     ).trim().toLowerCase();
@@ -156,7 +165,9 @@ export async function POST(request: NextRequest) {
     const street = String(form_data['207879c2'] || '').trim();
     const city = String(form_data['73400ed5'] || '').trim();
     const state = String(form_data['41db9d9c'] || 'Missouri').trim();
-    const zip = String(form_data['23cca2cb'] || '').trim();
+    // Zip comes from the IdentityFieldsStage by default (form_data.zip_code);
+    // 23cca2cb only survives on legacy forms that kept the dedicated Zip field on page 2.
+    const zip = String(form_data['23cca2cb'] || form_data['zip_code'] || '').trim();
     const fullAddress = [street, city, state, zip].filter(Boolean).join(', ');
 
     // ── Boolean conversions ──────────────────────────────────
