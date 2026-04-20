@@ -1,23 +1,18 @@
 'use client';
 
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 /**
  * Shared help-text renderer for every form field.
  *
  * Schemas are authored via the Flutter CRM admin surface and often embed
  * inline <a> links (voter-lookup, national-guideline references, etc).
- * Rendering the string as plain text shows the raw tags — which is what
- * happened with "Are you registered to vote in Missouri?" whose help read
- * `Not sure? <a href='…'>Check your status here</a>`.
+ * Rendering the string as plain text shows the raw tags.
  *
- * Even though the authoring surface is trusted, we sanitize with DOMPurify
- * before injection so a compromised schema row can't exfiltrate session
- * data via <script> / onerror / etc. Allowlist is narrow — only inline
- * formatting and links to safe protocols.
+ * HTML is sanitized through lib/sanitizeHtml which uses DOMPurify on the
+ * client and a conservative regex-scrub on the server (isomorphic-dompurify
+ * pulls in jsdom which breaks Vercel's Node runtime with ERR_REQUIRE_ESM).
  */
-const ALLOWED_TAGS = ['a', 'strong', 'b', 'em', 'i', 'u', 'br', 'span', 'code'];
-const ALLOWED_ATTR = ['href', 'target', 'rel', 'class'];
 
 // Force every anchor to open in a new tab with safe rel. Runs after
 // DOMPurify's own target filter so we know what survived, then we stamp
@@ -44,11 +39,7 @@ interface FieldHelpProps {
 
 export default function FieldHelp({ html, className = 'text-sm text-gray-500 mb-3' }: FieldHelpProps) {
   if (!html) return null;
-  const clean = DOMPurify.sanitize(html, {
-    ALLOWED_TAGS,
-    ALLOWED_ATTR,
-    ALLOWED_URI_REGEXP: /^(?:https?|mailto|tel):/i,
-  });
+  const clean = sanitizeHtml(html);
   const enhanced = enhanceLinks(clean);
   return (
     <p

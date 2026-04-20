@@ -11,7 +11,7 @@ import { SuccessMessage } from './SuccessMessage';
 import { FormRecord, FileUploadResult } from '@/types/forms';
 import { toTitleCase } from '@/lib/utils';
 import { FileText, AlertCircle, ArrowLeft } from 'lucide-react';
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import { pageVariants, pageTransition, fadeInUp } from '@/lib/motion';
 
 interface FormContainerProps {
@@ -149,13 +149,7 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
               className="text-gray-600 text-base leading-relaxed [&_a]:text-primary-600 [&_a]:underline [&_a:hover]:text-primary-700 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_b]:font-semibold"
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(form.description, {
-                  ALLOWED_TAGS: ['a', 'strong', 'b', 'em', 'i', 'u', 'br', 'p', 'span', 'code'],
-                  ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
-                  ALLOWED_URI_REGEXP: /^(?:https?|mailto|tel):/i,
-                }),
-              }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(form.description) }}
             />
           )}
 
