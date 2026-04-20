@@ -1,23 +1,46 @@
 /*
  * Style the PlaceAutocompleteElement to visually match MOYD form inputs.
- * The web component renders its own <input> inside a shadow DOM; we style
- * via the ::part() accessors Google exposes.
+ * The web component renders its own <input> inside a shadow DOM; most of
+ * its styling is driven by CSS custom properties (--gmpx-* tokens).
+ *
+ * Google's default look is a dark-mode combobox that clashes with the
+ * rest of the form. The tokens below recolour it to the light/primary-
+ * blue palette used elsewhere — input chrome + prediction dropdown +
+ * focus ring.
  */
 
 .moyd-places-host gmp-place-autocomplete {
   display: block;
   width: 100%;
+  /* Typography */
+  --gmpx-font-family-base: Inter, system-ui, -apple-system, sans-serif;
+  --gmpx-font-family-headings: inherit;
+  --gmpx-font-size-base: 1rem;
+  /* Surfaces */
+  --gmpx-color-surface: #ffffff;
+  --gmpx-color-on-surface: #1f2937;
+  --gmpx-color-on-surface-variant: #4b5563;
+  /* Primary (focus ring, selected row) */
+  --gmpx-color-primary: #0b4db8;
+  --gmpx-color-secondary: #0b4db8;
+  /* Outlines + borders */
+  --gmpx-color-outline: #e5e7eb;
+  /* Radius to match other fields */
+  --gmpx-rounding-outer: 0.75rem;
+  --gmpx-rounding-middle: 0.5rem;
 }
 
+/* Direct part overrides for rounding + border colour on the input */
 .moyd-places-host gmp-place-autocomplete::part(input) {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 2px solid #e5e7eb;
   border-radius: 0.75rem;
+  background-color: #ffffff;
+  color: #1f2937;
   font-size: 1rem;
   line-height: 1.5;
   transition: border-color 0.2s, box-shadow 0.2s;
-  background-color: #ffffff;
 }
 
 .moyd-places-host gmp-place-autocomplete::part(input):focus {
@@ -28,4 +51,18 @@
 
 .moyd-places-host gmp-place-autocomplete::part(input):hover {
   border-color: #9ca3af;
+}
+
+/* The prediction dropdown is rendered in a shadow DOM but Google exposes
+   each suggestion as ::part(prediction-item). Style to match the form. */
+.moyd-places-host gmp-place-autocomplete::part(prediction-item) {
+  background-color: #ffffff;
+  color: #1f2937;
+  padding: 0.75rem 1rem;
+}
+
+.moyd-places-host gmp-place-autocomplete::part(prediction-item):hover,
+.moyd-places-host gmp-place-autocomplete::part(prediction-item-selected) {
+  background-color: #eff6ff;
+  color: #0b4db8;
 }
