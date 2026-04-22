@@ -125,6 +125,26 @@ export async function POST(
     return NextResponse.json({ error: 'Failed to submit form' }, { status: 500 });
   }
 
+  // Link endorsement-questionnaire submissions to a specific candidate. The
+  // CRM bakes `?candidate_id=<uuid>` into the share link; the client posts it
+  // via body.candidate_id OR formData.candidate_id. Only applies to forms
+  // whose slug starts with `endorsement-questionnaire`.
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const rawCandidateId =
+    (typeof body.candidate_id === 'string' && body.candidate_id) ||
+    (typeof (formData as Record<string, unknown>).candidate_id === 'string'
+      ? ((formData as Record<string, unknown>).candidate_id as string)
+      : null);
+  if (slug.startsWith('endorsement-questionnaire') && rawCandidateId && uuidRegex.test(rawCandidateId)) {
+    const { error: linkErr } = await supabase
+      .from('form_submissions')
+      .update({ candidate_id: rawCandidateId })
+      .eq('id', submission.id);
+    if (linkErr) {
+      console.warn('[endorsement] failed to link candidate_id:', linkErr);
+    }
+  }
+
   // Create subscriber if email provided and not already a member
   if (submitter?.email && !memberId) {
     // Check if subscriber exists

@@ -18,12 +18,25 @@ interface FormContainerProps {
   form: FormRecord;
   identityConfig?: IdentityConfig;
   onFileUpload?: (file: File, fieldId: string) => Promise<FileUploadResult>;
+  /**
+   * Extra key/value pairs merged into the submitted form data. Used by the
+   * endorsement questionnaire to ship `candidate_id` from the URL into the
+   * submission without exposing a visible field.
+   */
+  extraFormData?: Record<string, unknown>;
+  /**
+   * Opt-in visual: show the Young-Dem vs Partner Candidate track banner
+   * once `date_of_birth` has been answered. Currently only used by the
+   * endorsement questionnaire, but implemented generically in case other
+   * age-gated forms want it later.
+   */
+  showTrackBanner?: boolean;
 }
 
 // Stage order for direction calculation
 const STAGE_ORDER = ['phone', 'identity', 'custom', 'submitted'];
 
-export function FormContainer({ form, identityConfig, onFileUpload }: FormContainerProps) {
+export function FormContainer({ form, identityConfig, onFileUpload, extraFormData, showTrackBanner }: FormContainerProps) {
   const [direction, setDirection] = useState(1);
   const [prevStage, setPrevStage] = useState('phone');
 
@@ -248,6 +261,8 @@ export function FormContainer({ form, identityConfig, onFileUpload }: FormContai
                 isLoading={isLoading}
                 submitLabel={form.settings?.submitButtonText || 'Submit'}
                 onFileUpload={onFileUpload}
+                extraFormData={extraFormData}
+                showTrackBanner={showTrackBanner}
               />
             </motion.div>
           )}

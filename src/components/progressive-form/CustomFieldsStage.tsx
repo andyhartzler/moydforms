@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormFieldConfig, FormSchema, normalizeFieldType, FieldType, FileUploadResult } from '@/types/forms';
 import { FileUploadInfo } from '@/lib/edgeFunction';
@@ -41,6 +41,10 @@ interface CustomFieldsStageProps {
   isLoading: boolean;
   submitLabel?: string;
   onFileUpload?: (file: File, fieldId: string) => Promise<FileUploadResult>;
+  /** Extra key/value pairs merged into submitted data (e.g. candidate_id). */
+  extraFormData?: Record<string, unknown>;
+  /** Show the Young Dem vs Partner track reveal banner once DOB is answered. */
+  showTrackBanner?: boolean;
 }
 
 // Patterns to detect identity fields by ID or label
@@ -258,11 +262,29 @@ export function CustomFieldsStage({
   isLoading,
   submitLabel = 'Submit',
   onFileUpload,
+  extraFormData,
+  showTrackBanner,
 }: CustomFieldsStageProps) {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [currentPage, setCurrentPage] = useState<number>(1);
   const fieldFocusTime = useRef<Record<string, number>>({});
+
+  // Derive `dob_is_young_dem` synthetic flag from date_of_birth for schemas that
+  // use age-gated branching (e.g. endorsement-questionnaire-2026 pages 10 vs 11).
+  // Writes 'true'/'false' string back into formData so evaluateCondition can match.
+  // Cutoff is 36 — MOYD's Young Dems definition (35 and under).
+  useEffect(() => {
+    const dob = formData.date_of_birth;
+    if (typeof dob !== 'string' || dob.length < 4) return;
+    const dobDate = new Date(dob);
+    if (Number.isNaN(dobDate.getTime())) return;
+    const ageYears = (Date.now() - dobDate.getTime()) / (365.25 * 24 * 3600 * 1000);
+    const flag = ageYears < 36 ? 'true' : 'false';
+    if (formData.dob_is_young_dem !== flag) {
+      setFormData((prev) => ({ ...prev, dob_is_young_dem: flag }));
+    }
+  }, [formData.date_of_birth, formData.dob_is_young_dem]);
 
   // Get all fields from schema
   const allFields = useMemo(() => normalizeSchemaToFields(schema as ExtendedSchema), [schema]);
@@ -295,6 +317,31 @@ export function CustomFieldsStage({
 
   const totalPages = pageNumbers.length || 1;
   const isMultiPage = totalPages > 1;
+
+  // Weighted progress — instead of N/total-pages (each page worth the same),
+  // weight each page by how many answerable fields live on it. Makes the
+  // bar feel truthful on long forms where page 5 has 14 questions but page
+  // 8 has just 4. Section headers don't count — they're pure chrome.
+  const pageWeights = useMemo(() => {
+    const weights: Record<number, number> = {};
+    customFields.forEach((f) => {
+      if (f.isSectionHeader) return;
+      const pn = f.pageNumber ?? 1;
+      weights[pn] = (weights[pn] || 0) + 1;
+    });
+    return weights;
+  }, [customFields]);
+
+  const weightedProgressPercent = useMemo(() => {
+    if (!isMultiPage) return 100;
+    const completedPages = pageNumbers.slice(0, currentPage - 1);
+    const totalWeight = pageNumbers.reduce((acc, p) => acc + (pageWeights[p] || 1), 0);
+    const completedWeight = completedPages.reduce((acc, p) => acc + (pageWeights[p] || 1), 0);
+    // Add a half-weight for the current page (user is partway through it).
+    const currentPageNum = pageNumbers[currentPage - 1];
+    const inProgressWeight = (pageWeights[currentPageNum] || 1) * 0.15;
+    return Math.min(100, ((completedWeight + inProgressWeight) / totalWeight) * 100);
+  }, [currentPage, pageNumbers, pageWeights, isMultiPage]);
 
   // Check if a field should be visible based on its condition
   const shouldShowField = useCallback(
@@ -463,10 +510,13 @@ export function CustomFieldsStage({
       return;
     }
 
-    // Build final data: start with identity values
+    // Build final data: start with identity values, overlay form answers, then
+    // any caller-injected extras (e.g. candidate_id from a URL query param).
+    // Extras win — they should never be overwritten by a user-typed value.
     const finalData: Record<string, unknown> = {
       ...identityValues,
       ...formData,
+      ...(extraFormData || {}),
     };
 
     // Map identity values to the form's specific field IDs
@@ -501,13 +551,31 @@ export function CustomFieldsStage({
     await onSubmit(finalData, fileUploads);
   };
 
-  // Render a section header with animation
+  // Render a section header with animation. On the endorsement questionnaire
+  // these are the page intros — bigger, bolder, with a gold accent bar — so
+  // they read like a real chapter break instead of a sub-heading.
   const renderSectionHeader = (field: ExtendedFieldConfig) => {
     return (
-      <div key={field.id} className="mb-6 pb-4 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">{field.label}</h3>
+      <div key={field.id} className="mb-8 pb-5 border-b border-gray-100 relative">
+        <div
+          className="absolute top-0 left-0 w-12 h-1 rounded-full"
+          style={{
+            background: 'linear-gradient(90deg, #d4a039 0%, #f0c04e 100%)',
+          }}
+        />
+        <h3
+          className="mt-4 text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight"
+          style={{
+            fontFamily: 'Montserrat, sans-serif',
+            letterSpacing: '-0.03em',
+          }}
+        >
+          {field.label}
+        </h3>
         {field.sectionDescription && (
-          <p className="mt-1 text-sm text-gray-600">{field.sectionDescription}</p>
+          <p className="mt-2 text-[15px] text-gray-600 leading-relaxed max-w-2xl">
+            {field.sectionDescription}
+          </p>
         )}
       </div>
     );
@@ -717,10 +785,10 @@ export function CustomFieldsStage({
         </div>
       </motion.div>
 
-      {/* Multi-page progress indicator — single source of truth.
-          Just the step counter + segmented page dots. The inline
-          AnimatedProgressBar + "N% complete" text that used to live here
-          were redundant with the dots and visually noisy. */}
+      {/* Multi-page progress indicator — step counter + segmented page dots,
+          now with a weighted fill bar underneath. Each page's slice of the
+          bar is proportional to how many real questions live on it, so page
+          5 (14 questions) advances the bar more than page 8 (4 questions). */}
       {isMultiPage && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -728,11 +796,91 @@ export function CustomFieldsStage({
           transition={{ delay: 0.1 }}
           className="bg-white rounded-2xl shadow-lg border border-gray-100 px-5 py-4 mb-6"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-3">
             <StepCounter current={currentPage} total={totalPages} />
             <PageDots total={totalPages} current={currentPage - 1} />
           </div>
+          <div className="relative h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+            <motion.div
+              className="absolute inset-y-0 left-0 rounded-full"
+              style={{
+                background:
+                  'linear-gradient(90deg, #0b4db8 0%, #d4a039 60%, #f0c04e 100%)',
+                boxShadow: '0 0 12px rgba(212,160,57,0.45)',
+              }}
+              initial={false}
+              animate={{ width: `${weightedProgressPercent}%` }}
+              transition={{ type: 'spring', stiffness: 120, damping: 22 }}
+            />
+          </div>
         </motion.div>
+      )}
+
+      {/* Track reveal banner — appears once DOB is answered and animates the
+          Young Dem vs Partner Candidate badge in. Only rendered when the
+          caller opts in (showTrackBanner) so we don't touch unrelated forms. */}
+      {showTrackBanner && formData.dob_is_young_dem && (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={formData.dob_is_young_dem === 'true' ? 'yd' : 'partner'}
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+            className={
+              'mb-6 relative overflow-hidden rounded-2xl p-5 border-2 shadow-lg ' +
+              (formData.dob_is_young_dem === 'true'
+                ? 'bg-gradient-to-br from-primary-600 to-primary-800 border-gold-400/60'
+                : 'bg-gradient-to-br from-gold-500 to-gold-700 border-primary-600/60')
+            }
+          >
+            {/* Animated sparkle */}
+            <motion.div
+              aria-hidden
+              className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-30"
+              style={{ background: 'radial-gradient(circle, #ffffff 0%, transparent 70%)' }}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
+            />
+            <div className="relative flex items-center gap-4">
+              <motion.div
+                initial={{ rotate: -15, scale: 0 }}
+                animate={{ rotate: 0, scale: 1 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 260,
+                  damping: 18,
+                  delay: 0.15,
+                }}
+                className="flex-shrink-0 w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-2xl"
+              >
+                {formData.dob_is_young_dem === 'true' ? '⚡' : '🤝'}
+              </motion.div>
+              <div className="flex-1 min-w-0">
+                <div
+                  className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70 mb-0.5"
+                  style={{ fontFamily: 'Montserrat, sans-serif' }}
+                >
+                  You're on the
+                </div>
+                <div
+                  className="text-white text-lg sm:text-xl font-extrabold leading-tight"
+                  style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-0.02em' }}
+                >
+                  {formData.dob_is_young_dem === 'true'
+                    ? 'Young Democrat track'
+                    : 'Partner Candidate track'}
+                </div>
+                <div className="text-white/80 text-sm mt-0.5">
+                  {formData.dob_is_young_dem === 'true'
+                    ? "You qualify as a MOYD member candidate — we'll ask about your Young Dems involvement."
+                    : "You're over 35 — we'll ask a few partner-specific questions about your alliance with MOYD."}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
       )}
 
       {/* Custom fields with page transitions */}
