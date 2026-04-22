@@ -819,7 +819,9 @@ export function CustomFieldsStage({
       {/* Track reveal banner — appears once DOB is answered and animates the
           Young Dem vs Partner Candidate badge in. Only rendered when the
           caller opts in (showTrackBanner) so we don't touch unrelated forms. */}
-      {showTrackBanner && formData.dob_is_young_dem && (
+      {showTrackBanner &&
+        (formData.dob_is_young_dem === 'true' ||
+          formData.dob_is_young_dem === 'false') && (
         <AnimatePresence mode="wait">
           <motion.div
             key={formData.dob_is_young_dem === 'true' ? 'yd' : 'partner'}
