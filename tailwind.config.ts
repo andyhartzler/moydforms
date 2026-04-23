@@ -8,7 +8,24 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Montserrat', 'system-ui', 'sans-serif'],
+        // Fraunces — editorial serif reserved for form titles and hero
+        // moments. Keep sans for body and all field labels so the forms
+        // stay clean and readable.
+        display: ['Fraunces', 'Georgia', 'serif'],
+      },
       colors: {
+        // MOYD brand palette (canonical — added 2026-04-23).
+        // unityBlue is the deep navy used on moyoungdemocrats.org body bg,
+        // sunriseGold the highlight, momentumBlue the bright accent,
+        // slateBlue a mid tone for rails/borders.
+        moyd: {
+          unity: '#273351',
+          sunrise: '#FDB813',
+          momentum: '#32A6DE',
+          slate: '#5A7FA3',
+        },
         primary: {
           DEFAULT: '#0b4db8',
           50: '#eef4ff',

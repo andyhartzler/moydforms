@@ -7,27 +7,24 @@ import { FormRecord, FileUploadResult } from '@/types/forms';
 
 interface Props {
   form: FormRecord;
-  candidateId?: string;
   skipHero: boolean;
   hero: React.ReactNode;
 }
 
 /**
- * Client shell for the endorsement questionnaire.
+ * Client shell for the membership form.
  *
- * - Preserves `?candidate_id=<uuid>` through into form state as a hidden field.
- *   The Postgres trigger `auto_extract_endorsement_candidate_id` unwraps it
- *   from `data` JSONB into the `form_submissions.candidate_id` column on insert
- *   — no Edge Function change required.
- *
- * - Either renders the hero splash or the form, switching on `?start=1`.
- *   Uses client-side navigation to avoid a full reload when the user clicks
- *   "Begin application".
+ * Mirrors the endorsement pattern:
+ *  - Renders a marketing hero until the user clicks "Become a member" or
+ *    the URL carries `?start=1`.
+ *  - Then hands off to the generic FormContainer with the membership schema.
+ *  - Autosave keyed by slug; identifier is filled in by the FormContainer
+ *    once the user keys their phone number (for now, a slug-level bucket
+ *    which keeps half-filled drafts from going to waste if the user
+ *    doesn't finish — handled in CustomFieldsStage via useFormAutosave).
  */
-export default function EndorsementFormClient({ form, candidateId, skipHero, hero }: Props) {
+export default function MembershipFormClient({ form, skipHero, hero }: Props) {
   const searchParams = useSearchParams();
-
-  // Show hero unless parent passed skipHero=true OR URL has ?start=1.
   const [showForm, setShowForm] = useState(skipHero);
 
   useEffect(() => {
@@ -65,20 +62,14 @@ export default function EndorsementFormClient({ form, candidateId, skipHero, her
     return <>{hero}</>;
   }
 
-  // Autosave key — prefer candidate_id when the CRM share link supplied one,
-  // otherwise a stable anon bucket. This guarantees a candidate resuming
-  // from the same link lands on their own draft, while a candidate hitting
-  // the bare URL gets a shared "anon" drawer (won't cross-pollute because
-  // the page is gated behind ?start=1 + phone entry anyway).
-  const autosaveKey = `endorsement-questionnaire-2026:${candidateId || 'anon'}`;
+  // Autosave bucket for membership — slug-scoped. Not per-user because we
+  // don't have a unique identifier until the user enters their phone, and
+  // the membership form is short enough that a shared "anon" drawer on a
+  // single device is a worthwhile trade for draft recovery. Drafts expire
+  // after 14 days via useFormAutosave.
+  const autosaveKey = 'membership:anon';
 
   return (
-    <FormContainer
-      form={form}
-      onFileUpload={handleFileUpload}
-      extraFormData={candidateId ? { candidate_id: candidateId } : undefined}
-      showTrackBanner
-      autosaveKey={autosaveKey}
-    />
+    <FormContainer form={form} onFileUpload={handleFileUpload} autosaveKey={autosaveKey} />
   );
 }

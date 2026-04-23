@@ -31,12 +31,33 @@ interface FormContainerProps {
    * age-gated forms want it later.
    */
   showTrackBanner?: boolean;
+  /**
+   * Opt-in localStorage autosave for the custom-fields stage. Set to a key
+   * like `membership:<phone>` or `endorsement-questionnaire-2026:<candidate_id>`
+   * and the user will be offered a "Pick up where you left off?" banner on
+   * next load. Pass `null` to explicitly disable (default for short forms).
+   */
+  autosaveKey?: string | null;
+  /**
+   * Replace the default generic header (icon + title) with a custom hero
+   * element. Used by the membership form to render a branded "Join the
+   * movement" splash instead of the default FileText icon card.
+   */
+  heroOverride?: React.ReactNode;
 }
 
 // Stage order for direction calculation
 const STAGE_ORDER = ['phone', 'identity', 'custom', 'submitted'];
 
-export function FormContainer({ form, identityConfig, onFileUpload, extraFormData, showTrackBanner }: FormContainerProps) {
+export function FormContainer({
+  form,
+  identityConfig,
+  onFileUpload,
+  extraFormData,
+  showTrackBanner,
+  autosaveKey,
+  heroOverride,
+}: FormContainerProps) {
   const [direction, setDirection] = useState(1);
   const [prevStage, setPrevStage] = useState('phone');
 
@@ -121,57 +142,70 @@ export function FormContainer({ form, identityConfig, onFileUpload, extraFormDat
           </motion.div>
         )}
 
-        {/* Form Header Card — animated entrance */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8 mb-6 relative overflow-hidden"
-        >
-          {/* Decorative accent — gold highlight */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary-600 via-gold-400 to-primary-600" />
-
-          {/* Form icon */}
-          <div className="flex items-center gap-4 mb-4">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 15, delay: 0.2 }}
-              className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center"
-            >
-              <FileText className="w-6 h-6 text-primary-600" />
-            </motion.div>
-            <div className="flex-1">
-              <h1
-                className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight"
-                style={{ fontFamily: 'Montserrat, sans-serif' }}
-              >
-                {formTitle}
-              </h1>
-            </div>
-          </div>
-
-          {/* Description only renders on the phone/identity intro stages.
-              Once the user is in custom-fields the long pitch is stale
-              (especially the "personal email" note, which reappeared on
-              every page). Custom stage shows its step counter instead.
-              Description is admin-authored HTML; sanitized before injection. */}
-          {form.description && (stage === 'phone' || stage === 'identity') && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-gray-600 text-base leading-relaxed [&_a]:text-primary-600 [&_a]:underline [&_a:hover]:text-primary-700 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_b]:font-semibold"
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(form.description) }}
+        {/* Form Header — either a caller-supplied hero (membership uses one)
+            or the default editorial header. Both paths render form.description
+            as sanitized HTML via the shared sanitizeHtml() helper. */}
+        {heroOverride ? (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+            className="mb-6"
+          >
+            {heroOverride}
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8 mb-6 relative overflow-hidden"
+          >
+            {/* Decorative accent — MOYD unity/sunrise gradient rule */}
+            <div
+              aria-hidden
+              className="absolute top-0 left-0 right-0 h-1.5"
+              style={{
+                background:
+                  'linear-gradient(90deg, #273351 0%, #FDB813 50%, #273351 100%)',
+              }}
             />
-          )}
 
-          {/* No header progress bar. The phone/identity stages are
-              instantaneous and an animated 33 → 66 → 100 looked like the
-              form was finishing before the user had answered anything.
-              Once on custom fields, the step counter + page dots on the
-              stage itself are the single source of progress truth. */}
-        </motion.div>
+            {/* Form icon + title. Title uses Fraunces display face for an
+                editorial first impression; icon tile gets an MOYD-unity
+                background so the eye goes to the word, not the chrome. */}
+            <div className="flex items-start gap-4 mb-1">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 15, delay: 0.15 }}
+                className="w-12 h-12 rounded-xl bg-moyd-unity flex items-center justify-center shadow-[0_8px_20px_-10px_rgba(39,51,81,0.7)]"
+              >
+                <FileText className="w-6 h-6 text-moyd-sunrise" />
+              </motion.div>
+              <div className="flex-1 min-w-0 pt-0.5">
+                <div className="text-[11px] font-black uppercase tracking-[0.2em] text-moyd-unity/70">
+                  Missouri Young Democrats
+                </div>
+                <h1 className="mt-1 font-display text-[28px] sm:text-[36px] leading-[1.05] tracking-tight font-semibold text-moyd-unity">
+                  {formTitle}
+                </h1>
+              </div>
+            </div>
+
+            {/* Description only on phone/identity intro stages. Sanitized
+                via sanitizeHtml() before injection — same behavior as before. */}
+            {form.description && (stage === 'phone' || stage === 'identity') && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="mt-4 text-gray-600 text-base leading-relaxed [&_a]:text-primary-600 [&_a]:underline [&_a:hover]:text-primary-700 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_b]:font-semibold"
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(form.description) }}
+              />
+            )}
+          </motion.div>
+        )}
 
         {/* Error message with animation */}
         <AnimatePresence>
@@ -263,6 +297,7 @@ export function FormContainer({ form, identityConfig, onFileUpload, extraFormDat
                 onFileUpload={onFileUpload}
                 extraFormData={extraFormData}
                 showTrackBanner={showTrackBanner}
+                autosaveKey={autosaveKey}
               />
             </motion.div>
           )}

@@ -44,17 +44,30 @@ export function SuccessMessage({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 text-center overflow-hidden relative"
+        className="bg-white rounded-3xl shadow-[0_30px_80px_-30px_rgba(39,51,81,0.35)] border border-gray-100 p-8 sm:p-10 text-center overflow-hidden relative"
       >
-        {/* Decorative gradient accent */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-green-400 via-gold-400 to-green-400" />
+        {/* Decorative gradient accent — MOYD unity/sunrise */}
+        <div
+          aria-hidden
+          className="absolute top-0 left-0 right-0 h-1.5"
+          style={{
+            background:
+              'linear-gradient(90deg, #273351 0%, #FDB813 45%, #32A6DE 100%)',
+          }}
+        />
+        {/* Ambient sunrise blur */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-16 -right-16 w-56 h-56 rounded-full opacity-30 blur-3xl"
+          style={{ background: 'radial-gradient(circle, #FDB813 0%, transparent 65%)' }}
+        />
 
         {/* Animated checkmark */}
         <motion.div
           variants={successVariants}
           initial="hidden"
           animate="visible"
-          className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+          className="relative w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
         >
           <CheckCircle className="w-10 h-10 text-green-600" />
         </motion.div>
@@ -63,9 +76,9 @@ export function SuccessMessage({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="text-2xl font-bold text-gray-900 mb-3"
+          className="relative font-display text-3xl sm:text-4xl font-semibold tracking-tight text-moyd-unity leading-[1.05] mb-3"
         >
-          Thank You! 🎉
+          Thank you.
         </motion.h2>
 
         {/* Display the message */}

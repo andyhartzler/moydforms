@@ -45,10 +45,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Load Montserrat font via CSS */}
+        {/* Load Montserrat (body/UI) + Fraunces (editorial display for form
+            titles and hero moments) via Google Fonts. Fraunces variable
+            font handles optical sizing automatically. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&display=swap"
+          rel="stylesheet"
+        />
         {/* Google tag (gtag.js) */}
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-WBYHCGZF50" />
         <Script id="gtag-init" strategy="afterInteractive">
