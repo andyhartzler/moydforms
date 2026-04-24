@@ -1,0 +1,1072 @@
+{
+  "slug": "endorsement-questionnaire-2026-v2",
+  "title": "MOYD Candidate Endorsement Questionnaire (Policy Alignment)",
+  "description": "The Missouri Young Democrats alignment questionnaire. One open-ended question plus 50 scored items (multiple choice + true/false) keyed to the MOYD 2025 Policy Platform. Generates an overall progressive-alignment score (0-100) and per-policy-area sub-scores used by the endorsement committee.",
+  "version": 2,
+  "status": "proposal",
+  "based_on_platform": "MOYD 2025 Policy Platform (adopted November 11, 2025)",
+  "scoring": {
+    "methodology": "weighted-aligned-count",
+    "description": "Each scored question has a MOYD-aligned answer and an integer weight 1-5. Overall score = (sum of weights of aligned answers) / (sum of all weights) * 100. Per-policy-area scores use the same formula restricted to questions tagged with that area. Questions where the candidate picks an MC option marked aligned=true, or answers a true/false question matching moyd_aligned_answer, count as aligned. The open-ended narrative is not scored — it is displayed alongside the score.",
+    "spectrum_axes": ["overall_progressive_score", "per_policy_area"],
+    "max_score": 100,
+    "interpretation_bands": [
+      {"min": 85, "max": 100, "label": "Strongly aligned — Progressive"},
+      {"min": 70, "max": 84, "label": "Aligned — Progressive-leaning"},
+      {"min": 55, "max": 69, "label": "Mixed — Moderate Democrat"},
+      {"min": 40, "max": 54, "label": "Weakly aligned — Conservative Democrat"},
+      {"min": 0, "max": 39, "label": "Not aligned with MOYD platform"}
+    ],
+    "weights_legend": {
+      "5": "Core MOYD plank — non-negotiable platform position",
+      "4": "Major platform priority",
+      "3": "Platform position with internal flexibility",
+      "2": "Secondary / tactical preference",
+      "1": "Style or emphasis question"
+    }
+  },
+  "policy_areas": [
+    "economy_labor",
+    "healthcare",
+    "education",
+    "environment_climate",
+    "civil_rights_lgbtq",
+    "reproductive_rights",
+    "criminal_justice",
+    "democracy_voting",
+    "housing",
+    "immigration",
+    "gun_policy",
+    "tax_fiscal",
+    "foreign_policy",
+    "youth_specific",
+    "narrative"
+  ],
+  "questions": [
+    {
+      "id": "open_ended_why_running",
+      "type": "long_text",
+      "question_type": "long_answer",
+      "text": "Why are you running for office?",
+      "required": true,
+      "max_length": 2000,
+      "min_length": 100,
+      "policy_area": "narrative",
+      "scoring_weight": 0,
+      "helper_text": "This is the only open-ended question. Be direct and specific."
+    },
+
+    {
+      "id": "mc_minimum_wage",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is the proper role of the minimum wage?",
+      "required": true,
+      "policy_area": "economy_labor",
+      "options": [
+        {"value": "a", "label": "Abolish the minimum wage — set by the market", "spectrum": "conservative", "aligned": false},
+        {"value": "b", "label": "Leave it to each state — no federal floor", "spectrum": "moderate_right", "aligned": false},
+        {"value": "c", "label": "Keep the federal minimum at $7.25 and adjust occasionally", "spectrum": "moderate", "aligned": false},
+        {"value": "d", "label": "Raise the federal minimum to $15 and index to inflation", "spectrum": "progressive", "aligned": true},
+        {"value": "e", "label": "Raise to $20+ as a true living wage, index to inflation, with regional adjustments", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["d", "e"],
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_right_to_organize",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support expanding collective bargaining protections to all workers, including gig, farm, and domestic workers.",
+      "required": true,
+      "policy_area": "economy_labor",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_right_to_work",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I would vote against any 'right to work' legislation in Missouri.",
+      "required": true,
+      "policy_area": "economy_labor",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_paid_family_leave",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support a Missouri mandate requiring paid family and medical leave for all workers.",
+      "required": true,
+      "policy_area": "economy_labor",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "mc_card_check",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is your position on the PRO Act and card-check union recognition?",
+      "required": true,
+      "policy_area": "economy_labor",
+      "options": [
+        {"value": "a", "label": "Oppose — secret ballot only", "spectrum": "conservative", "aligned": false},
+        {"value": "b", "label": "Neutral — it's a federal matter, no strong view", "spectrum": "moderate", "aligned": false},
+        {"value": "c", "label": "Support card-check as one option when workers choose it", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "Full support for the PRO Act including card-check and banning captive-audience meetings", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["c", "d"],
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_gig_worker_classification",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support classifying gig workers (rideshare, delivery) as employees with full labor protections.",
+      "required": true,
+      "policy_area": "economy_labor",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+
+    {
+      "id": "mc_healthcare_system",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is the best path to universal healthcare in the United States?",
+      "required": true,
+      "policy_area": "healthcare",
+      "options": [
+        {"value": "a", "label": "The current mixed-market ACA system is sufficient", "spectrum": "moderate_right", "aligned": false},
+        {"value": "b", "label": "Expand ACA subsidies and add a public option as an alternative to private insurance", "spectrum": "moderate", "aligned": true},
+        {"value": "c", "label": "Medicare for All — a single-payer national system", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "Medicare for All plus expansion to long-term care, dental, vision, and mental health", "spectrum": "progressive_plus", "aligned": true},
+        {"value": "e", "label": "Repeal the ACA and return to a purely market-based system", "spectrum": "conservative", "aligned": false}
+      ],
+      "moyd_aligned_answer": ["b", "c", "d"],
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_healthcare_human_right",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "Healthcare access — including mental health and substance use treatment — is a human right that government must guarantee.",
+      "required": true,
+      "policy_area": "healthcare",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_medicaid_expansion_defense",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I will vote to defend and protect Missouri's voter-approved Medicaid expansion from any funding cuts or eligibility rollbacks.",
+      "required": true,
+      "policy_area": "healthcare",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_mental_health_parity",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "Missouri should fund mental health and substance use treatment at parity with physical health and expand community-based crisis response teams.",
+      "required": true,
+      "policy_area": "healthcare",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "mc_drug_pricing",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is your position on prescription drug pricing?",
+      "required": true,
+      "policy_area": "healthcare",
+      "options": [
+        {"value": "a", "label": "Let the market set prices", "spectrum": "conservative", "aligned": false},
+        {"value": "b", "label": "Modest Medicare negotiation for a few drugs (current law)", "spectrum": "moderate", "aligned": false},
+        {"value": "c", "label": "Expand Medicare negotiation to all drugs and cap out-of-pocket costs", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "Direct federal price regulation plus public manufacturing of generics", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["c", "d"],
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+
+    {
+      "id": "tf_public_school_funding",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I will vote to fully fund Missouri's public K-12 foundation formula before approving any new tax cuts.",
+      "required": true,
+      "policy_area": "education",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_oppose_vouchers",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I oppose school voucher programs, tax-credit scholarships, and any other mechanism that diverts public funds to private schools.",
+      "required": true,
+      "policy_area": "education",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "mc_higher_education",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is the right approach to college affordability?",
+      "required": true,
+      "policy_area": "education",
+      "options": [
+        {"value": "a", "label": "Status quo — loans and means-tested Pell grants", "spectrum": "moderate_right", "aligned": false},
+        {"value": "b", "label": "Expand Pell and refinance existing debt at low interest", "spectrum": "moderate", "aligned": false},
+        {"value": "c", "label": "Tuition-free community college plus broad federal student debt cancellation", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "Tuition-free public college (2-year and 4-year) plus full student debt cancellation", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["c", "d"],
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_universal_prek",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support universal, publicly funded pre-K for every Missouri four-year-old.",
+      "required": true,
+      "policy_area": "education",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_teacher_pay_floor",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support raising Missouri's minimum teacher salary to at least $50,000 and funding it with state (not local) dollars.",
+      "required": true,
+      "policy_area": "education",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_library_protection",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I oppose defunding public libraries and oppose any legislation that criminalizes librarians for the books on their shelves.",
+      "required": true,
+      "policy_area": "education",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_inclusive_curriculum",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "Public school curriculum should accurately teach the history of slavery, racism, and LGBTQ+ Americans — not whitewash it.",
+      "required": true,
+      "policy_area": "education",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+
+    {
+      "id": "mc_climate_pace",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "How fast should Missouri transition to 100% clean electricity?",
+      "required": true,
+      "policy_area": "environment_climate",
+      "options": [
+        {"value": "a", "label": "Let the market decide — no mandated timeline", "spectrum": "conservative", "aligned": false},
+        {"value": "b", "label": "100% clean by 2050", "spectrum": "moderate", "aligned": false},
+        {"value": "c", "label": "100% clean by 2040 with a binding state RPS", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "100% clean by 2035 with a binding RPS and union-built public investment", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["c", "d"],
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_polluter_accountability",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support strengthening Missouri DNR enforcement and holding corporate polluters financially liable for environmental damage.",
+      "required": true,
+      "policy_area": "environment_climate",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_environmental_justice",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "Environmental regulations must prioritize communities — especially Black, Brown, and low-income communities — that have been disproportionately harmed by pollution.",
+      "required": true,
+      "policy_area": "environment_climate",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_transit_investment",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "Missouri should significantly expand public transit investment in urban and rural areas, including inter-city passenger rail.",
+      "required": true,
+      "policy_area": "environment_climate",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "mc_utility_reform",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is your view of Missouri's investor-owned utilities (Ameren, Evergy, Spire)?",
+      "required": true,
+      "policy_area": "environment_climate",
+      "options": [
+        {"value": "a", "label": "They work well — keep the current PSC framework", "spectrum": "moderate_right", "aligned": false},
+        {"value": "b", "label": "Modest reform — more consumer advocates on the PSC", "spectrum": "moderate", "aligned": false},
+        {"value": "c", "label": "Major reform — ban shareholder-funded political spending, block rate hikes on working families, accelerate clean-energy mandates", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "Move toward public / municipal / cooperative utility ownership", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["c", "d"],
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+
+    {
+      "id": "tf_monda",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support the Missouri Nondiscrimination Act, adding sexual orientation and gender identity to state civil rights law in employment, housing, and public accommodations.",
+      "required": true,
+      "policy_area": "civil_rights_lgbtq",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_repeal_gender_affirming_ban",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support repealing Missouri's ban on gender-affirming care for minors.",
+      "required": true,
+      "policy_area": "civil_rights_lgbtq",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_trans_athletes",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I oppose state laws that ban transgender students from playing on the school sports teams that match their gender identity.",
+      "required": true,
+      "policy_area": "civil_rights_lgbtq",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_disability_rights",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support fully funding home- and community-based services for Missourians with disabilities, ending the Medicaid HCBS waitlist.",
+      "required": true,
+      "policy_area": "civil_rights_lgbtq",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+
+    {
+      "id": "mc_abortion_access",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is your position on abortion access in Missouri after the passage of Amendment 3 (2024)?",
+      "required": true,
+      "policy_area": "reproductive_rights",
+      "options": [
+        {"value": "a", "label": "Ban abortion with narrow exceptions", "spectrum": "conservative", "aligned": false},
+        {"value": "b", "label": "Permit abortion with significant restrictions (waiting periods, trimester bans)", "spectrum": "moderate_right", "aligned": false},
+        {"value": "c", "label": "Enforce Amendment 3 as written and remove pre-Dobbs restrictions (TRAP laws)", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "Enforce Amendment 3 and proactively expand — state Medicaid coverage for abortion, provider protections, and travel funds for out-of-state patients", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["c", "d"],
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_contraception_right",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support a statutory right to contraception in Missouri, including IUDs, Plan B, and hormonal birth control.",
+      "required": true,
+      "policy_area": "reproductive_rights",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_ivf_fertility",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support a statutory right to IVF and other fertility treatments, and I oppose fetal-personhood legislation that would restrict them.",
+      "required": true,
+      "policy_area": "reproductive_rights",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_no_hyde",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support repealing the Hyde Amendment so federal Medicaid covers abortion care.",
+      "required": true,
+      "policy_area": "reproductive_rights",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+
+    {
+      "id": "tf_end_cash_bail",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support abolishing cash bail for non-violent offenses in Missouri.",
+      "required": true,
+      "policy_area": "criminal_justice",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "mc_mandatory_minimums",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is your view of mandatory minimum sentences?",
+      "required": true,
+      "policy_area": "criminal_justice",
+      "options": [
+        {"value": "a", "label": "Expand them — tougher sentences deter crime", "spectrum": "conservative", "aligned": false},
+        {"value": "b", "label": "Keep the current framework", "spectrum": "moderate", "aligned": false},
+        {"value": "c", "label": "Reduce mandatory minimums and restore judicial discretion", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "Eliminate most mandatory minimums entirely and shift to treatment, diversion, and restorative justice", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["c", "d"],
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_marijuana_expungement",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support automatic expungement of all non-violent cannabis convictions in Missouri.",
+      "required": true,
+      "policy_area": "criminal_justice",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_police_accountability",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support independent civilian oversight boards with subpoena power for every Missouri municipal and county police department.",
+      "required": true,
+      "policy_area": "criminal_justice",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_reentry_investment",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "Missouri should substantially increase funding for re-entry services (housing, job placement, mental health) for people leaving incarceration.",
+      "required": true,
+      "policy_area": "criminal_justice",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "mc_death_penalty",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is your position on the death penalty in Missouri?",
+      "required": true,
+      "policy_area": "criminal_justice",
+      "options": [
+        {"value": "a", "label": "Keep and expand the death penalty", "spectrum": "conservative", "aligned": false},
+        {"value": "b", "label": "Keep the death penalty for the worst offenses", "spectrum": "moderate_right", "aligned": false},
+        {"value": "c", "label": "Impose a moratorium while the system is studied and reformed", "spectrum": "moderate", "aligned": false},
+        {"value": "d", "label": "Abolish the death penalty in Missouri", "spectrum": "progressive", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["d"],
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+
+    {
+      "id": "tf_auto_voter_reg",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support automatic voter registration at DMV and other state agencies, plus same-day voter registration.",
+      "required": true,
+      "policy_area": "democracy_voting",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_no_excuse_early_voting",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support no-excuse early voting and no-excuse absentee voting for every Missouri election.",
+      "required": true,
+      "policy_area": "democracy_voting",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_restore_felon_voting",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support restoring voting rights to formerly incarcerated Missourians upon release — not after probation or parole.",
+      "required": true,
+      "policy_area": "democracy_voting",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "mc_redistricting",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "Who should draw Missouri's legislative and congressional districts?",
+      "required": true,
+      "policy_area": "democracy_voting",
+      "options": [
+        {"value": "a", "label": "The party that controls the legislature", "spectrum": "conservative", "aligned": false},
+        {"value": "b", "label": "The legislature, with judicial review", "spectrum": "moderate", "aligned": false},
+        {"value": "c", "label": "A nonpartisan state demographer or advisory commission", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "An independent citizens' redistricting commission with binding authority — end gerrymandering", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["c", "d"],
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "mc_campaign_finance",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is the best approach to campaign finance?",
+      "required": true,
+      "policy_area": "democracy_voting",
+      "options": [
+        {"value": "a", "label": "Status quo — money is speech", "spectrum": "conservative", "aligned": false},
+        {"value": "b", "label": "Stronger disclosure requirements only", "spectrum": "moderate", "aligned": false},
+        {"value": "c", "label": "Overturn Citizens United via constitutional amendment and cap independent expenditures", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "Overturn Citizens United AND establish small-donor public financing (democracy dollars / matched donations) for Missouri elections", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["c", "d"],
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_dc_pr_statehood",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support statehood for Washington, D.C. and (by referendum) for Puerto Rico.",
+      "required": true,
+      "policy_area": "democracy_voting",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 2,
+      "spectrum_contribution": "progressive"
+    },
+
+    {
+      "id": "mc_housing_supply",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is the right approach to Missouri's housing affordability crisis?",
+      "required": true,
+      "policy_area": "housing",
+      "options": [
+        {"value": "a", "label": "Reduce regulation and let developers build", "spectrum": "moderate_right", "aligned": false},
+        {"value": "b", "label": "Targeted tax credits for affordable developers", "spectrum": "moderate", "aligned": false},
+        {"value": "c", "label": "Mix of zoning reform, tenant protections, and expanded public / social housing investment", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "Full social-housing program, rent stabilization, and right-to-counsel in eviction court", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["c", "d"],
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_right_to_counsel",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support a right to legal counsel for tenants facing eviction, funded by the state.",
+      "required": true,
+      "policy_area": "housing",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_source_of_income_discrimination",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support banning source-of-income discrimination statewide so landlords cannot refuse Section 8 voucher holders.",
+      "required": true,
+      "policy_area": "housing",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_repeal_rent_control_preemption",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support repealing Missouri's state preemption that blocks local governments from enacting rent stabilization.",
+      "required": true,
+      "policy_area": "housing",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+
+    {
+      "id": "mc_immigration_reform",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is the right federal immigration framework?",
+      "required": true,
+      "policy_area": "immigration",
+      "options": [
+        {"value": "a", "label": "Mass deportation of all undocumented immigrants", "spectrum": "conservative", "aligned": false},
+        {"value": "b", "label": "Border security first, then limited legalization", "spectrum": "moderate_right", "aligned": false},
+        {"value": "c", "label": "Comprehensive reform — pathway to citizenship for the undocumented, permanent DACA protections, reformed asylum", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "Comprehensive reform plus abolishing ICE in its current form and demilitarizing immigration enforcement", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["c", "d"],
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_no_local_ice_cooperation",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "Missouri law should NOT force local police to cooperate with ICE civil detainers or share non-criminal immigration data.",
+      "required": true,
+      "policy_area": "immigration",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_instate_tuition_dreamers",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "Undocumented students who grew up in Missouri should qualify for in-state tuition at Missouri public universities.",
+      "required": true,
+      "policy_area": "immigration",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+
+    {
+      "id": "tf_universal_background_checks",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support universal background checks on all firearm sales and transfers in Missouri.",
+      "required": true,
+      "policy_area": "gun_policy",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_red_flag_law",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support an extreme risk protection order ('red-flag') law in Missouri, with due-process protections.",
+      "required": true,
+      "policy_area": "gun_policy",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_repeal_sapa",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support repealing Missouri's Second Amendment Preservation Act (SAPA), which interferes with federal gun-law enforcement.",
+      "required": true,
+      "policy_area": "gun_policy",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "mc_assault_weapons",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is your position on semi-automatic rifles with large-capacity magazines?",
+      "required": true,
+      "policy_area": "gun_policy",
+      "options": [
+        {"value": "a", "label": "No restrictions", "spectrum": "conservative", "aligned": false},
+        {"value": "b", "label": "Age-21 minimum and waiting period only", "spectrum": "moderate", "aligned": false},
+        {"value": "c", "label": "Ban large-capacity magazines (>10 rounds) and require additional licensing", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "Full federal assault weapons ban plus magazine cap", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["c", "d"],
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+
+    {
+      "id": "mc_missouri_income_tax",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What should Missouri do with its flat state income tax?",
+      "required": true,
+      "policy_area": "tax_fiscal",
+      "options": [
+        {"value": "a", "label": "Eliminate the income tax entirely (shift to sales tax)", "spectrum": "conservative", "aligned": false},
+        {"value": "b", "label": "Continue cutting the flat rate", "spectrum": "moderate_right", "aligned": false},
+        {"value": "c", "label": "Pause further cuts and protect current revenue", "spectrum": "moderate", "aligned": false},
+        {"value": "d", "label": "Replace the flat tax with a progressive income tax that asks more of high earners", "spectrum": "progressive", "aligned": true},
+        {"value": "e", "label": "Progressive income tax plus a wealth/capital-gains surcharge on top earners", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["d", "e"],
+      "weight": 5,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_abolish_grocery_tax",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support fully eliminating Missouri's sales tax on groceries and essential medicines.",
+      "required": true,
+      "policy_area": "tax_fiscal",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_land_value_tax",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support exploring land-value taxation as a tool for equitable development and reducing speculative land-holding.",
+      "required": true,
+      "policy_area": "tax_fiscal",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 2,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_close_corporate_loopholes",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "Missouri should close corporate tax loopholes and end tax incentive deals that do not produce documented, clawback-enforced job growth.",
+      "required": true,
+      "policy_area": "tax_fiscal",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+
+    {
+      "id": "mc_israel_palestine",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is your position on the Israeli-Palestinian conflict?",
+      "required": true,
+      "policy_area": "foreign_policy",
+      "options": [
+        {"value": "a", "label": "Unconditional support for the current Israeli government", "spectrum": "conservative", "aligned": false},
+        {"value": "b", "label": "Continued aid with minimal conditions", "spectrum": "moderate", "aligned": false},
+        {"value": "c", "label": "Support a two-state solution that recognizes the rights and security of Israelis and Palestinians, with humanitarian conditions on military aid", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "Two-state solution plus an immediate permanent ceasefire, full humanitarian access, and ending offensive military aid", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["c", "d"],
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_reduce_military_budget",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support reducing the federal military budget and redirecting savings toward domestic priorities like healthcare and education.",
+      "required": true,
+      "policy_area": "foreign_policy",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 2,
+      "spectrum_contribution": "progressive"
+    },
+
+    {
+      "id": "tf_child_care_affordability",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "Missouri should subsidize child care so no working family spends more than 7% of income on it.",
+      "required": true,
+      "policy_area": "youth_specific",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 4,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_student_loan_cancellation",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "I support federal student loan cancellation of at least $10,000 per borrower with additional relief for Pell recipients.",
+      "required": true,
+      "policy_area": "youth_specific",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "tf_youth_mental_health",
+      "type": "true_false",
+      "question_type": "radio",
+      "text": "Every Missouri public school should have a full-time, on-staff mental health professional funded by the state.",
+      "required": true,
+      "policy_area": "youth_specific",
+      "options": [
+        {"value": "true", "label": "True", "aligned": true, "spectrum": "progressive"},
+        {"value": "false", "label": "False", "aligned": false, "spectrum": "conservative"}
+      ],
+      "moyd_aligned_answer": true,
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    },
+    {
+      "id": "mc_youth_political_power",
+      "type": "multiple_choice",
+      "question_type": "radio",
+      "text": "What is the best way to expand young people's voice in Missouri politics?",
+      "required": true,
+      "policy_area": "youth_specific",
+      "options": [
+        {"value": "a", "label": "Nothing — young people vote when they're ready", "spectrum": "conservative", "aligned": false},
+        {"value": "b", "label": "More civic-education funding in schools", "spectrum": "moderate", "aligned": false},
+        {"value": "c", "label": "Automatic voter registration at age 18, pre-registration at 16, civics requirement, and expanded vote-by-mail for college students", "spectrum": "progressive", "aligned": true},
+        {"value": "d", "label": "All of the above plus lowering the voting age to 16 for municipal elections and funding youth-led organizing", "spectrum": "progressive_plus", "aligned": true}
+      ],
+      "moyd_aligned_answer": ["c", "d"],
+      "weight": 3,
+      "spectrum_contribution": "progressive"
+    }
+  ]
+}

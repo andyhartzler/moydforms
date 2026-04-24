@@ -27,9 +27,14 @@ import {
   Autocomplete,
   PlacesAutocomplete,
 } from '@/components/form-fields';
+import TrueFalseToggle from '@/components/form-fields/TrueFalseToggle';
+import PromptCardTextArea from '@/components/form-fields/PromptCardTextArea';
 import { Check, Loader2, Send, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AnimatedProgressBar, PageDots, StepCounter } from '@/components/motion/AnimatedProgress';
 import { pageVariants, pageTransition, staggerContainer, fieldEntrance } from '@/lib/motion';
+import { useFormAutosave } from '@/hooks/useFormAutosave';
+import { RestoreDraftBanner } from './RestoreDraftBanner';
+import { PolicyAreaBreadcrumb, POLICY_AREA_LABELS } from './PolicyAreaBreadcrumb';
 
 interface CustomFieldsStageProps {
   schema: FormSchema;
@@ -45,6 +50,13 @@ interface CustomFieldsStageProps {
   extraFormData?: Record<string, unknown>;
   /** Show the Young Dem vs Partner track reveal banner once DOB is answered. */
   showTrackBanner?: boolean;
+  /**
+   * Opt-in localStorage autosave. When set, drafts are persisted under
+   * `moyd-form-draft:<autosaveKey>` and the user is offered a "Pick up where
+   * you left off?" banner on next load. Useful for long/surveyed forms like
+   * the endorsement questionnaire (65+ questions).
+   */
+  autosaveKey?: string | null;
 }
 
 // Patterns to detect identity fields by ID or label
@@ -94,8 +106,14 @@ interface QuestionFormat {
   id: string;
   text: string;
   question_type: string;
+  /** v2 schema exposes a coarse `type` ("true_false", "long_text", ...) next
+   *  to the narrower HTML widget hint `question_type`. We preserve it so
+   *  the renderer can use it to pick specialty widgets (TrueFalseToggle,
+   *  PromptCardTextArea, ...) without regressing generic radio/textarea
+   *  behavior. */
+  type?: string;
   required?: boolean;
-  options?: Array<{ id?: string; value: string; label: string }>;
+  options?: Array<{ id?: string; value: string; label: string; aligned?: boolean; spectrum?: string }>;
   placeholder?: string;
   helper_text?: string;
   description?: string;
@@ -103,6 +121,15 @@ interface QuestionFormat {
   condition?: Condition;
   page?: number;
   file_config?: Record<string, unknown>;
+  /** v2 endorsement schema metadata — carried into the field config so the
+   *  renderer can surface policy-area breadcrumbs and tune styling based on
+   *  scoring weight, but NEVER sent back to the submit endpoint as anything
+   *  other than the answer value itself (see finalData construction). */
+  policy_area?: string;
+  weight?: number;
+  moyd_aligned_answer?: unknown;
+  max_length?: number;
+  min_length?: number;
 }
 
 // Extended field config to include condition and section header info
@@ -111,6 +138,11 @@ interface ExtendedFieldConfig extends FormFieldConfig {
   sectionDescription?: string;
   condition?: Condition;
   originalQuestionType?: string;
+  /** v2 endorsement schema metadata — see QuestionFormat comment. */
+  policyArea?: string;
+  weight?: number;
+  isTrueFalse?: boolean;
+  isLongFormNarrative?: boolean;
 }
 
 // Extended schema type to handle both formats
@@ -160,27 +192,46 @@ function normalizeSchemaToFields(schema: ExtendedSchema): ExtendedFieldConfig[] 
   if (schema.questions && schema.questions.length > 0) {
     return schema.questions
       .filter((q) => q.question_type !== 'hidden')
-      .map((q): ExtendedFieldConfig => ({
-        id: q.id,
-        type: QUESTION_TYPE_MAP[q.question_type] || 'text',
-        label: q.text,
-        placeholder: q.placeholder,
-        help: q.helper_text,
-        required: q.required ?? false,
-        options: q.options?.map((opt) => ({
-          value: opt.value,
-          label: opt.label,
-        })),
-        validation: q.validation as FormFieldConfig['validation'],
-        pageNumber: q.page,
-        allowedExtensions: q.file_config?.accept as string[] | undefined,
-        maxFileSizeMB: q.file_config?.max_size_mb as number | undefined,
-        // Extended properties
-        isSectionHeader: q.question_type === 'section_header',
-        sectionDescription: q.description,
-        condition: q.condition,
-        originalQuestionType: q.question_type,
-      }));
+      .map((q): ExtendedFieldConfig => {
+        const isTrueFalse = q.type === 'true_false';
+        const isLongFormNarrative =
+          q.type === 'long_text' ||
+          q.question_type === 'long_answer' ||
+          q.question_type === 'textarea';
+        return {
+          id: q.id,
+          type: QUESTION_TYPE_MAP[q.question_type] || 'text',
+          label: q.text,
+          placeholder: q.placeholder,
+          help: q.helper_text,
+          required: q.required ?? false,
+          options: q.options?.map((opt) => ({
+            value: opt.value,
+            label: opt.label,
+          })),
+          validation: {
+            ...(q.validation as FormFieldConfig['validation'] ?? {}),
+            // v2 schema surfaces min_length/max_length at the top level on
+            // narrative prompts — promote them into validation so existing
+            // validators light up without a separate code path.
+            ...(q.min_length != null ? { minLength: q.min_length } : {}),
+            ...(q.max_length != null ? { maxLength: q.max_length } : {}),
+          },
+          maxLength: q.max_length ?? undefined,
+          pageNumber: q.page,
+          allowedExtensions: q.file_config?.accept as string[] | undefined,
+          maxFileSizeMB: q.file_config?.max_size_mb as number | undefined,
+          // Extended properties
+          isSectionHeader: q.question_type === 'section_header',
+          sectionDescription: q.description,
+          condition: q.condition,
+          originalQuestionType: q.question_type,
+          policyArea: q.policy_area,
+          weight: q.weight,
+          isTrueFalse,
+          isLongFormNarrative,
+        };
+      });
   }
 
   return [];
@@ -264,11 +315,54 @@ export function CustomFieldsStage({
   onFileUpload,
   extraFormData,
   showTrackBanner,
+  autosaveKey,
 }: CustomFieldsStageProps) {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [currentPage, setCurrentPage] = useState<number>(1);
   const fieldFocusTime = useRef<Record<string, number>>({});
+  const [showRestoreBanner, setShowRestoreBanner] = useState<boolean>(false);
+
+  // Opt-in localStorage draft — only when the caller passes `autosaveKey`.
+  // The hook is a no-op when the key is falsy.
+  const {
+    available: savedDraft,
+    clearDraft,
+    acknowledge: ackDraft,
+  } = useFormAutosave<{ formData: Record<string, unknown>; page: number }>({
+    storageKey: autosaveKey ?? null,
+    values: { formData, page: currentPage },
+    page: currentPage,
+    enabled: !!autosaveKey,
+  });
+
+  // Surface the restore banner once on first hydration — do not surface again
+  // after the user has dismissed or restored.
+  useEffect(() => {
+    if (savedDraft && !showRestoreBanner) {
+      setShowRestoreBanner(true);
+    }
+  }, [savedDraft]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleRestoreDraft = useCallback(() => {
+    if (!savedDraft) return;
+    const draftValues = (savedDraft.values as { formData: Record<string, unknown>; page: number } | undefined)?.formData;
+    const draftPage = (savedDraft.values as { formData: Record<string, unknown>; page: number } | undefined)?.page;
+    if (draftValues && typeof draftValues === 'object') {
+      setFormData(draftValues);
+      Object.entries(draftValues).forEach(([k, v]) => onFieldChange(k, v));
+    }
+    if (typeof draftPage === 'number') {
+      setCurrentPage(draftPage);
+    }
+    setShowRestoreBanner(false);
+    ackDraft();
+  }, [savedDraft, onFieldChange, ackDraft]);
+
+  const handleDiscardDraft = useCallback(() => {
+    clearDraft();
+    setShowRestoreBanner(false);
+  }, [clearDraft]);
 
   // Derive `dob_is_young_dem` synthetic flag from date_of_birth for schemas that
   // use age-gated branching (e.g. endorsement-questionnaire-2026 pages 10 vs 11).
@@ -317,6 +411,26 @@ export function CustomFieldsStage({
 
   const totalPages = pageNumbers.length || 1;
   const isMultiPage = totalPages > 1;
+
+  // Derive a policy-area label for the current page. We take the most common
+  // policy_area among the page's scored questions — section headers and
+  // narrative prompts don't count. This is the label rendered in the
+  // breadcrumb above the question set ("Step 3 of 9 · Healthcare").
+  const currentPagePolicyLabel = useMemo<string | null>(() => {
+    if (!isMultiPage) return null;
+    const targetPage = pageNumbers[currentPage - 1] || pageNumbers[0];
+    const areaCounts: Record<string, number> = {};
+    customFields.forEach((f) => {
+      if (f.pageNumber !== targetPage) return;
+      if (f.isSectionHeader) return;
+      if (!f.policyArea || f.policyArea === 'narrative') return;
+      areaCounts[f.policyArea] = (areaCounts[f.policyArea] || 0) + 1;
+    });
+    const sorted = Object.entries(areaCounts).sort((a, b) => b[1] - a[1]);
+    if (sorted.length === 0) return null;
+    const key = sorted[0][0];
+    return POLICY_AREA_LABELS[key] || null;
+  }, [customFields, pageNumbers, currentPage, isMultiPage]);
 
   // Weighted progress — instead of N/total-pages (each page worth the same),
   // weight each page by how many answerable fields live on it. Makes the
@@ -548,32 +662,47 @@ export function CustomFieldsStage({
       }
     });
 
-    await onSubmit(finalData, fileUploads);
+    const ok = await onSubmit(finalData, fileUploads);
+    // Only clear the draft on a confirmed successful submit — if the caller
+    // returns false we want the user's answers to survive a retry.
+    if (ok !== false) {
+      clearDraft();
+    }
   };
 
   // Render a section header with animation. On the endorsement questionnaire
-  // these are the page intros — bigger, bolder, with a gold accent bar — so
-  // they read like a real chapter break instead of a sub-heading.
+  // these are the page intros — bigger, bolder, with a gold accent bar and
+  // (when available) a serif display face — so they read like a real chapter
+  // break. The eyebrow shows the policy area when a page is policy-tagged.
   const renderSectionHeader = (field: ExtendedFieldConfig) => {
+    const eyebrowLabel =
+      field.policyArea && POLICY_AREA_LABELS[field.policyArea]
+        ? POLICY_AREA_LABELS[field.policyArea]
+        : null;
     return (
-      <div key={field.id} className="mb-8 pb-5 border-b border-gray-100 relative">
+      <div key={field.id} className="mb-8 pb-6 border-b border-gray-100 relative">
         <div
-          className="absolute top-0 left-0 w-12 h-1 rounded-full"
+          className="absolute top-0 left-0 w-14 h-1 rounded-full"
           style={{
-            background: 'linear-gradient(90deg, #d4a039 0%, #f0c04e 100%)',
+            background: 'linear-gradient(90deg, #FDB813 0%, #f0c04e 100%)',
           }}
         />
+        {eyebrowLabel && (
+          <div className="mt-5 inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-moyd-unity/70">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-moyd-sunrise" />
+            {eyebrowLabel}
+          </div>
+        )}
         <h3
-          className="mt-4 text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight"
-          style={{
-            fontFamily: 'Montserrat, sans-serif',
-            letterSpacing: '-0.03em',
-          }}
+          className={
+            (eyebrowLabel ? 'mt-2 ' : 'mt-5 ') +
+            'font-display text-3xl sm:text-4xl font-semibold text-moyd-unity leading-[1.05] tracking-tight'
+          }
         >
           {field.label}
         </h3>
         {field.sectionDescription && (
-          <p className="mt-2 text-[15px] text-gray-600 leading-relaxed max-w-2xl">
+          <p className="mt-3 text-[15px] text-gray-600 leading-relaxed max-w-2xl">
             {field.sectionDescription}
           </p>
         )}
@@ -632,6 +761,17 @@ export function CustomFieldsStage({
       onFocus: () => handleFieldFocus(field.id),
       onBlur: () => handleFieldBlur(field.id, field.type),
     };
+
+    // Specialty widgets: prompt-card for marquee narrative prompt, pill-pair
+    // for true/false. These are opt-in via schema metadata and short-circuit
+    // the generic type-based dispatch below. The shape of `commonProps` stays
+    // identical, so CustomFieldsStage's consumer contract is unchanged.
+    if (field.isLongFormNarrative && (field.policyArea === 'narrative' || (field.weight ?? 0) === 0)) {
+      return <PromptCardTextArea key={field.id} {...commonProps} />;
+    }
+    if (field.isTrueFalse && field.options && field.options.length === 2) {
+      return <TrueFalseToggle key={field.id} {...commonProps} />;
+    }
 
     switch (normalizedType) {
       case 'text':
@@ -754,8 +894,23 @@ export function CustomFieldsStage({
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
 
+  // Aria-live error summary — screen readers announce when a new validation
+  // error is surfaced on the current page. Polite so it doesn't interrupt.
+  const errorCount = Object.keys(errors).length;
+  const ariaErrorMessage = errorCount
+    ? errorCount === 1
+      ? 'One answer needs attention before you can continue.'
+      : `${errorCount} answers need attention before you can continue.`
+    : '';
+
   return (
-    <form onSubmit={handleSubmit} className="custom-fields-form">
+    <form onSubmit={handleSubmit} className="custom-fields-form" noValidate>
+      {/* Invisible aria-live region — announces validation changes to AT users
+          without disturbing the visual layout. */}
+      <div className="sr-only" aria-live="polite" role="status">
+        {ariaErrorMessage}
+      </div>
+
       {/* Identity summary with stagger animation */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -785,10 +940,23 @@ export function CustomFieldsStage({
         </div>
       </motion.div>
 
+      {/* Restore-draft banner — surfaces only when useFormAutosave finds a
+          prior draft on this device. Dismissed once the user picks Resume
+          or Start fresh. */}
+      {showRestoreBanner && savedDraft && (
+        <RestoreDraftBanner
+          savedAt={savedDraft.savedAt}
+          onRestore={handleRestoreDraft}
+          onDiscard={handleDiscardDraft}
+        />
+      )}
+
       {/* Multi-page progress indicator — step counter + segmented page dots,
-          now with a weighted fill bar underneath. Each page's slice of the
-          bar is proportional to how many real questions live on it, so page
-          5 (14 questions) advances the bar more than page 8 (4 questions). */}
+          now with a weighted fill bar underneath and (for policy-tagged
+          schemas) a policy-area breadcrumb replacing the bare "Step N of M".
+          Each page's slice of the bar is proportional to how many real
+          questions live on it, so page 5 (14 questions) advances the bar
+          more than page 8 (4 questions). */}
       {isMultiPage && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -796,17 +964,32 @@ export function CustomFieldsStage({
           transition={{ delay: 0.1 }}
           className="bg-white rounded-2xl shadow-lg border border-gray-100 px-5 py-4 mb-6"
         >
-          <div className="flex items-center justify-between mb-3">
-            <StepCounter current={currentPage} total={totalPages} />
+          <div className="flex items-center justify-between mb-3 gap-3">
+            {currentPagePolicyLabel ? (
+              <PolicyAreaBreadcrumb
+                areaLabel={currentPagePolicyLabel}
+                current={currentPage}
+                total={totalPages}
+              />
+            ) : (
+              <StepCounter current={currentPage} total={totalPages} />
+            )}
             <PageDots total={totalPages} current={currentPage - 1} />
           </div>
-          <div className="relative h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+          <div
+            className="relative h-1.5 w-full rounded-full bg-gray-100 overflow-hidden"
+            role="progressbar"
+            aria-label="Form completion"
+            aria-valuenow={Math.round(weightedProgressPercent)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
             <motion.div
               className="absolute inset-y-0 left-0 rounded-full"
               style={{
                 background:
-                  'linear-gradient(90deg, #0b4db8 0%, #d4a039 60%, #f0c04e 100%)',
-                boxShadow: '0 0 12px rgba(212,160,57,0.45)',
+                  'linear-gradient(90deg, #273351 0%, #FDB813 55%, #f0c04e 100%)',
+                boxShadow: '0 0 12px rgba(253,184,19,0.45)',
               }}
               initial={false}
               animate={{ width: `${weightedProgressPercent}%` }}

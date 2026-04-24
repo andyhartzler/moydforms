@@ -1,0 +1,199 @@
+{
+  "title": "MOYD 2026 Endorsement Questionnaire",
+  "description": "Missouri Young Democrats candidate endorsement application. Branches into a Young Dem track (under 36) and a Partner Candidate track (36+).",
+  "version": "1.0.0",
+  "questions": [
+    { "id": "section_intro", "page": 1, "question_type": "section_header", "text": "Run with us.", "description": "The Missouri Young Democrats endorse candidates who share our vision for a Missouri that works for everyone under 40. This questionnaire takes about 20 minutes. Your answers stay confidential within our endorsement committee until you're publicly endorsed." },
+
+    { "id": "full_name", "page": 1, "question_type": "short_answer", "text": "Full legal name", "required": true, "placeholder": "Alex Rivera", "validation": { "min_length": 2, "max_length": 120 } },
+    { "id": "preferred_name", "page": 1, "question_type": "short_answer", "text": "Preferred name (if different)", "required": false, "placeholder": "Alex" },
+    { "id": "pronouns", "page": 1, "question_type": "short_answer", "text": "Pronouns", "required": false, "placeholder": "she/her, he/him, they/them" },
+    { "id": "email", "page": 1, "question_type": "email", "text": "Campaign email", "required": true, "placeholder": "alex@alexformissouri.com" },
+    { "id": "phone", "page": 1, "question_type": "phone", "text": "Mobile phone", "required": true, "helper_text": "We'll text you when the endorsement committee has updates." },
+    { "id": "date_of_birth", "page": 1, "question_type": "date_picker", "text": "Date of birth", "required": true, "helper_text": "Young Dems are 35 and under. This determines which track of the questionnaire you'll complete." },
+
+    { "id": "section_residence", "page": 2, "question_type": "section_header", "text": "Where you live and run.", "description": "Basic geography — we match candidates to the chapter that supports their district." },
+    { "id": "home_address", "page": 2, "question_type": "short_answer", "text": "Home street address", "required": true },
+    { "id": "home_city", "page": 2, "question_type": "short_answer", "text": "City", "required": true },
+    { "id": "home_zip", "page": 2, "question_type": "short_answer", "text": "ZIP code", "required": true, "validation": { "pattern": "^\\d{5}(-\\d{4})?$" } },
+    { "id": "home_county", "page": 2, "question_type": "short_answer", "text": "County", "required": true, "placeholder": "Boone, Jackson, St. Louis, etc." },
+    { "id": "years_in_district", "page": 2, "question_type": "number", "text": "Years living in the district you're running in", "required": true, "validation": { "min": 0, "max": 120 } },
+
+    { "id": "section_race", "page": 3, "question_type": "section_header", "text": "The race.", "description": "Tell us about the seat you're seeking and the political landscape." },
+    { "id": "office_sought", "page": 3, "question_type": "dropdown", "text": "Office sought", "required": true, "options": [
+      { "value": "us_house", "label": "U.S. House" },
+      { "value": "us_senate", "label": "U.S. Senate" },
+      { "value": "statewide", "label": "Missouri statewide" },
+      { "value": "state_senate", "label": "Missouri State Senate" },
+      { "value": "state_house", "label": "Missouri State House" },
+      { "value": "county", "label": "County office" },
+      { "value": "municipal", "label": "Municipal / city office" },
+      { "value": "school_board", "label": "School board" },
+      { "value": "judicial", "label": "Judicial" },
+      { "value": "other", "label": "Other" }
+    ] },
+    { "id": "district_number", "page": 3, "question_type": "short_answer", "text": "District or jurisdiction", "required": true, "placeholder": "MO House 46, St. Louis Ward 7, Boone County Commission" },
+    { "id": "election_date", "page": 3, "question_type": "date_picker", "text": "Election date", "required": true },
+    { "id": "primary_date", "page": 3, "question_type": "date_picker", "text": "Primary date (if applicable)", "required": false },
+    { "id": "race_type", "page": 3, "question_type": "radio", "text": "Which best describes this race?", "required": true, "options": [
+      { "value": "open_seat", "label": "Open seat — no incumbent running" },
+      { "value": "primary_incumbent_d", "label": "Primarying a Democratic incumbent" },
+      { "value": "challenger_to_r", "label": "Challenging a Republican incumbent" },
+      { "value": "challenger_to_i", "label": "Challenging an independent or third-party incumbent" },
+      { "value": "reelection", "label": "Seeking re-election (I'm the incumbent)" }
+    ] },
+
+    { "id": "incumbent_name", "page": 3, "question_type": "short_answer", "text": "Name of the Democratic incumbent you're challenging", "required": true, "condition": { "field": "race_type", "value": "primary_incumbent_d" } },
+    { "id": "primary_rationale", "page": 3, "question_type": "long_answer", "text": "Why primary them? Make the case.", "required": true, "helper_text": "Specific policy, voting-record, or representation gaps. MOYD does not endorse primary challenges lightly — be direct.", "validation": { "min_length": 150, "max_length": 2000 }, "condition": { "field": "race_type", "value": "primary_incumbent_d" } },
+
+    { "id": "opponent_r_name", "page": 3, "question_type": "short_answer", "text": "Name of the Republican incumbent", "required": true, "condition": { "field": "race_type", "value": "challenger_to_r" } },
+    { "id": "r_district_pvi", "page": 3, "question_type": "short_answer", "text": "District partisan lean (Cook PVI or 2024 presidential margin, if known)", "required": false, "condition": { "field": "race_type", "value": "challenger_to_r" } },
+
+    { "id": "section_identity", "page": 4, "question_type": "section_header", "text": "Your political identity.", "description": "How you describe your politics — and how you got here." },
+    { "id": "party_history", "page": 4, "question_type": "radio", "text": "Have you ever run or registered as anything other than a Democrat?", "required": true, "options": [
+      { "value": "always_d", "label": "Always a Democrat" },
+      { "value": "former_i", "label": "Previously unaffiliated / independent" },
+      { "value": "former_gp", "label": "Previously Green Party" },
+      { "value": "former_r", "label": "Previously Republican" },
+      { "value": "other", "label": "Other — explain below" }
+    ] },
+    { "id": "party_history_detail", "page": 4, "question_type": "long_answer", "text": "Please explain your party history.", "required": true, "validation": { "min_length": 30, "max_length": 1200 }, "condition": { "field": "party_history", "value": "other" } },
+    { "id": "party_history_detail_r", "page": 4, "question_type": "long_answer", "text": "When and why did you become a Democrat?", "required": true, "validation": { "min_length": 30, "max_length": 1200 }, "condition": { "field": "party_history", "value": "former_r" } },
+    { "id": "ideology", "page": 4, "question_type": "radio", "text": "Which best describes your political ideology?", "required": true, "options": [
+      { "value": "progressive", "label": "Progressive" },
+      { "value": "democratic_socialist", "label": "Democratic socialist" },
+      { "value": "liberal", "label": "Liberal" },
+      { "value": "moderate", "label": "Moderate / pragmatic" },
+      { "value": "populist", "label": "Economic populist" },
+      { "value": "other", "label": "Other" }
+    ] },
+    { "id": "voted_2024_pres", "page": 4, "question_type": "radio", "text": "Who did you vote for for President in 2024?", "required": true, "options": [
+      { "value": "harris", "label": "Kamala Harris" },
+      { "value": "trump", "label": "Donald Trump" },
+      { "value": "third", "label": "Third party" },
+      { "value": "didnt_vote", "label": "Did not vote" },
+      { "value": "prefer_not", "label": "Prefer not to say" }
+    ] },
+    { "id": "democratic_primary_history", "page": 4, "question_type": "long_answer", "text": "List Democratic primaries you've voted in (last 6 years).", "required": false, "helper_text": "August primaries count. Municipal nonpartisan skip." },
+
+    { "id": "section_platform", "page": 5, "question_type": "section_header", "text": "Where you stand.", "description": "These are the positions our endorsement committee cares most about. Yes/no is fine but please explain any 'it's complicated' answers in the follow-up." },
+
+    { "id": "pos_medicare_for_all", "page": 5, "question_type": "radio", "text": "Do you support Medicare for All (a single-payer universal healthcare system)?", "required": true, "options": [
+      { "value": "yes", "label": "Yes" }, { "value": "public_option", "label": "Prefer a public option as a path to it" }, { "value": "no", "label": "No" }, { "value": "unsure", "label": "Still forming a position" }
+    ] },
+    { "id": "pos_reproductive_rights", "page": 5, "question_type": "radio", "text": "Do you support codifying abortion access in Missouri law without restrictions beyond Roe?", "required": true, "options": [
+      { "value": "yes_full", "label": "Yes — full codification" }, { "value": "yes_with_roe_framework", "label": "Yes — within the Roe framework" }, { "value": "partial", "label": "Partial / with some restrictions" }, { "value": "no", "label": "No" }
+    ] },
+    { "id": "pos_lgbtq", "page": 5, "question_type": "radio", "text": "Do you support the Missouri Nondiscrimination Act (protects LGBTQ+ Missourians in housing, employment, public accommodations)?", "required": true, "options": [
+      { "value": "yes", "label": "Yes" }, { "value": "no", "label": "No" }, { "value": "qualified", "label": "Support with caveats — explain" }
+    ] },
+    { "id": "pos_trans_youth", "page": 5, "question_type": "radio", "text": "Do you support repealing Missouri's ban on gender-affirming care for minors?", "required": true, "options": [
+      { "value": "yes", "label": "Yes" }, { "value": "no", "label": "No" }, { "value": "qualified", "label": "Support with caveats" }
+    ] },
+    { "id": "pos_minimum_wage", "page": 5, "question_type": "radio", "text": "Do you support a $15+ minimum wage with automatic indexing to inflation?", "required": true, "options": [
+      { "value": "yes_20", "label": "Yes — $20+ is my floor" }, { "value": "yes_15", "label": "Yes — $15 indexed" }, { "value": "lower_indexed", "label": "Lower number but indexed" }, { "value": "no", "label": "No" }
+    ] },
+    { "id": "pos_right_to_work", "page": 5, "question_type": "radio", "text": "Would you vote against any 'right to work' legislation?", "required": true, "options": [
+      { "value": "yes", "label": "Yes — I'm pro-union" }, { "value": "no", "label": "No" }, { "value": "qualified", "label": "Depends" }
+    ] },
+    { "id": "pos_climate", "page": 5, "question_type": "radio", "text": "Do you support a Missouri Green New Deal — union-built clean energy, public transit investment, utility reform?", "required": true, "options": [
+      { "value": "yes", "label": "Yes" }, { "value": "partial", "label": "Support most of it" }, { "value": "no", "label": "No" }
+    ] },
+    { "id": "pos_guns", "page": 5, "question_type": "radio", "text": "Do you support universal background checks and red-flag laws in Missouri?", "required": true, "options": [
+      { "value": "yes_both", "label": "Yes — both" }, { "value": "bg_only", "label": "Background checks only" }, { "value": "red_flag_only", "label": "Red-flag only" }, { "value": "no", "label": "No" }
+    ] },
+    { "id": "pos_marijuana", "page": 5, "question_type": "radio", "text": "Do you support expunging all non-violent marijuana convictions in Missouri?", "required": true, "options": [
+      { "value": "yes", "label": "Yes" }, { "value": "no", "label": "No" }, { "value": "qualified", "label": "Partial" }
+    ] },
+    { "id": "pos_voting_rights", "page": 5, "question_type": "radio", "text": "Do you support no-excuse early voting and same-day registration in Missouri?", "required": true, "options": [
+      { "value": "yes_both", "label": "Yes — both" }, { "value": "early_only", "label": "Early voting only" }, { "value": "no", "label": "No" }
+    ] },
+    { "id": "pos_housing", "page": 5, "question_type": "long_answer", "text": "What's your housing policy in 100 words or less?", "required": true, "validation": { "min_length": 50, "max_length": 800 } },
+    { "id": "pos_public_education", "page": 5, "question_type": "radio", "text": "Do you oppose school voucher programs that send public money to private schools?", "required": true, "options": [
+      { "value": "yes", "label": "Yes — oppose vouchers" }, { "value": "no", "label": "No" }, { "value": "qualified", "label": "Depends on structure" }
+    ] },
+    { "id": "pos_top_priority", "page": 5, "question_type": "long_answer", "text": "What's the single policy you'd fight hardest for if elected?", "required": true, "validation": { "min_length": 100, "max_length": 1500 } },
+
+    { "id": "section_campaign", "page": 6, "question_type": "section_header", "text": "Campaign readiness.", "description": "We endorse candidates we believe can win. These answers stay confidential." },
+    { "id": "campaign_committee_name", "page": 6, "question_type": "short_answer", "text": "Official campaign committee name", "required": true },
+    { "id": "mec_id", "page": 6, "question_type": "short_answer", "text": "MEC committee ID (if filed)", "required": false, "placeholder": "C123456" },
+    { "id": "fec_id", "page": 6, "question_type": "short_answer", "text": "FEC candidate ID (if federal)", "required": false },
+    { "id": "treasurer_name", "page": 6, "question_type": "short_answer", "text": "Campaign treasurer name", "required": true },
+    { "id": "campaign_manager", "page": 6, "question_type": "short_answer", "text": "Campaign manager (or 'none yet')", "required": true },
+    { "id": "consultant", "page": 6, "question_type": "short_answer", "text": "Consultant(s) / firms you're working with", "required": false },
+    { "id": "raised_to_date", "page": 6, "question_type": "number", "text": "Total raised to date (USD)", "required": true, "validation": { "min": 0 } },
+    { "id": "cash_on_hand", "page": 6, "question_type": "number", "text": "Cash on hand right now (USD)", "required": true, "validation": { "min": 0 } },
+    { "id": "fundraising_goal", "page": 6, "question_type": "number", "text": "Total fundraising goal for this race (USD)", "required": true, "validation": { "min": 0 } },
+    { "id": "self_funded_amount", "page": 6, "question_type": "number", "text": "How much of your raised total is self-funded?", "required": true, "validation": { "min": 0 } },
+    { "id": "budget_file", "page": 6, "question_type": "file_upload", "text": "Campaign budget / plan (PDF)", "required": false, "file_config": { "accept": [".pdf", ".xlsx", ".csv"], "max_size_mb": 10 } },
+    { "id": "field_plan", "page": 6, "question_type": "long_answer", "text": "Describe your field / voter contact plan.", "required": true, "validation": { "min_length": 100, "max_length": 3000 } },
+    { "id": "van_access", "page": 6, "question_type": "radio", "text": "Do you have VAN (VoteBuilder) access?", "required": true, "options": [
+      { "value": "yes_own", "label": "Yes — my own committee" }, { "value": "yes_shared", "label": "Yes — through the state party" }, { "value": "no", "label": "No" }, { "value": "applying", "label": "Applying" }
+    ] },
+
+    { "id": "section_experience", "page": 7, "question_type": "section_header", "text": "Experience.", "description": "Tell us what you bring to the race." },
+    { "id": "prior_campaigns", "page": 7, "question_type": "long_answer", "text": "Campaigns you've worked on, volunteered for, or run on before this one.", "required": true, "validation": { "min_length": 30, "max_length": 2000 } },
+    { "id": "prior_office", "page": 7, "question_type": "radio", "text": "Have you held elected office before?", "required": true, "options": [
+      { "value": "yes", "label": "Yes" }, { "value": "no", "label": "No" }
+    ] },
+    { "id": "prior_office_detail", "page": 7, "question_type": "long_answer", "text": "What office, when, and what did you accomplish?", "required": true, "condition": { "field": "prior_office", "value": "yes" }, "validation": { "min_length": 30, "max_length": 1500 } },
+    { "id": "occupation", "page": 7, "question_type": "short_answer", "text": "Current occupation", "required": true },
+    { "id": "education", "page": 7, "question_type": "long_answer", "text": "Education (schools + degrees)", "required": false },
+    { "id": "why_running", "page": 7, "question_type": "long_answer", "text": "Why are you running — in your own words?", "required": true, "validation": { "min_length": 200, "max_length": 3000 } },
+
+    { "id": "section_community", "page": 8, "question_type": "section_header", "text": "Community and coalition.", "description": "Who knows you? Who's already with you?" },
+    { "id": "community_involvement", "page": 8, "question_type": "long_answer", "text": "Community organizations you're active in (boards, unions, mutual aid, faith, PTA, etc.).", "required": true, "validation": { "min_length": 30, "max_length": 2500 } },
+    { "id": "endorsements_received", "page": 8, "question_type": "long_answer", "text": "Endorsements you've already received.", "required": false, "validation": { "max_length": 2500 } },
+    { "id": "endorsements_seeking", "page": 8, "question_type": "checkbox_group", "text": "Which other endorsements are you actively pursuing?", "required": false, "options": [
+      { "value": "mo_afl_cio", "label": "MO AFL-CIO" },
+      { "value": "planned_parenthood", "label": "Planned Parenthood Advocates" },
+      { "value": "sierra_club", "label": "Sierra Club MO" },
+      { "value": "mnea", "label": "MNEA / MO-NEA" },
+      { "value": "mo_dem_party", "label": "Missouri Democratic Party" },
+      { "value": "county_party", "label": "County Democratic Committee" },
+      { "value": "emily_list", "label": "EMILYs List" },
+      { "value": "run_for_something", "label": "Run for Something" },
+      { "value": "working_families", "label": "Working Families Party" },
+      { "value": "faith_in_action", "label": "Faith in Action / community coalition" },
+      { "value": "other", "label": "Other" }
+    ] },
+
+    { "id": "section_references", "page": 9, "question_type": "section_header", "text": "References.", "description": "Three people who know your politics well. We may reach out." },
+    { "id": "ref_1_name", "page": 9, "question_type": "short_answer", "text": "Reference 1 — Name", "required": true },
+    { "id": "ref_1_relationship", "page": 9, "question_type": "short_answer", "text": "Reference 1 — Relationship", "required": true },
+    { "id": "ref_1_phone", "page": 9, "question_type": "phone", "text": "Reference 1 — Phone", "required": true },
+    { "id": "ref_1_email", "page": 9, "question_type": "email", "text": "Reference 1 — Email", "required": false },
+    { "id": "ref_2_name", "page": 9, "question_type": "short_answer", "text": "Reference 2 — Name", "required": true },
+    { "id": "ref_2_relationship", "page": 9, "question_type": "short_answer", "text": "Reference 2 — Relationship", "required": true },
+    { "id": "ref_2_phone", "page": 9, "question_type": "phone", "text": "Reference 2 — Phone", "required": true },
+    { "id": "ref_2_email", "page": 9, "question_type": "email", "text": "Reference 2 — Email", "required": false },
+    { "id": "ref_3_name", "page": 9, "question_type": "short_answer", "text": "Reference 3 — Name", "required": true },
+    { "id": "ref_3_relationship", "page": 9, "question_type": "short_answer", "text": "Reference 3 — Relationship", "required": true },
+    { "id": "ref_3_phone", "page": 9, "question_type": "phone", "text": "Reference 3 — Phone", "required": true },
+
+    { "id": "section_young_dem", "page": 10, "question_type": "section_header", "text": "The Young Dem track.", "description": "You're 35 or under — here's what we specifically want to know from our next generation of leaders. Skip this page if the date-of-birth gate doesn't apply.", "condition": { "field": "dob_is_young_dem", "value": "true" } },
+    { "id": "moyd_member", "page": 10, "question_type": "radio", "text": "Are you a current MOYD member?", "required": true, "condition": { "field": "dob_is_young_dem", "value": "true" }, "options": [
+      { "value": "yes", "label": "Yes" }, { "value": "no", "label": "No — but I'll join" }, { "value": "lapsed", "label": "Lapsed — I'll renew" }
+    ] },
+    { "id": "moyd_chapter", "page": 10, "question_type": "short_answer", "text": "Which MOYD chapter (county / HS / college) are you affiliated with?", "required": false, "condition": { "field": "dob_is_young_dem", "value": "true" } },
+    { "id": "young_dem_agenda", "page": 10, "question_type": "long_answer", "text": "Which three issues from the MOYD policy platform are top priorities for you — and how will you advance them in office?", "required": true, "validation": { "min_length": 200, "max_length": 3000 }, "condition": { "field": "dob_is_young_dem", "value": "true" } },
+    { "id": "generational_case", "page": 10, "question_type": "long_answer", "text": "What does young leadership bring to this race that older candidates can't?", "required": true, "validation": { "min_length": 100, "max_length": 2000 }, "condition": { "field": "dob_is_young_dem", "value": "true" } },
+    { "id": "moyd_volunteer_plan", "page": 10, "question_type": "long_answer", "text": "How will you build a young-voter operation in your race (college chapters, HS chapters, county Young Dems)?", "required": true, "validation": { "min_length": 100, "max_length": 2000 }, "condition": { "field": "dob_is_young_dem", "value": "true" } },
+
+    { "id": "section_partner", "page": 11, "question_type": "section_header", "text": "The Partner Candidate track.", "description": "You're over 35 — we still endorse candidates who champion young people. Here's what we need from partners.", "condition": { "field": "dob_is_young_dem", "value": "false" } },
+    { "id": "partner_young_staff", "page": 11, "question_type": "long_answer", "text": "How will you involve young people (18–35) in your campaign — staff, interns, leadership, not just door-knockers?", "required": true, "validation": { "min_length": 100, "max_length": 2000 }, "condition": { "field": "dob_is_young_dem", "value": "false" } },
+    { "id": "partner_youth_agenda", "page": 11, "question_type": "long_answer", "text": "Which three priorities from the MOYD platform will you champion in office?", "required": true, "validation": { "min_length": 150, "max_length": 2500 }, "condition": { "field": "dob_is_young_dem", "value": "false" } },
+    { "id": "partner_succession", "page": 11, "question_type": "long_answer", "text": "How do you plan to build a bench — recruiting and mentoring younger candidates in your district?", "required": true, "validation": { "min_length": 100, "max_length": 2000 }, "condition": { "field": "dob_is_young_dem", "value": "false" } },
+    { "id": "partner_youth_hires", "page": 11, "question_type": "radio", "text": "Will you commit to at least one paid position (staff or senior intern) for a Missouri Young Dem?", "required": true, "condition": { "field": "dob_is_young_dem", "value": "false" }, "options": [
+      { "value": "yes", "label": "Yes" }, { "value": "cannot", "label": "Can't commit financially" }, { "value": "no", "label": "No" }
+    ] },
+
+    { "id": "section_final", "page": 12, "question_type": "section_header", "text": "Last thing.", "description": "Anything we didn't ask?" },
+    { "id": "anything_else", "page": 12, "question_type": "long_answer", "text": "What should MOYD know about you or this race that the form didn't cover?", "required": false, "validation": { "max_length": 3000 } },
+    { "id": "opposition_research", "page": 12, "question_type": "long_answer", "text": "Is there anything in your public or personal record that an opponent will use against you?", "required": true, "helper_text": "We ask every candidate. Honesty here protects your endorsement — surprises don't.", "validation": { "min_length": 10, "max_length": 3000 } },
+    { "id": "headshot", "page": 12, "question_type": "file_upload", "text": "Headshot (for endorsement announcements)", "required": false, "file_config": { "accept": [".jpg", ".jpeg", ".png"], "max_size_mb": 8 } },
+    { "id": "certify", "page": 12, "question_type": "radio", "text": "I certify that the information above is truthful and complete.", "required": true, "options": [
+      { "value": "yes", "label": "Yes — I certify" }
+    ] }
+  ]
+}
