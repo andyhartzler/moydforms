@@ -20,6 +20,10 @@ export { default as RangeSlider } from './RangeSlider';
 export { default as NumberStepper } from './NumberStepper';
 export { default as StarRating } from './StarRating';
 
+// Smart-form prefill confirmer (used by endorsement-questionnaire-2026)
+export { default as PrefilledConfirm } from './PrefilledConfirm';
+export type { PrefillPayload } from './PrefilledConfirm';
+
 // Special
 export { default as ColorPicker } from './ColorPicker';
 export { default as SignaturePad } from './SignaturePad';

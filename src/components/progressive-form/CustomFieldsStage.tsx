@@ -26,7 +26,9 @@ import {
   ImageUpload,
   Autocomplete,
   PlacesAutocomplete,
+  PrefilledConfirm,
 } from '@/components/form-fields';
+import type { PrefillPayload } from '@/components/form-fields';
 import TrueFalseToggle from '@/components/form-fields/TrueFalseToggle';
 import PromptCardTextArea from '@/components/form-fields/PromptCardTextArea';
 import { Check, Loader2, Send, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -57,6 +59,13 @@ interface CustomFieldsStageProps {
    * the endorsement questionnaire (65+ questions).
    */
   autosaveKey?: string | null;
+  /**
+   * Smart-form prefill bag — keys map to `prefill_source` strings on
+   * questions of type `prefilled_confirm`. Each value is shaped
+   * `{value, display, source, confidence}` and comes from the Supabase
+   * RPC `prefill_endorsement_for_candidate(<candidate_id>)`.
+   */
+  prefillData?: Record<string, PrefillPayload> | null;
 }
 
 // Patterns to detect identity fields by ID or label
@@ -68,6 +77,7 @@ const ZIP_PATTERNS = ['zip', 'zipcode', 'zip_code', 'postal', 'postal_code', 'po
 type IdentityFieldType = 'phone' | 'name' | 'email' | 'zip_code' | null;
 
 // Map question_type values to FieldType values
+// `prefilled_confirm` is part of the FieldType union (see types/forms.ts).
 const QUESTION_TYPE_MAP: Record<string, FieldType> = {
   'short_answer': 'text',
   'long_answer': 'textarea',
@@ -87,6 +97,10 @@ const QUESTION_TYPE_MAP: Record<string, FieldType> = {
   'url': 'url',
   'hidden': 'text',
   'section_header': 'section_header',
+  // Smart-form widget — see PrefilledConfirm.tsx. The renderer treats this
+  // as its own type and only falls through to `fallback_question_type`
+  // (mapped via this same table) when the user picks Edit.
+  'prefilled_confirm': 'prefilled_confirm',
 };
 
 // Condition type from schema
@@ -130,6 +144,19 @@ interface QuestionFormat {
   moyd_aligned_answer?: unknown;
   max_length?: number;
   min_length?: number;
+  /**
+   * Smart-form fields — see PrefilledConfirm.tsx + the migration
+   * 20260507_01_prefill_endorsement_for_candidate.sql for the source
+   * of truth on the JSON contract.
+   *
+   * `prefill_source` names the key the renderer looks up in the prefill
+   * bag returned by the RPC. `fallback_question_type` is the editable
+   * widget type the renderer mounts when the user picks Edit (or when
+   * the RPC returned no value for this source).
+   */
+  prefill_source?: string;
+  prefill_format?: 'currency' | 'text' | 'csv' | 'date';
+  fallback_question_type?: string;
 }
 
 // Extended field config to include condition and section header info
@@ -143,6 +170,10 @@ interface ExtendedFieldConfig extends FormFieldConfig {
   weight?: number;
   isTrueFalse?: boolean;
   isLongFormNarrative?: boolean;
+  /** Smart-form metadata — see QuestionFormat. */
+  prefillSource?: string;
+  prefillFormat?: 'currency' | 'text' | 'csv' | 'date';
+  fallbackQuestionType?: string;
 }
 
 // Extended schema type to handle both formats
@@ -230,6 +261,9 @@ function normalizeSchemaToFields(schema: ExtendedSchema): ExtendedFieldConfig[] 
           weight: q.weight,
           isTrueFalse,
           isLongFormNarrative,
+          prefillSource: q.prefill_source,
+          prefillFormat: q.prefill_format,
+          fallbackQuestionType: q.fallback_question_type,
         };
       });
   }
@@ -316,6 +350,7 @@ export function CustomFieldsStage({
   extraFormData,
   showTrackBanner,
   autosaveKey,
+  prefillData,
 }: CustomFieldsStageProps) {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -742,6 +777,75 @@ export function CustomFieldsStage({
     );
   };
 
+  // Helper: render a non-section field by its `type` (or a coerced override
+  // type for the fallback widget that prefilled_confirm pops out when the
+  // user picks Edit). Extracted from renderField so prefilled_confirm can
+  // pass its own fallback type through the same dispatch.
+  const renderFieldByType = (
+    field: ExtendedFieldConfig,
+    coercedType: FieldType,
+    value: unknown,
+    error?: string,
+  ): JSX.Element => {
+    const normalizedType = normalizeFieldType(coercedType);
+    const commonProps = {
+      field,
+      value,
+      onChange: (val: unknown) => handleFieldChange(field.id, val),
+      error,
+      onFocus: () => handleFieldFocus(field.id),
+      onBlur: () => handleFieldBlur(field.id, field.type),
+    };
+
+    switch (normalizedType) {
+      case 'text':
+      case 'email':
+      case 'phone':
+      case 'tel':
+      case 'url':
+      case 'number':
+      case 'cupertino_text_field':
+        if (field.places_autocomplete) {
+          return (
+            <PlacesAutocomplete
+              key={field.id}
+              {...commonProps}
+              setField={(id, v) => handleFieldChange(id, v)}
+            />
+          );
+        }
+        return <TextInput key={field.id} {...commonProps} />;
+
+      case 'textarea':
+        return <TextArea key={field.id} {...commonProps} />;
+
+      case 'dropdown':
+      case 'select':
+      case 'searchable_dropdown':
+        return <Select key={field.id} {...commonProps} />;
+
+      case 'radio':
+        return renderWithOther(field, value, <RadioGroup key={field.id} {...commonProps} />);
+
+      case 'checkbox':
+      case 'cupertino_checkbox':
+        if (!field.options || field.options.length === 0) {
+          return <Checkbox key={field.id} {...commonProps} />;
+        }
+        return renderWithOther(field, value, <CheckboxGroup key={field.id} {...commonProps} />);
+
+      case 'checkbox_group':
+        return renderWithOther(field, value, <CheckboxGroup key={field.id} {...commonProps} />);
+
+      case 'switch':
+      case 'cupertino_switch':
+        return <Switch key={field.id} {...commonProps} />;
+
+      default:
+        return <TextInput key={field.id} {...commonProps} />;
+    }
+  };
+
   // Render a single field
   const renderField = (field: ExtendedFieldConfig) => {
     // Render section headers specially
@@ -761,6 +865,39 @@ export function CustomFieldsStage({
       onFocus: () => handleFieldFocus(field.id),
       onBlur: () => handleFieldBlur(field.id, field.type),
     };
+
+    // Smart-form prefilled_confirm — render the confirm/edit card with the
+    // matching prefill payload. If the RPC didn't supply data for this
+    // question's source, fall through to the editable widget (defined by
+    // the question's `fallback_question_type`).
+    if (normalizedType === 'prefilled_confirm') {
+      const sourceKey = field.prefillSource;
+      const payload = (sourceKey && prefillData?.[sourceKey]) || null;
+      const fallbackTypeRaw = field.fallbackQuestionType || 'short_answer';
+      const fallbackType = (QUESTION_TYPE_MAP[fallbackTypeRaw] || 'text') as FieldType;
+      const fallbackNode = renderFieldByType(
+        { ...field, type: fallbackType, isSectionHeader: false },
+        fallbackType,
+        value,
+        error,
+      );
+      return (
+        <PrefilledConfirm
+          key={field.id}
+          field={{
+            id: field.id,
+            label: field.label,
+            help: field.help,
+            required: field.required,
+            fallback: fallbackNode,
+          }}
+          prefillPayload={payload}
+          value={value}
+          onChange={(val) => handleFieldChange(field.id, val)}
+          error={error}
+        />
+      );
+    }
 
     // Specialty widgets: prompt-card for marquee narrative prompt, pill-pair
     // for true/false. These are opt-in via schema metadata and short-circuit

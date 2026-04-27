@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FormContainer } from '@/components/progressive-form';
 import { FormRecord, FileUploadResult } from '@/types/forms';
+import { createClient } from '@/lib/supabase/client';
+import type { PrefillPayload } from '@/components/form-fields';
 
 interface Props {
   form: FormRecord;
@@ -30,9 +32,45 @@ export default function EndorsementFormClient({ form, candidateId, skipHero, her
   // Show hero unless parent passed skipHero=true OR URL has ?start=1.
   const [showForm, setShowForm] = useState(skipHero);
 
+  // Smart-form: fetch prefill payload once, when we have a candidateId.
+  // This calls the Supabase RPC `prefill_endorsement_for_candidate(<uuid>)`
+  // and converts any list-it-out questions in the schema (MEC committee,
+  // total raised, prior office, primary participation, filing status) into
+  // confirm-correct cards. If the RPC errors, we silently fall back to
+  // the regular editable widgets — the form still works without prefill.
+  const [prefillData, setPrefillData] = useState<Record<string, PrefillPayload> | null>(null);
+
   useEffect(() => {
     if (searchParams?.get('start')) setShowForm(true);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!candidateId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase.rpc(
+          'prefill_endorsement_for_candidate',
+          { p_candidate_id: candidateId }
+        );
+        if (cancelled) return;
+        if (error) {
+          // Don't block the form — just log and keep going without prefill.
+          console.warn('[endorsement] prefill RPC failed:', error.message);
+          return;
+        }
+        if (data && typeof data === 'object') {
+          setPrefillData(data as Record<string, PrefillPayload>);
+        }
+      } catch (e) {
+        console.warn('[endorsement] prefill RPC threw:', e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [candidateId]);
 
   const handleFileUpload = useCallback(
     async (file: File, fieldId: string): Promise<FileUploadResult> => {
@@ -79,6 +117,7 @@ export default function EndorsementFormClient({ form, candidateId, skipHero, her
       extraFormData={candidateId ? { candidate_id: candidateId } : undefined}
       showTrackBanner
       autosaveKey={autosaveKey}
+      prefillData={prefillData}
     />
   );
 }

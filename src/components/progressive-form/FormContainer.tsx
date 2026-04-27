@@ -44,6 +44,21 @@ interface FormContainerProps {
    * movement" splash instead of the default FileText icon card.
    */
   heroOverride?: React.ReactNode;
+  /**
+   * Smart-form prefill bag — keys map to question.prefill_source values.
+   * For the endorsement questionnaire this comes from the Supabase RPC
+   * `prefill_endorsement_for_candidate(<candidate_id>)`. When a question
+   * has `question_type: 'prefilled_confirm'` and a matching key exists
+   * here, the renderer surfaces a confirm-correct / edit toggle instead
+   * of an empty input. Pass `null`/undefined for forms that don't use
+   * the smart-form path.
+   */
+  prefillData?: Record<string, {
+    value: string | number | null;
+    display: string;
+    source: string;
+    confidence: 'high' | 'medium' | 'low' | 'missing';
+  }> | null;
 }
 
 // Stage order for direction calculation
@@ -57,6 +72,7 @@ export function FormContainer({
   showTrackBanner,
   autosaveKey,
   heroOverride,
+  prefillData,
 }: FormContainerProps) {
   const [direction, setDirection] = useState(1);
   const [prevStage, setPrevStage] = useState('phone');
@@ -298,6 +314,7 @@ export function FormContainer({
                 extraFormData={extraFormData}
                 showTrackBanner={showTrackBanner}
                 autosaveKey={autosaveKey}
+                prefillData={prefillData}
               />
             </motion.div>
           )}

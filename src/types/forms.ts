@@ -35,6 +35,11 @@ export type FieldType =
   | 'image_picker'
   | 'section_header'
   | 'hidden'
+  // Smart-form: confirm-this-prefilled-value widget. The renderer reads
+  // `prefill_source` on the question and looks up the matching payload
+  // in the bag returned by prefill_endorsement_for_candidate(). When the
+  // user picks Edit, the renderer falls through to `fallback_question_type`.
+  | 'prefilled_confirm'
   // iOS (Cupertino) - render as standard on web
   | 'cupertino_text_field'
   | 'cupertino_checkbox'
