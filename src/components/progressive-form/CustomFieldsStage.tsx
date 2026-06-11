@@ -74,6 +74,19 @@ const NAME_PATTERNS = ['name', 'full_name', 'fullname', 'your_name', 'yourname']
 const EMAIL_PATTERNS = ['email', 'e_mail', 'email_address', 'emailaddress'];
 const ZIP_PATTERNS = ['zip', 'zipcode', 'zip_code', 'postal', 'postal_code', 'postalcode'];
 
+// Fields that are about somebody (or something) OTHER than the person filling
+// out the form must never be absorbed into the identity stage. Without this
+// guard, the endorsement questionnaire's "Reference 1 — Phone", "Campaign
+// treasurer name", "Name of the Democratic incumbent", etc. were stripped
+// from the form and silently overwritten with the submitter's own
+// name/phone/email at submit time. 'preferred' is here because
+// "Preferred name (if different)" is by definition distinct from the
+// identity-stage legal name and must stay an answerable question.
+const THIRD_PARTY_FIELD_EXCLUSIONS = [
+  'ref_', 'reference', 'treasurer', 'incumbent', 'opponent', 'manager',
+  'consultant', 'committee', 'witness', 'preferred',
+];
+
 type IdentityFieldType = 'phone' | 'name' | 'email' | 'zip_code' | null;
 
 // Map question_type values to FieldType values
@@ -164,6 +177,12 @@ interface ExtendedFieldConfig extends FormFieldConfig {
   isSectionHeader?: boolean;
   sectionDescription?: string;
   condition?: Condition;
+  /** Raw snake_case smart-form keys as stored on fields[]-shape schemas in
+   *  form_schemas.schema (see migration 20260507_01). Translated to the
+   *  camelCase props below in normalizeSchemaToFields. */
+  prefill_source?: string;
+  prefill_format?: 'currency' | 'text' | 'csv' | 'date';
+  fallback_question_type?: string;
   originalQuestionType?: string;
   /** v2 endorsement schema metadata — see QuestionFormat comment. */
   policyArea?: string;
@@ -199,6 +218,14 @@ function normalizeSchemaToFields(schema: ExtendedSchema): ExtendedFieldConfig[] 
       const translated: ExtendedFieldConfig = {
         ...f,
         isSectionHeader: f.isSectionHeader || f.type === 'section_header',
+        // Smart-form (prefilled_confirm) metadata is stored snake_case on the
+        // fields[] schema shape, but the renderer reads the camelCase props.
+        // Without this mapping the prefill payload is never matched (no
+        // confirm-card ever shows) and the fallback widget always degrades
+        // to a bare text input — radio fallbacks lose their options.
+        prefillSource: f.prefillSource ?? f.prefill_source,
+        prefillFormat: f.prefillFormat ?? f.prefill_format,
+        fallbackQuestionType: f.fallbackQuestionType ?? f.fallback_question_type,
       };
       // The FormBuilder writes conditional rules as flat properties on the
       // field itself — `conditionalFieldId` / `conditionalValue` /
@@ -280,6 +307,12 @@ function getIdentityFieldType(field: ExtendedFieldConfig): IdentityFieldType {
   const labelLower = field.label.toLowerCase().replace(/[-\s]/g, '_');
   const fieldType = field.type.toLowerCase();
 
+  // Hard stop: third-party fields (references, treasurer, opponent, ...) are
+  // questions, not identity — regardless of their input type.
+  if (THIRD_PARTY_FIELD_EXCLUSIONS.some((e) => idLower.includes(e) || labelLower.includes(e))) {
+    return null;
+  }
+
   // Common exclusions for social media and secondary contact fields
   // These should NOT be treated as identity fields even if they have email/phone type
   // Note: "contact_" is NOT excluded because "contact_name", "contact_email", "contact_phone" ARE primary identity fields
@@ -355,6 +388,7 @@ export function CustomFieldsStage({
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageDirection, setPageDirection] = useState(1);
   const fieldFocusTime = useRef<Record<string, number>>({});
   const [showRestoreBanner, setShowRestoreBanner] = useState<boolean>(false);
 
@@ -435,17 +469,41 @@ export function CustomFieldsStage({
     return { identityFieldMappings: mappings, customFields: custom };
   }, [allFields]);
 
-  // Get unique page numbers
+  // Check if a field should be visible based on its condition
+  const shouldShowField = useCallback(
+    (field: ExtendedFieldConfig): boolean => {
+      return evaluateCondition(field.condition, formData);
+    },
+    [formData]
+  );
+
+  // Get unique page numbers — only pages with at least one VISIBLE,
+  // answerable field count. A page whose every question is condition-gated
+  // off (e.g. the endorsement questionnaire's Partner track page when the
+  // candidate is on the Young Dem track) is skipped entirely instead of
+  // rendering as a blank "Please review your information" interstitial.
   const pageNumbers = useMemo(() => {
     const pages = new Set<number>();
     customFields.forEach((f) => {
-      if (f.pageNumber) pages.add(f.pageNumber);
+      if (!f.pageNumber) return;
+      if (f.isSectionHeader) return; // headers alone don't make a page
+      if (!shouldShowField(f)) return;
+      pages.add(f.pageNumber);
     });
     return Array.from(pages).sort((a, b) => a - b);
-  }, [customFields]);
+  }, [customFields, shouldShowField]);
 
   const totalPages = pageNumbers.length || 1;
   const isMultiPage = totalPages > 1;
+
+  // If answers change in a way that removes pages (totalPages shrank below
+  // the page we're standing on), clamp so we never strand the user on a
+  // page index that no longer exists.
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   // Derive a policy-area label for the current page. We take the most common
   // policy_area among the page's scored questions — section headers and
@@ -491,14 +549,6 @@ export function CustomFieldsStage({
     const inProgressWeight = (pageWeights[currentPageNum] || 1) * 0.15;
     return Math.min(100, ((completedWeight + inProgressWeight) / totalWeight) * 100);
   }, [currentPage, pageNumbers, pageWeights, isMultiPage]);
-
-  // Check if a field should be visible based on its condition
-  const shouldShowField = useCallback(
-    (field: ExtendedFieldConfig): boolean => {
-      return evaluateCondition(field.condition, formData);
-    },
-    [formData]
-  );
 
   // Get fields for current page that should be visible
   const currentPageFields = useMemo(() => {
@@ -598,7 +648,7 @@ export function CustomFieldsStage({
     return Object.keys(newErrors).length === 0;
   };
 
-  const validateAllFields = (): boolean => {
+  const validateAllFields = (): Record<string, string> => {
     const newErrors: Record<string, string> = {};
 
     customFields.forEach((field) => {
@@ -611,7 +661,7 @@ export function CustomFieldsStage({
     });
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
   const handleFieldChange = (fieldId: string, value: unknown) => {
@@ -655,7 +705,25 @@ export function CustomFieldsStage({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateAllFields()) {
+    const allErrors = validateAllFields();
+    if (Object.keys(allErrors).length > 0) {
+      // Errors can live on an EARLIER page than the one the submit button is
+      // on (e.g. a conditional field that became required after the user
+      // passed its page). Submitting silently while showing nothing is a
+      // dead end — jump back to the first page that has an error so the
+      // user can see and fix it.
+      const firstErroredField = customFields.find((f) => allErrors[f.id]);
+      if (firstErroredField?.pageNumber) {
+        const pageIdx = pageNumbers.indexOf(firstErroredField.pageNumber);
+        if (pageIdx >= 0 && pageIdx + 1 !== currentPage) {
+          setPageDirection(-1);
+          setCurrentPage(pageIdx + 1);
+        }
+      }
+      setTimeout(() => {
+        const firstErrorEl = document.querySelector('[class*="text-red-600"]');
+        firstErrorEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 250);
       return;
     }
 
@@ -1004,7 +1072,6 @@ export function CustomFieldsStage({
     }
   };
 
-  const [pageDirection, setPageDirection] = useState(1);
   const isLastPage = currentPage >= totalPages;
   const isFirstPage = currentPage <= 1;
   const progressPercent = isMultiPage ? (currentPage / totalPages) * 100 : 100;
