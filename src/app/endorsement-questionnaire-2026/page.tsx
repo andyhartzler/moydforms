@@ -24,12 +24,19 @@ export const metadata = {
 };
 
 interface EndorsementPageProps {
-  searchParams: { candidate_id?: string; start?: string };
+  searchParams: { candidate_id?: string; start?: string; token?: string };
 }
 
 // The landing route. `?start=1` (or any truthy value) deep-links past the hero
 // straight into the form — the CRM share link can append this to send candidates
 // right to the application without the marketing shell.
+//
+// `?token=<opaque>` is the personalized email-campaign link. We resolve it
+// server-side to the candidate (the raw candidates.id UUID never appears in the
+// URL), which lets the hero greet "Hi {first_name}" and offer a "Not you?"
+// escape if the link was forwarded. The resolved candidate_id then feeds the
+// existing prefill + submission-stamping plumbing exactly as the legacy
+// `?candidate_id=` link did.
 export default async function EndorsementPage({ searchParams }: EndorsementPageProps) {
   const supabase = createClient();
 
@@ -41,6 +48,23 @@ export default async function EndorsementPage({ searchParams }: EndorsementPageP
 
   if (error || !form) {
     notFound();
+  }
+
+  // Resolve the personalized claim token, if present. A bad/expired/revoked
+  // token simply yields no greeting — the form still works as the bare URL.
+  let resolvedCandidateId: string | undefined;
+  let candidateName: string | undefined;
+  const token = searchParams.token;
+  if (token) {
+    const { data: claim, error: claimError } = await supabase.rpc('resolve_claim_token', {
+      p_token: token,
+    });
+    if (claimError) {
+      console.warn('[endorsement] resolve_claim_token failed:', claimError.message);
+    } else if (Array.isArray(claim) && claim.length > 0) {
+      resolvedCandidateId = claim[0].candidate_id ?? undefined;
+      candidateName = claim[0].first_name ?? undefined;
+    }
   }
 
   const availability = checkFormAvailability(form as FormRecord);
@@ -62,14 +86,21 @@ export default async function EndorsementPage({ searchParams }: EndorsementPageP
   }
 
   const shouldSkipHero = !!searchParams.start;
-  const candidateId = searchParams.candidate_id;
+  // Token wins over a legacy ?candidate_id= param when both are present.
+  const candidateId = resolvedCandidateId ?? searchParams.candidate_id;
 
   return (
     <EndorsementFormClient
       form={form as FormRecord}
       candidateId={candidateId}
       skipHero={shouldSkipHero}
-      hero={<EndorsementHero candidateId={candidateId} />}
+      hero={
+        <EndorsementHero
+          candidateId={candidateId}
+          candidateName={candidateName}
+          token={token}
+        />
+      }
     />
   );
 }
