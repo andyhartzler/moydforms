@@ -9,11 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Montserrat', 'system-ui', 'sans-serif'],
-        // Fraunces — editorial serif reserved for form titles and hero
-        // moments. Keep sans for body and all field labels so the forms
-        // stay clean and readable.
-        display: ['Fraunces', 'Georgia', 'serif'],
+        // Match moyoungdemocrats.org: Epilogue for body, Montserrat for
+        // headings/titles. `display` is used by form titles & hero moments —
+        // now Montserrat (was Fraunces serif, which didn't match the site).
+        sans: ['Epilogue', 'system-ui', 'sans-serif'],
+        display: ['Montserrat', 'system-ui', 'sans-serif'],
       },
       colors: {
         // MOYD brand palette (canonical — added 2026-04-23).

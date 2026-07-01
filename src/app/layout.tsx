@@ -45,13 +45,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Load Montserrat (body/UI) + Fraunces (editorial display for form
-            titles and hero moments) via Google Fonts. Fraunces variable
-            font handles optical sizing automatically. */}
+        {/* Match moyoungdemocrats.org's type system: Montserrat for headings
+            + Epilogue for body. (Previously Fraunces serif for titles, which
+            didn't match the main site.) */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Epilogue:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
         {/* Google tag (gtag.js) */}
