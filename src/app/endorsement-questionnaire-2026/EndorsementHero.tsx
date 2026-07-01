@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowRight, ShieldCheck, Timer, Users } from 'lucide-react';
+import { ArrowRight, Timer } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 interface EndorsementHeroProps {
@@ -220,72 +220,6 @@ export default function EndorsementHero({ candidateId, candidateName, token }: E
           </div>
         </motion.div>
 
-        {/* Three-up feature grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.55 }}
-          className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4"
-        >
-          <HeroCard
-            icon={<Users className="w-5 h-5" />}
-            label="Who we endorse"
-            copy="Young Democrats 35 and under, plus partner candidates 36+ who champion our issues."
-          />
-          <HeroCard
-            icon={<ShieldCheck className="w-5 h-5" />}
-            label="Confidential review"
-            copy="Your answers stay inside our endorsement committee until you're publicly endorsed."
-          />
-          <HeroCard
-            icon={<Timer className="w-5 h-5" />}
-            label="What's next"
-            copy="We review submissions rolling, interview finalists, and vote at the next MOYD board meeting."
-          />
-        </motion.div>
-
-        {/* Process timeline */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.7 }}
-          className="mt-16"
-        >
-          <h2
-            className="text-blue-100/70 text-xs font-bold uppercase tracking-[0.2em] mb-5"
-            style={{ fontFamily: 'Montserrat, sans-serif' }}
-          >
-            How it works
-          </h2>
-          <ol className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            {[
-              { n: '01', t: 'Apply', d: '12-page questionnaire. DOB auto-routes you to the Young Dem or Partner track.' },
-              { n: '02', t: 'Review', d: 'Our endorsement committee reads every answer. We may follow up by text.' },
-              { n: '03', t: 'Interview', d: 'Finalists meet with the committee — 20 minutes, Zoom or in person.' },
-              { n: '04', t: 'Vote', d: 'MOYD board votes. Endorsed candidates get our full field and comms support.' },
-            ].map((s) => (
-              <li
-                key={s.n}
-                className="relative rounded-2xl p-5 bg-white/5 backdrop-blur-md border border-white/10 hover:border-gold-400/40 transition-colors"
-              >
-                <div
-                  className="text-gold-300 text-xs font-black tracking-[0.2em] mb-2"
-                  style={{ fontFamily: 'Montserrat, sans-serif' }}
-                >
-                  {s.n}
-                </div>
-                <div
-                  className="text-white font-bold text-lg mb-1"
-                  style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-0.02em' }}
-                >
-                  {s.t}
-                </div>
-                <div className="text-blue-100/75 text-sm leading-relaxed">{s.d}</div>
-              </li>
-            ))}
-          </ol>
-        </motion.div>
-
         {/* Final CTA stripe */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -327,31 +261,6 @@ export default function EndorsementHero({ candidateId, candidateName, token }: E
           </div>
         </motion.div>
       </div>
-    </div>
-  );
-}
-
-function HeroCard({
-  icon,
-  label,
-  copy,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  copy: string;
-}) {
-  return (
-    <div className="group relative rounded-2xl p-6 bg-white/5 backdrop-blur-md border border-white/10 hover:border-gold-400/40 hover:bg-white/10 transition-all duration-300">
-      <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gold-400/20 text-gold-300 mb-4 group-hover:scale-110 transition-transform">
-        {icon}
-      </div>
-      <div
-        className="text-white font-bold text-base mb-1.5"
-        style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-0.02em' }}
-      >
-        {label}
-      </div>
-      <div className="text-blue-100/75 text-sm leading-relaxed">{copy}</div>
     </div>
   );
 }
