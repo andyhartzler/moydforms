@@ -1289,7 +1289,20 @@ export function CustomFieldsStage({
             ) : (
               <StepCounter current={currentPage} total={totalPages} />
             )}
-            <PageDots total={totalPages} current={currentPage - 1} />
+            <PageDots
+              total={totalPages}
+              current={currentPage - 1}
+              onDotClick={(i) => {
+                // Let the user jump straight BACK to any earlier step by tapping
+                // its indicator. Forward jumps are ignored so required fields on
+                // skipped pages can't be bypassed.
+                const target = i + 1;
+                if (target < currentPage) {
+                  setPageDirection(-1);
+                  setCurrentPage(target);
+                }
+              }}
+            />
           </div>
           <div
             className="relative h-1.5 w-full rounded-full bg-gray-100 overflow-hidden"

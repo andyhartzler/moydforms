@@ -36,31 +36,34 @@ export function PageDots({ total, current, onDotClick }: PageDotsProps) {
 
   return (
     <div className="flex items-center justify-center gap-2 py-3">
-      {Array.from({ length: total }).map((_, i) => (
-        <motion.button
-          key={i}
-          type="button"
-          onClick={() => onDotClick?.(i)}
-          className="rounded-full focus:outline-none"
-          animate={{
-            width: i === current ? 24 : 8,
-            height: 8,
-            backgroundColor: i === current
-              ? '#0b4db8'
-              : i < current
-                ? '#4ade80'
-                : '#d1d5db',
-          }}
-          whileHover={{ scale: 1.2 }}
-          whileTap={{ scale: 0.9 }}
-          transition={{
-            type: 'spring',
-            stiffness: 500,
-            damping: 25,
-          }}
-          aria-label={`Go to page ${i + 1}`}
-        />
-      ))}
+      {Array.from({ length: total }).map((_, i) => {
+        // Only completed (earlier) steps are tappable — you can jump back, not
+        // skip ahead past required fields.
+        const canGoBack = !!onDotClick && i < current;
+        return (
+          <motion.button
+            key={i}
+            type="button"
+            onClick={() => canGoBack && onDotClick?.(i)}
+            disabled={!canGoBack}
+            className={`rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 ${canGoBack ? 'cursor-pointer' : 'cursor-default'}`}
+            animate={{
+              width: i === current ? 24 : 8,
+              height: 8,
+              backgroundColor: i === current
+                ? '#0b4db8'
+                : i < current
+                  ? '#4ade80'
+                  : '#d1d5db',
+            }}
+            whileHover={canGoBack ? { scale: 1.35 } : undefined}
+            whileTap={canGoBack ? { scale: 0.9 } : undefined}
+            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+            aria-label={canGoBack ? `Go back to step ${i + 1}` : `Step ${i + 1}`}
+            title={canGoBack ? `Go back to step ${i + 1}` : undefined}
+          />
+        );
+      })}
     </div>
   );
 }
