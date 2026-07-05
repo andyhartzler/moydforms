@@ -7,7 +7,7 @@ import EndorsementFormClient from './EndorsementFormClient';
 export const metadata = {
   title: 'Run With Us — 2026 Endorsement Questionnaire | MOYD',
   description:
-    'The Missouri Young Democrats endorse candidates who share our vision for a Missouri that works for everyone under 40. Apply for MOYD endorsement in under 20 minutes.',
+    'The Missouri Young Democrats endorse candidates who share our vision for a Missouri that works for everyone under 40. Apply for MOYD endorsement.',
   openGraph: {
     title: 'Run With Us — 2026 Endorsement Questionnaire',
     description:
@@ -93,14 +93,10 @@ export default async function EndorsementPage({ searchParams }: EndorsementPageP
     <EndorsementFormClient
       form={form as FormRecord}
       candidateId={candidateId}
+      candidateName={candidateName}
+      token={token}
       skipHero={shouldSkipHero}
-      hero={
-        <EndorsementHero
-          candidateId={candidateId}
-          candidateName={candidateName}
-          token={token}
-        />
-      }
+      hero={<EndorsementHero candidateId={candidateId} token={token} />}
     />
   );
 }

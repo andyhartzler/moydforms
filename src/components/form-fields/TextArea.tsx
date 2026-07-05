@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormFieldConfig } from '@/types/forms';
 import FieldHelp from './FieldHelp';
@@ -21,14 +21,9 @@ export default function TextArea({ field, value, onChange, error, onBlur, onFocu
   const currentLength = (value || '').length;
   const maxLength = field.maxLength;
 
-  useEffect(() => {
-    if (isFocused && textareaRef.current) {
-      const timer = setTimeout(() => {
-        textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [isFocused]);
+  // No scrollIntoView on focus — see TextInput.tsx. The old smooth scroll to
+  // center fired on every focus and made the page shake/jump. Native browser
+  // focus handling keeps the field visible above the keyboard on its own.
 
   const handleFocus = () => {
     setIsFocused(true);

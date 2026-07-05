@@ -59,6 +59,14 @@ interface FormContainerProps {
     source: string;
     confidence: 'high' | 'medium' | 'low' | 'missing';
   }> | null;
+  /**
+   * Optional node rendered only on the FIRST survey step (phone entry), above
+   * the stage content. The endorsement questionnaire uses it for the small
+   * "Not {name}? click here" escape on a forwarded personalized link — kept off
+   * the marketing hero so it only appears once the candidate is actually in the
+   * form.
+   */
+  preFormNote?: React.ReactNode;
 }
 
 // Stage order for direction calculation
@@ -73,6 +81,7 @@ export function FormContainer({
   autosaveKey,
   heroOverride,
   prefillData,
+  preFormNote,
 }: FormContainerProps) {
   const [direction, setDirection] = useState(1);
   const [prevStage, setPrevStage] = useState('phone');
@@ -258,6 +267,7 @@ export function FormContainer({
               exit="exit"
               transition={pageTransition}
             >
+              {preFormNote}
               <PhoneEntryStage
                 label="Phone Number"
                 helpText="Enter your phone number to get started"

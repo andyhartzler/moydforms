@@ -10,6 +10,10 @@ import type { PrefillPayload } from '@/components/form-fields';
 interface Props {
   form: FormRecord;
   candidateId?: string;
+  /** First name resolved from a personalized ?token= link, for the greeting. */
+  candidateName?: string;
+  /** The opaque claim token, so a forwarded link can be disclaimed. */
+  token?: string;
   skipHero: boolean;
   hero: React.ReactNode;
 }
@@ -26,8 +30,48 @@ interface Props {
  *   Uses client-side navigation to avoid a full reload when the user clicks
  *   "Begin application".
  */
-export default function EndorsementFormClient({ form, candidateId, skipHero, hero }: Props) {
+export default function EndorsementFormClient({
+  form,
+  candidateId,
+  candidateName,
+  token,
+  skipHero,
+  hero,
+}: Props) {
   const searchParams = useSearchParams();
+
+  // "Not you?" escape for a forwarded personalized link. Shown as a small line
+  // on the very first survey step (phone entry). Flags the token as disclaimed,
+  // then hard-navigates to a clean, unstamped application. Hard nav (not a
+  // client push) guarantees the FormContainer + prefill state fully reset.
+  const [disclaiming, setDisclaiming] = useState(false);
+  const handleNotYou = useCallback(async () => {
+    setDisclaiming(true);
+    try {
+      if (token) {
+        await createClient().rpc('disclaim_claim_token', { p_token: token });
+      }
+    } catch {
+      // Non-blocking — route to the bare form even if the flag write fails.
+    } finally {
+      window.location.assign('/endorsement-questionnaire-2026?start=1');
+    }
+  }, [token]);
+
+  const preFormNote =
+    candidateName && token ? (
+      <p className="mb-5 text-center text-sm text-blue-100/80">
+        Not {candidateName}?{' '}
+        <button
+          type="button"
+          onClick={handleNotYou}
+          disabled={disclaiming}
+          className="font-semibold text-white underline underline-offset-2 hover:text-gold-200 disabled:opacity-60 transition-colors"
+        >
+          {disclaiming ? 'one sec…' : 'click here'}
+        </button>
+      </p>
+    ) : undefined;
 
   // Show hero unless parent passed skipHero=true OR URL has ?start=1.
   const [showForm, setShowForm] = useState(skipHero);
@@ -118,6 +162,7 @@ export default function EndorsementFormClient({ form, candidateId, skipHero, her
       showTrackBanner
       autosaveKey={autosaveKey}
       prefillData={prefillData}
+      preFormNote={preFormNote}
     />
   );
 }

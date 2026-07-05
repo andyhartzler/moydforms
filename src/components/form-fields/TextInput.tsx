@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormFieldConfig } from '@/types/forms';
 import FieldHelp from './FieldHelp';
@@ -29,15 +29,11 @@ export default function TextInput({ field, value, onChange, error, onBlur, onFoc
     }
   })();
 
-  // Auto-scroll input into view on mobile when focused
-  useEffect(() => {
-    if (isFocused && inputRef.current) {
-      const timer = setTimeout(() => {
-        inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [isFocused]);
+  // NOTE: we deliberately do NOT scroll the input into view on focus. Browsers
+  // (including mobile Safari/Chrome) already keep a focused input visible above
+  // the keyboard natively. The old smooth scrollIntoView({block:'center'}) fired
+  // on every focus — even for already-visible fields — which yanked the whole
+  // page up/down and read as a "shake" on both desktop and mobile.
 
   const handleFocus = () => {
     setIsFocused(true);

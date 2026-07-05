@@ -439,7 +439,17 @@ export function CustomFieldsStage({
   // Cutoff is 36 — MOYD's Young Dems definition (35 and under).
   useEffect(() => {
     const dob = formData.date_of_birth;
-    if (typeof dob !== 'string' || dob.length < 4) return;
+    // Only derive the track once the birthdate is COMPLETE and plausible.
+    // Guarding on a full ISO date (YYYY-MM-DD) + a sane birth-year range stops
+    // the Young-Dem/Partner banner from flickering while the year is still being
+    // typed (e.g. "1" → "19" → "1998" would each parse to a different age).
+    if (typeof dob !== 'string') return;
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dob.trim());
+    if (!m) return;
+    const year = Number(m[1]);
+    const currentYear = new Date().getFullYear();
+    // No one applying to run for office is under 16 or over 120.
+    if (year < currentYear - 120 || year > currentYear - 16) return;
     const dobDate = new Date(dob);
     if (Number.isNaN(dobDate.getTime())) return;
     const ageYears = (Date.now() - dobDate.getTime()) / (365.25 * 24 * 3600 * 1000);

@@ -1,17 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowRight, Timer } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { ArrowRight } from 'lucide-react';
 
 interface EndorsementHeroProps {
   candidateId?: string;
-  /** First name resolved from a personalized ?token= link, for the greeting. */
-  candidateName?: string;
-  /** The opaque claim token, so "Not you?" can disclaim it. */
+  /** The opaque claim token, preserved through into the form via ?start=1. */
   token?: string;
 }
 
@@ -25,34 +20,17 @@ interface EndorsementHeroProps {
  * be disclaimed before any of that candidate's data is touched. Navy/gold MOYD
  * brand colors; scroll-reveal animations; responsive.
  */
-export default function EndorsementHero({ candidateId, candidateName, token }: EndorsementHeroProps) {
-  const router = useRouter();
-  const [notYouOpen, setNotYouOpen] = useState(false);
-  const [disclaiming, setDisclaiming] = useState(false);
-
+export default function EndorsementHero({ candidateId, token }: EndorsementHeroProps) {
   // Preserve the personalized token (preferred) or legacy candidate_id through
   // to the form so the link works end-to-end. The token keeps the raw UUID out
-  // of the URL; the server re-resolves it on the next load.
+  // of the URL; the server re-resolves it on the next load. The personalized
+  // greeting + "Not you?" escape now live on the first survey step (phone
+  // entry), not on this marketing splash.
   const startHref = token
     ? `/endorsement-questionnaire-2026?start=1&token=${encodeURIComponent(token)}`
     : candidateId
       ? `/endorsement-questionnaire-2026?start=1&candidate_id=${encodeURIComponent(candidateId)}`
       : '/endorsement-questionnaire-2026?start=1';
-
-  // "Not you?" — flag the forwarded link, then drop the candidate association
-  // and send the visitor to a clean application they can fill out as themselves.
-  async function handleNotYou() {
-    setDisclaiming(true);
-    try {
-      if (token) {
-        await createClient().rpc('disclaim_claim_token', { p_token: token });
-      }
-    } catch {
-      // Non-blocking: even if the flag write fails, still route to the bare form.
-    } finally {
-      router.push('/endorsement-questionnaire-2026?start=1');
-    }
-  }
 
   return (
     <div className="relative z-10 min-h-screen">
@@ -69,63 +47,6 @@ export default function EndorsementHero({ candidateId, candidateName, token }: E
       </div>
 
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-20">
-        {/* Personalized greeting (only when opened from an email ?token= link). */}
-        {candidateName && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-7 rounded-2xl border border-gold-400/30 bg-white/5 backdrop-blur-md px-5 py-4 sm:px-6 sm:py-5"
-          >
-            <div
-              className="text-white text-xl sm:text-2xl font-extrabold leading-tight"
-              style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-0.02em' }}
-            >
-              Hi {candidateName} 👋
-            </div>
-            <p className="mt-1 text-blue-50/85 text-sm sm:text-base" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-              This endorsement invitation was personalized for you — your link is unique, so please don&apos;t forward it.
-            </p>
-
-            {!notYouOpen ? (
-              <button
-                type="button"
-                onClick={() => setNotYouOpen(true)}
-                className="mt-2 text-gold-300 hover:text-gold-200 underline underline-offset-2 text-sm font-semibold transition-colors"
-                style={{ fontFamily: 'Montserrat, sans-serif' }}
-              >
-                Not {candidateName}?
-              </button>
-            ) : (
-              <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                <span className="text-blue-50/80 text-sm" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                  Got this link by mistake? Start a fresh application instead.
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    disabled={disclaiming}
-                    onClick={handleNotYou}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-gold-400 px-3.5 py-2 text-sm font-bold text-primary-900 hover:bg-gold-300 disabled:opacity-60 transition-colors"
-                    style={{ fontFamily: 'Montserrat, sans-serif' }}
-                  >
-                    {disclaiming ? 'One sec…' : 'Start fresh'}
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setNotYouOpen(false)}
-                    className="text-blue-100/70 hover:text-white text-sm transition-colors"
-                    style={{ fontFamily: 'Montserrat, sans-serif' }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-          </motion.div>
-        )}
-
         {/* Eyebrow */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -210,14 +131,6 @@ export default function EndorsementHero({ candidateId, candidateName, token }: E
             <span className="relative">Begin application</span>
             <ArrowRight className="relative w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
-
-          <div
-            className="inline-flex items-center gap-2 text-blue-100/80 text-sm"
-            style={{ fontFamily: 'Montserrat, sans-serif' }}
-          >
-            <Timer className="w-4 h-4" />
-            ~20 minutes · save-and-return supported
-          </div>
         </motion.div>
 
         {/* Final CTA stripe */}

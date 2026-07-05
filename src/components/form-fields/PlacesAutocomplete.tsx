@@ -14,10 +14,12 @@ import FieldHelp from './FieldHelp';
  * complete control over the input + dropdown visuals while still using
  * the Places API (New).
  *
- * Biased toward Missouri (where most MOYD members are) without restricting
- * — out-of-state addresses still surface. On selection we fetch the
- * address components and write just the street number + route into the
- * form state (city/state/zip live in their own fields).
+ * Restricted to Missouri. We hard-bound the query with a locationRestriction
+ * rectangle over the state and then filter predictions down to those whose
+ * secondary text is actually in MO/Missouri — the rectangle alone would leak a
+ * sliver of the neighboring states in its corners. On selection we fetch the
+ * address components and write just the street number + route into the form
+ * state (city/state/zip live in their own fields).
  */
 
 declare global {
@@ -27,16 +29,22 @@ declare global {
 }
 
 const PLACES_SCRIPT_ID = 'moyd-google-places-script';
-// Places API caps locationBias circles at 50km, which isn't enough to cover
-// Missouri. Use a rectangle bounding box instead — SW and NE corners that
-// enclose the whole state with a small buffer. Out-of-state addresses still
-// surface (bias, not restriction).
-const MO_BIAS_RECT = {
+// Rectangle enclosing Missouri (SW + NE corners, small buffer). Used as a
+// hard locationRestriction so Places only returns results inside the box.
+// Missouri isn't a perfect rectangle, so the box catches a little of the
+// bordering states in its corners — those get dropped by isMissouri() below.
+const MO_RECT = {
   south: 35.99,
   west: -95.78,
   north: 40.62,
   east: -89.10,
 };
+
+// A prediction is Missouri if its secondary (context) text names the state.
+// Google returns things like "Springfield, MO, USA" or "…, Missouri, USA".
+function isMissouri(secondaryText: string): boolean {
+  return /(^|,\s*)(MO|Missouri)(\s*,|\s*$)/i.test(secondaryText || '');
+}
 
 function loadMapsScript(): Promise<void> {
   if (typeof window === 'undefined') return Promise.resolve();
@@ -141,13 +149,13 @@ export default function PlacesAutocomplete({
         const req = {
           input: query,
           includedRegionCodes: ['us'],
-          // Rectangle bias covering Missouri; Places API circle bias is
-          // capped at 50km which can't reach state-wide.
-          locationBias: {
-            south: MO_BIAS_RECT.south,
-            west: MO_BIAS_RECT.west,
-            north: MO_BIAS_RECT.north,
-            east: MO_BIAS_RECT.east,
+          // Hard-restrict to the Missouri bounding box (not just bias). Corners
+          // that spill into neighboring states are filtered out by isMissouri().
+          locationRestriction: {
+            south: MO_RECT.south,
+            west: MO_RECT.west,
+            north: MO_RECT.north,
+            east: MO_RECT.east,
           },
           sessionToken: sessionTokenRef.current,
         };
@@ -164,7 +172,9 @@ export default function PlacesAutocomplete({
               secondaryText: p.secondaryText?.text || '',
             };
           })
-          .filter((s): s is Suggestion => !!s && !!s.mainText);
+          .filter((s): s is Suggestion => !!s && !!s.mainText)
+          // Missouri-only: drop any prediction whose context isn't in MO.
+          .filter((s) => isMissouri(s.secondaryText));
         setSuggestions(parsed);
         setOpen(parsed.length > 0);
         setHighlight(0);
