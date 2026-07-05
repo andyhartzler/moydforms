@@ -33,7 +33,11 @@ export default function EndorsementHero({ candidateId, token }: EndorsementHeroP
       : '/endorsement-questionnaire-2026?start=1';
 
   return (
-    <div className="relative z-10 min-h-screen">
+    // Center the (short) hero content vertically instead of pinning it to the
+    // top of a full-height box — otherwise the compact copy sits up top with a
+    // large dead gap above the footer, especially on mobile. 100svh keeps it
+    // stable under mobile browser chrome.
+    <div className="relative z-10 flex min-h-[100svh] flex-col justify-center">
       {/* Ambient gradient glows anchored to the hero — cheap parallax. */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
@@ -46,7 +50,7 @@ export default function EndorsementHero({ candidateId, token }: EndorsementHeroP
         />
       </div>
 
-      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-20">
+      <div className="relative w-full max-w-5xl mx-auto px-5 sm:px-6 py-10 sm:py-14">
         {/* Eyebrow */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
