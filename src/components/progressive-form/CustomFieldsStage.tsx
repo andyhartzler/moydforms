@@ -138,7 +138,13 @@ interface AndCondition {
   and: SimpleCondition[];
 }
 
-type Condition = SimpleCondition | NotEmptyCondition | AndCondition;
+// Show the field when ANY of the listed field=value pairs match (e.g. reveal the
+// FEC candidate ID only for federal offices: US House OR US Senate).
+interface OrCondition {
+  or: SimpleCondition[];
+}
+
+type Condition = SimpleCondition | NotEmptyCondition | AndCondition | OrCondition;
 
 // Question format from new schema (questions array)
 interface QuestionFormat {
@@ -372,6 +378,14 @@ function evaluateCondition(condition: Condition | undefined, formData: Record<st
   // Handle AND condition
   if ('and' in condition && Array.isArray(condition.and)) {
     return condition.and.every((c) => formData[c.field] === c.value);
+  }
+
+  // Handle OR condition (any match shows the field)
+  if ('or' in condition && Array.isArray(condition.or)) {
+    return condition.or.some((c) => {
+      const fv = formData[c.field];
+      return Array.isArray(fv) ? fv.includes(c.value) : fv === c.value;
+    });
   }
 
   // Handle "reveal once another field is non-empty"
