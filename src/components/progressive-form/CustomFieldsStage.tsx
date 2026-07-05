@@ -34,8 +34,8 @@ import PromptCardTextArea from '@/components/form-fields/PromptCardTextArea';
 import { Check, Loader2, Send, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AnimatedProgressBar, PageDots, StepCounter } from '@/components/motion/AnimatedProgress';
 import { pageVariants, pageTransition, staggerContainer, fieldEntrance } from '@/lib/motion';
-import { useFormAutosave } from '@/hooks/useFormAutosave';
-import { RestoreDraftBanner } from './RestoreDraftBanner';
+import { useServerDraft } from '@/hooks/useServerDraft';
+import { ResumeModal } from './ResumeModal';
 import { PolicyAreaBreadcrumb, POLICY_AREA_LABELS } from './PolicyAreaBreadcrumb';
 
 interface CustomFieldsStageProps {
@@ -392,21 +392,25 @@ export function CustomFieldsStage({
   const fieldFocusTime = useRef<Record<string, number>>({});
   const [showRestoreBanner, setShowRestoreBanner] = useState<boolean>(false);
 
-  // Opt-in localStorage draft — only when the caller passes `autosaveKey`.
-  // The hook is a no-op when the key is falsy.
+  // Server-side draft, keyed by the respondent's phone + form slug. Persists to
+  // Supabase (RLS-locked table via SECURITY DEFINER RPCs) so a candidate can
+  // resume on any device. The slug is the part of autosaveKey before the ':';
+  // the phone comes from the identity stage.
+  const draftSlug = autosaveKey ? autosaveKey.split(':')[0] : null;
+  const draftPhone = typeof identityValues?.phone === 'string' ? identityValues.phone : null;
   const {
     available: savedDraft,
     clearDraft,
-    acknowledge: ackDraft,
-  } = useFormAutosave<{ formData: Record<string, unknown>; page: number }>({
-    storageKey: autosaveKey ?? null,
-    values: { formData, page: currentPage },
+    dismiss: ackDraft,
+  } = useServerDraft({
+    slug: draftSlug,
+    phone: draftPhone,
+    formData,
     page: currentPage,
     enabled: !!autosaveKey,
   });
 
-  // Surface the restore banner once on first hydration — do not surface again
-  // after the user has dismissed or restored.
+  // Surface the resume modal once, when a server draft is found.
   useEffect(() => {
     if (savedDraft && !showRestoreBanner) {
       setShowRestoreBanner(true);
@@ -415,8 +419,8 @@ export function CustomFieldsStage({
 
   const handleRestoreDraft = useCallback(() => {
     if (!savedDraft) return;
-    const draftValues = (savedDraft.values as { formData: Record<string, unknown>; page: number } | undefined)?.formData;
-    const draftPage = (savedDraft.values as { formData: Record<string, unknown>; page: number } | undefined)?.page;
+    const draftValues = savedDraft.data;
+    const draftPage = savedDraft.page;
     if (draftValues && typeof draftValues === 'object') {
       setFormData(draftValues);
       Object.entries(draftValues).forEach(([k, v]) => onFieldChange(k, v));
@@ -1154,16 +1158,14 @@ export function CustomFieldsStage({
         </div>
       </motion.div>
 
-      {/* Restore-draft banner — surfaces only when useFormAutosave finds a
-          prior draft on this device. Dismissed once the user picks Resume
-          or Start fresh. */}
-      {showRestoreBanner && savedDraft && (
-        <RestoreDraftBanner
-          savedAt={savedDraft.savedAt}
-          onRestore={handleRestoreDraft}
-          onDiscard={handleDiscardDraft}
-        />
-      )}
+      {/* Centered resume modal — surfaces when we find an unsubmitted,
+          server-saved application for this phone number. */}
+      <ResumeModal
+        open={showRestoreBanner && !!savedDraft}
+        updatedAt={savedDraft?.updatedAt}
+        onResume={handleRestoreDraft}
+        onStartOver={handleDiscardDraft}
+      />
 
       {/* Multi-page progress indicator — step counter + segmented page dots,
           now with a weighted fill bar underneath and (for policy-tagged
