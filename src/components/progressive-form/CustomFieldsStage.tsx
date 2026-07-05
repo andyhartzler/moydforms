@@ -85,6 +85,11 @@ const ZIP_PATTERNS = ['zip', 'zipcode', 'zip_code', 'postal', 'postal_code', 'po
 const THIRD_PARTY_FIELD_EXCLUSIONS = [
   'ref_', 'reference', 'treasurer', 'incumbent', 'opponent', 'manager',
   'consultant', 'committee', 'witness', 'preferred',
+  // 'home_' address-page fields (home_zip especially) are their own answerable
+  // questions on the "Where you live" page — home_zip matches the ZIP identity
+  // pattern and was being absorbed into the identity stage, so it never rendered
+  // and couldn't be auto-filled from the Places selection.
+  'home_',
 ];
 
 type IdentityFieldType = 'phone' | 'name' | 'email' | 'zip_code' | null;
