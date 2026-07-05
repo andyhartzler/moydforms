@@ -1,9 +1,10 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
-import { FormFieldConfig } from '@/types/forms';
+import { useRef, useEffect, useState, useCallback } from 'react';
+import SignaturePadLib from 'signature_pad';
+import { FormFieldConfig, FileUploadResult } from '@/types/forms';
 import FieldHelp from './FieldHelp';
-import { Trash2 } from 'lucide-react';
+import { Eraser, Check, Loader2 } from 'lucide-react';
 
 interface SignaturePadProps {
   field: FormFieldConfig;
@@ -12,163 +13,168 @@ interface SignaturePadProps {
   error?: string;
   onBlur?: () => void;
   onFocus?: () => void;
+  /** When provided, the drawn signature is uploaded as a real PNG file and the
+   *  stored value is the file URL. Without it, we store a PNG data URL. */
+  onFileUpload?: (file: File, fieldId: string) => Promise<FileUploadResult>;
 }
 
-export default function SignaturePad({ field, value, onChange, error, onBlur, onFocus }: SignaturePadProps) {
+const INK = '#263351'; // MOYD navy
+
+/**
+ * Best-in-class signature field. Uses the `signature_pad` library for smooth,
+ * pressure-like bezier strokes; renders on a high-DPI, fully responsive canvas
+ * that works with touch, pen, and mouse; disables page scroll while signing on
+ * mobile; and exports a white-background PNG (uploaded as a real file when an
+ * uploader is available, else stored as a PNG data URL).
+ */
+export default function SignaturePad({
+  field, value, onChange, error, onBlur, onFocus, onFileUpload,
+}: SignaturePadProps) {
+  const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [hasSignature, setHasSignature] = useState(false);
+  const padRef = useRef<SignaturePadLib | null>(null);
+  const [hasInk, setHasInk] = useState<boolean>(!!value);
+  const [saved, setSaved] = useState<boolean>(!!value);
+  const [uploading, setUploading] = useState(false);
+
+  // Size the canvas to its container at the device pixel ratio so strokes are
+  // crisp. Resizing clears the canvas, so preserve + restore the drawing.
+  const resize = useCallback(() => {
+    const canvas = canvasRef.current;
+    const wrap = wrapRef.current;
+    const pad = padRef.current;
+    if (!canvas || !wrap || !pad) return;
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const data = pad.toData();
+    canvas.width = wrap.clientWidth * ratio;
+    canvas.height = 200 * ratio;
+    canvas.style.width = `${wrap.clientWidth}px`;
+    canvas.style.height = '200px';
+    const ctx = canvas.getContext('2d');
+    if (ctx) ctx.scale(ratio, ratio);
+    pad.clear(); // also resets internal state to the new size
+    if (data.length) pad.fromData(data);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set up canvas
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    // Load existing signature if any
-    if (value) {
-      const img = new Image();
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0);
-        setHasSignature(true);
-      };
-      img.src = value;
-    }
+    const pad = new SignaturePadLib(canvas, {
+      penColor: INK,
+      backgroundColor: '#ffffff',
+      minWidth: 0.9,
+      maxWidth: 2.6,
+      velocityFilterWeight: 0.7,
+    });
+    padRef.current = pad;
+    resize();
+    const onResize = () => resize();
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+    pad.addEventListener('beginStroke', () => { onFocus?.(); });
+    pad.addEventListener('endStroke', () => {
+      setHasInk(!pad.isEmpty());
+      setSaved(false);
+    });
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+      pad.off();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getCoordinates = (e: React.MouseEvent | React.TouchEvent) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
+  const clear = () => {
+    padRef.current?.clear();
+    setHasInk(false);
+    setSaved(false);
+    onChange('');
+  };
 
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    if ('touches' in e) {
-      const touch = e.touches[0];
-      return {
-        x: (touch.clientX - rect.left) * scaleX,
-        y: (touch.clientY - rect.top) * scaleY,
-      };
+  // Persist the signature: upload a PNG file if we can, else store a data URL.
+  const save = async () => {
+    const pad = padRef.current;
+    if (!pad || pad.isEmpty()) return;
+    const dataUrl = pad.toDataURL('image/png');
+    if (onFileUpload) {
+      try {
+        setUploading(true);
+        const blob = await (await fetch(dataUrl)).blob();
+        const file = new File([blob], `signature_${Date.now()}.png`, { type: 'image/png' });
+        const res = await onFileUpload(file, field.id);
+        onChange(res.url);
+      } catch {
+        onChange(dataUrl); // fall back to inline PNG if the upload fails
+      } finally {
+        setUploading(false);
+      }
     } else {
-      return {
-        x: (e.clientX - rect.left) * scaleX,
-        y: (e.clientY - rect.top) * scaleY,
-      };
+      onChange(dataUrl);
     }
-  };
-
-  const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!ctx) return;
-
-    const coords = getCoordinates(e);
-    if (!coords) return;
-
-    setIsDrawing(true);
-    ctx.beginPath();
-    ctx.moveTo(coords.x, coords.y);
-    onFocus?.();
-  };
-
-  const draw = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDrawing) return;
-    e.preventDefault();
-
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!ctx) return;
-
-    const coords = getCoordinates(e);
-    if (!coords) return;
-
-    ctx.lineTo(coords.x, coords.y);
-    ctx.stroke();
-    setHasSignature(true);
-  };
-
-  const stopDrawing = () => {
-    if (!isDrawing) return;
-    setIsDrawing(false);
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    // Save signature as data URL
-    const dataUrl = canvas.toDataURL('image/png');
-    onChange(dataUrl);
+    setSaved(true);
     onBlur?.();
-  };
-
-  const clearSignature = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!ctx || !canvas) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    setHasSignature(false);
-    onChange(null);
   };
 
   return (
     <div className="mb-6">
-      <div className="flex justify-between items-center mb-2">
-        <label className="block text-sm font-medium text-gray-700">
-          {field.label}
-          {field.required && <span className="text-red-500 ml-1">*</span>}
-        </label>
-        {hasSignature && (
+      <label className="block text-sm font-semibold text-gray-800 mb-1.5">
+        {field.label}
+        {field.required && <span className="text-red-500 ml-1">*</span>}
+      </label>
+      <FieldHelp html={field.help} className="text-sm text-gray-500 mb-2" />
+
+      <div
+        ref={wrapRef}
+        className={`relative rounded-2xl border-2 bg-white overflow-hidden select-none
+          ${error ? 'border-red-300' : saved ? 'border-green-400' : 'border-gray-200'}`}
+      >
+        {/* Signature baseline + hint (fade out once there's ink) */}
+        <div
+          className={`pointer-events-none absolute inset-x-6 bottom-9 flex items-center gap-3 transition-opacity duration-200 ${hasInk ? 'opacity-0' : 'opacity-100'}`}
+        >
+          <span className="text-gray-300 text-xl leading-none">✕</span>
+          <span className="flex-1 border-b border-dashed border-gray-300" />
+        </div>
+        <span
+          className={`pointer-events-none absolute left-6 bottom-3 text-xs font-medium text-gray-400 transition-opacity ${hasInk ? 'opacity-0' : 'opacity-100'}`}
+        >
+          Sign here
+        </span>
+
+        <canvas
+          ref={canvasRef}
+          className="block w-full touch-none cursor-crosshair"
+          style={{ height: 200 }}
+          aria-label="Signature canvas"
+        />
+      </div>
+
+      <div className="mt-2 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={clear}
+          disabled={!hasInk || uploading}
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-700 disabled:opacity-40 transition-colors"
+        >
+          <Eraser className="w-4 h-4" />
+          Clear
+        </button>
+
+        {saved ? (
+          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-600">
+            <Check className="w-4 h-4" /> Signature saved
+          </span>
+        ) : (
           <button
             type="button"
-            onClick={clearSignature}
-            disabled={field.enabled === false}
-            className="flex items-center text-sm text-red-600 hover:text-red-700"
+            onClick={save}
+            disabled={!hasInk || uploading}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
           >
-            <Trash2 className="h-4 w-4 mr-1" />
-            Clear
+            {uploading ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : <>Save signature</>}
           </button>
         )}
       </div>
-      <FieldHelp html={field.help} className="mb-2 text-sm text-gray-500" />
-
-      <div
-        className={`relative border-2 rounded-lg bg-white ${
-          error ? 'border-red-300' : 'border-gray-300'
-        } ${field.enabled === false ? 'opacity-50 pointer-events-none' : ''}`}
-      >
-        <canvas
-          ref={canvasRef}
-          width={400}
-          height={150}
-          onMouseDown={startDrawing}
-          onMouseMove={draw}
-          onMouseUp={stopDrawing}
-          onMouseLeave={stopDrawing}
-          onTouchStart={startDrawing}
-          onTouchMove={draw}
-          onTouchEnd={stopDrawing}
-          className="w-full h-36 cursor-crosshair touch-none"
-        />
-
-        {!hasSignature && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <p className="text-gray-400 text-sm">Sign here</p>
-          </div>
-        )}
-
-        {/* Signature line */}
-        <div className="absolute bottom-4 left-4 right-4 border-b border-gray-300" />
-      </div>
-
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </div>
   );

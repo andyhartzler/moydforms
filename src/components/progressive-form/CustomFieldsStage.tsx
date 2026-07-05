@@ -1149,7 +1149,7 @@ export function CustomFieldsStage({
         return <ColorPicker key={field.id} {...commonProps} />;
 
       case 'signature_pad':
-        return <SignaturePad key={field.id} {...commonProps} />;
+        return <SignaturePad key={field.id} {...commonProps} onFileUpload={onFileUpload} />;
 
       case 'typeahead':
         return <Autocomplete key={field.id} {...commonProps} />;
