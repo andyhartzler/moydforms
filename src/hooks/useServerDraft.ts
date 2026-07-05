@@ -41,21 +41,25 @@ export function useServerDraft({
 }: Options) {
   const [available, setAvailable] = useState<ServerDraft | null>(null);
   const [hydrating, setHydrating] = useState(true);
-  const loadedRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clientRef = useRef<ReturnType<typeof createClient> | null>(null);
   if (!clientRef.current) clientRef.current = createClient();
 
   const active = !!(enabled && slug && phone);
 
-  // Load the saved draft once, when the phone is known.
+  // Load the saved draft when the phone is known. Deliberately NO "load once"
+  // ref guard: under React StrictMode the effect double-invokes, and a ref guard
+  // makes the second pass early-return without ever clearing `hydrating` (the
+  // first pass having been cancelled), which wedges the debounced save off. The
+  // read is idempotent + cheap, so letting it re-run is fine; it also correctly
+  // reloads if the phone changes.
   useEffect(() => {
-    if (!active || loadedRef.current) {
-      if (!active) setHydrating(false);
+    if (!active) {
+      setHydrating(false);
       return;
     }
-    loadedRef.current = true;
     let cancelled = false;
+    setHydrating(true);
     (async () => {
       try {
         const { data, error } = await clientRef.current!.rpc('get_form_draft', {
