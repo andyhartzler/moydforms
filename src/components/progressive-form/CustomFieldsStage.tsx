@@ -127,11 +127,18 @@ interface SimpleCondition {
   value: string;
 }
 
+// Show the field once another field has any non-empty answer (e.g. reveal the
+// campaign-manager email only after a manager name is entered).
+interface NotEmptyCondition {
+  field: string;
+  notEmpty: true;
+}
+
 interface AndCondition {
   and: SimpleCondition[];
 }
 
-type Condition = SimpleCondition | AndCondition;
+type Condition = SimpleCondition | NotEmptyCondition | AndCondition;
 
 // Question format from new schema (questions array)
 interface QuestionFormat {
@@ -365,6 +372,13 @@ function evaluateCondition(condition: Condition | undefined, formData: Record<st
   // Handle AND condition
   if ('and' in condition && Array.isArray(condition.and)) {
     return condition.and.every((c) => formData[c.field] === c.value);
+  }
+
+  // Handle "reveal once another field is non-empty"
+  if ('field' in condition && 'notEmpty' in condition && condition.notEmpty) {
+    const v = formData[condition.field];
+    if (Array.isArray(v)) return v.length > 0;
+    return v !== undefined && v !== null && String(v).trim() !== '';
   }
 
   // Handle simple condition
@@ -1101,9 +1115,19 @@ export function CustomFieldsStage({
       setPageDirection(1);
       setCurrentPage((prev) => Math.min(prev + 1, totalPages));
 
-      // Auto-scroll to top of form on page change
+      // Bring the form into view on page change, but ONLY if its top has
+      // scrolled out above the viewport (i.e. the user was reading deep down a
+      // long page). block:'nearest' is a no-op when the form top is already
+      // visible, so a short page that barely scrolled doesn't yank the user's
+      // view back to the top.
       setTimeout(() => {
-        document.querySelector('.custom-fields-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const formEl = document.querySelector('.custom-fields-form');
+        if (!formEl) return;
+        const top = formEl.getBoundingClientRect().top;
+        // Only scroll when the form top is meaningfully above the viewport.
+        if (top < -40) {
+          formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }, 100);
     } else {
       // Auto-scroll to first error

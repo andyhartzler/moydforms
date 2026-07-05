@@ -47,7 +47,11 @@ export default function TextInput({ field, value, onChange, error, onBlur, onFoc
   };
 
   const hasValue = value && value.length > 0;
-  const isValid = hasBeenTouched && hasValue && !error;
+  // Only show the "valid" green check once the field has been committed
+  // (blurred at least once) AND is not currently being edited AND passes
+  // validation. Without the !isFocused guard the check popped in mid-typing
+  // after a couple characters, which read as a glitch.
+  const isValid = hasBeenTouched && !isFocused && hasValue && !error;
   const showFloatingLabel = isFocused || hasValue;
 
   return (

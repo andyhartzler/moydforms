@@ -361,6 +361,9 @@ export function normalizeFieldType(type: string): FieldType {
     'select': 'dropdown',
     'tel': 'phone',
     'date': 'date_picker',
+    'file_upload': 'file_picker',
+    'file': 'file_picker',
+    'image_upload': 'image_picker',
   };
   return (aliases[type] || type) as FieldType;
 }
