@@ -272,17 +272,30 @@ export function useFormSession({ formId, formSlug, formSettings, onSessionStart,
   const handleAbandon = useCallback(() => {
     if (!session) return;
 
-    // Use sendBeacon for reliability on page unload
+    // fetch({keepalive}) survives page unload like sendBeacon, but WITHOUT
+    // forcing credentials mode 'include' — sendBeacon always sends credentialed
+    // requests, which the edge function's wildcard `Access-Control-Allow-Origin:
+    // *` rejects on prod (a credentialed CORS request can't use the wildcard).
+    // A plain fetch is same-origin-credentials by default, so cross-origin it
+    // sends no credentials and the wildcard is accepted.
     const data = JSON.stringify({
       action: 'abandon',
       submission_id: session.submissionId,
       session_token: session.sessionToken,
     });
 
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(getEdgeFunctionUrl(), new Blob([data], { type: 'application/json' }));
-    } else {
-      abandonForm(session.submissionId, session.sessionToken).catch(console.error);
+    try {
+      fetch(getEdgeFunctionUrl(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+        },
+        body: data,
+        keepalive: true,
+      }).catch(() => {});
+    } catch {
+      abandonForm(session.submissionId, session.sessionToken).catch(() => {});
     }
   }, [session]);
 

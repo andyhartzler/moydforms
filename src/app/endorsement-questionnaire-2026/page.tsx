@@ -5,11 +5,11 @@ import EndorsementHero from './EndorsementHero';
 import EndorsementFormClient from './EndorsementFormClient';
 
 export const metadata = {
-  title: 'Run With Us — 2026 Endorsement Questionnaire | MOYD',
+  title: 'Run With Us: 2026 Endorsement Questionnaire | MOYD',
   description:
     'The Missouri Young Democrats endorse candidates who share our vision for a Missouri that works for everyone under 40. Apply for MOYD endorsement.',
   openGraph: {
-    title: 'Run With Us — 2026 Endorsement Questionnaire',
+    title: 'Run With Us: 2026 Endorsement Questionnaire',
     description:
       'Apply for MOYD endorsement. Young Democrats 35 and under, or partner candidates 36+ who champion our issues.',
     type: 'website',
@@ -17,7 +17,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Run With Us — 2026 Endorsement Questionnaire',
+    title: 'Run With Us: 2026 Endorsement Questionnaire',
     description:
       'Apply for MOYD endorsement. Young Democrats 35 and under, or partner candidates 36+ who champion our issues.',
   },

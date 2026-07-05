@@ -1273,8 +1273,8 @@ export function CustomFieldsStage({
                 </div>
                 <div className="text-white/80 text-sm mt-0.5">
                   {formData.dob_is_young_dem === 'true'
-                    ? "You qualify as a MOYD member candidate — we'll ask about your Young Dems involvement."
-                    : "You're over 35 — we'll ask a few partner-specific questions about your alliance with MOYD."}
+                    ? "As someone under the age of 36, you qualify as a Young Democrat, so we'll ask you relevant questions."
+                    : "As someone over the age of 35, you qualify as a partner candidate, so we'll ask a few questions about your alliance with MOYD."}
                 </div>
               </div>
             </div>

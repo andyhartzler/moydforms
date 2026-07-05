@@ -99,9 +99,9 @@ export default function EndorsementHero({ candidateId, token }: EndorsementHeroP
           className="mt-6 max-w-2xl text-lg sm:text-xl leading-relaxed text-blue-50/90"
           style={{ fontFamily: 'Montserrat, sans-serif' }}
         >
-          Missouri Young Democrats endorse candidates who share our vision for a
-          Missouri that works for everyone under 40. Tell us who you are, the race
-          you're running, and where you stand — we'll do the rest.
+          Missouri Young Democrats endorse candidates who share our progressive
+          vision for a Missouri that works for everyone. Tell us who you are, the
+          race you're running, and where you stand. We'll do the rest.
         </motion.p>
 
         {/* Primary CTA */}
@@ -131,47 +131,6 @@ export default function EndorsementHero({ candidateId, token }: EndorsementHeroP
             <span className="relative">Begin application</span>
             <ArrowRight className="relative w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
-        </motion.div>
-
-        {/* Final CTA stripe */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.85 }}
-          className="mt-16 rounded-3xl p-8 sm:p-10 relative overflow-hidden border border-white/10"
-          style={{
-            background: 'linear-gradient(135deg, rgba(11,30,55,0.75) 0%, rgba(11,77,184,0.45) 100%)',
-            backdropFilter: 'blur(12px)',
-          }}
-        >
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div>
-              <div
-                className="text-gold-300 text-xs font-black uppercase tracking-[0.2em] mb-2"
-                style={{ fontFamily: 'Montserrat, sans-serif' }}
-              >
-                Ready?
-              </div>
-              <div
-                className="text-white text-2xl sm:text-3xl font-extrabold leading-tight"
-                style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-0.03em' }}
-              >
-                Let's get you on the ballot — and on ours.
-              </div>
-            </div>
-            <Link
-              href={startHref}
-              className="group flex-shrink-0 inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-bold text-primary-900 shadow-lg hover:shadow-xl transition-shadow"
-              style={{
-                backgroundImage: 'linear-gradient(135deg, #f0c04e 0%, #d4a039 100%)',
-                fontFamily: 'Montserrat, sans-serif',
-                letterSpacing: '-0.02em',
-              }}
-            >
-              Begin application
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
         </motion.div>
       </div>
     </div>
