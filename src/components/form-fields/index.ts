@@ -24,6 +24,9 @@ export { default as StarRating } from './StarRating';
 export { default as PrefilledConfirm } from './PrefilledConfirm';
 export type { PrefillPayload } from './PrefilledConfirm';
 
+// Grouped optional references with an "add another" button
+export { default as ReferenceBlock } from './ReferenceBlock';
+
 // Special
 export { default as ColorPicker } from './ColorPicker';
 export { default as SignaturePad } from './SignaturePad';

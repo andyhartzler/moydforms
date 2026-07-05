@@ -27,6 +27,7 @@ import {
   Autocomplete,
   PlacesAutocomplete,
   PrefilledConfirm,
+  ReferenceBlock,
 } from '@/components/form-fields';
 import type { PrefillPayload } from '@/components/form-fields';
 import TrueFalseToggle from '@/components/form-fields/TrueFalseToggle';
@@ -1158,6 +1159,16 @@ export function CustomFieldsStage({
 
       case 'image_picker':
         return <ImageUpload key={field.id} {...commonProps} onFileUpload={onFileUpload} />;
+
+      case 'reference_block':
+        return (
+          <ReferenceBlock
+            key={field.id}
+            field={field}
+            formData={formData}
+            setField={(id, v) => handleFieldChange(id, v)}
+          />
+        );
 
       default:
         return <TextInput key={field.id} {...commonProps} />;
