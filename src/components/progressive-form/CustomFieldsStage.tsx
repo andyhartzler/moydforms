@@ -860,25 +860,25 @@ export function CustomFieldsStage({
         ? POLICY_AREA_LABELS[field.policyArea]
         : null;
     return (
-      <div key={field.id} className="mb-8 pb-6 border-b border-gray-100 relative">
+      <div key={field.id} className="mb-8 pb-6 border-b border-gray-100">
+        {/* Gold accent bar lives in normal flow with a fixed gap below it, so it
+            never crowds or overlaps the heading. It used to be absolutely
+            positioned at top-0 and relied on the heading's top margin to clear
+            it, which collapsed onto the text on mobile (tight leading + large
+            display font). */}
         <div
-          className="absolute top-0 left-0 w-14 h-1 rounded-full"
+          className="w-14 h-1 rounded-full mb-4"
           style={{
             background: 'linear-gradient(90deg, #FDB813 0%, #f0c04e 100%)',
           }}
         />
         {eyebrowLabel && (
-          <div className="mt-5 inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-moyd-unity/70">
+          <div className="mb-2 inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-moyd-unity/70">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-moyd-sunrise" />
             {eyebrowLabel}
           </div>
         )}
-        <h3
-          className={
-            (eyebrowLabel ? 'mt-2 ' : 'mt-5 ') +
-            'font-display text-3xl sm:text-4xl font-semibold text-moyd-unity leading-[1.05] tracking-tight'
-          }
-        >
+        <h3 className="font-display text-3xl sm:text-4xl font-semibold text-moyd-unity leading-[1.05] tracking-tight">
           {field.label}
         </h3>
         {field.sectionDescription && (
