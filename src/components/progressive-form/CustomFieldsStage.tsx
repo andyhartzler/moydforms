@@ -381,9 +381,13 @@ function evaluateCondition(condition: Condition | undefined, formData: Record<st
     return v !== undefined && v !== null && String(v).trim() !== '';
   }
 
-  // Handle simple condition
+  // Handle simple condition. For a multiselect controlling field (array value),
+  // treat the condition as "value is among the selected" so e.g. an "Other,
+  // please name" text field shows when "Other" is one of the checked options.
   if ('field' in condition && 'value' in condition) {
-    return formData[condition.field] === condition.value;
+    const fv = formData[condition.field];
+    if (Array.isArray(fv)) return fv.includes(condition.value);
+    return fv === condition.value;
   }
 
   return true; // Unknown condition format, show by default
@@ -958,8 +962,24 @@ export function CustomFieldsStage({
     const error = errors[field.id];
     const normalizedType = normalizeFieldType(field.type);
 
+    // `excludeSelectedFrom` drops any option already chosen in another multiselect
+    // (e.g. the "actively pursuing" list hides endorsements you've already marked
+    // as received), so the two lists never overlap.
+    let effectiveField = field;
+    const exclFrom = (field as ExtendedFieldConfig & { excludeSelectedFrom?: string }).excludeSelectedFrom;
+    if (exclFrom && Array.isArray(field.options)) {
+      const chosen = formData[exclFrom];
+      const chosenSet = new Set(Array.isArray(chosen) ? (chosen as unknown[]).map(String) : []);
+      if (chosenSet.size > 0) {
+        effectiveField = {
+          ...field,
+          options: field.options.filter((o) => !chosenSet.has(String(typeof o === 'string' ? o : o.value))),
+        };
+      }
+    }
+
     const commonProps = {
-      field,
+      field: effectiveField,
       value,
       onChange: (val: unknown) => handleFieldChange(field.id, val),
       error,
