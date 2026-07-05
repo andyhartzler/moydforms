@@ -40,6 +40,8 @@ export type FieldType =
   // in the bag returned by prefill_endorsement_for_candidate(). When the
   // user picks Edit, the renderer falls through to `fallback_question_type`.
   | 'prefilled_confirm'
+  // Grouped optional references (1-3) with an "add another" button
+  | 'reference_block'
   // iOS (Cupertino) - render as standard on web
   | 'cupertino_text_field'
   | 'cupertino_checkbox'
