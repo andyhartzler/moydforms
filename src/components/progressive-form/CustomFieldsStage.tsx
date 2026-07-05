@@ -489,6 +489,31 @@ export function CustomFieldsStage({
   // Get all fields from schema
   const allFields = useMemo(() => normalizeSchemaToFields(schema as ExtendedSchema), [schema]);
 
+  // Pre-fill plain fields from the smart-form prefill bag (campaign committee
+  // name, treasurer, etc.) so an identified candidate sees their info already
+  // filled in — editable, and WITHOUT the "we have this on file / confirm
+  // correct" card. Only fills a field that's currently empty, so it never
+  // clobbers a resumed draft or something the user already typed.
+  useEffect(() => {
+    if (!prefillData) return;
+    setFormData((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      allFields.forEach((f) => {
+        const src = f.prefillSource;
+        if (!src) return;
+        if (normalizeFieldType(f.type) === 'prefilled_confirm') return; // card owns its value
+        const payload = prefillData[src];
+        if (!payload || payload.value == null || payload.value === '') return;
+        const cur = next[f.id];
+        if (cur !== undefined && cur !== null && cur !== '') return;
+        next[f.id] = payload.value;
+        changed = true;
+      });
+      return changed ? next : prev;
+    });
+  }, [prefillData, allFields]);
+
   // Separate identity fields from custom fields
   const { identityFieldMappings, customFields } = useMemo(() => {
     const mappings: Array<{ field: ExtendedFieldConfig; identityKey: IdentityFieldType }> = [];
