@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle, Link2, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
 import { SubmissionResult } from '@/hooks/useFormSession';
-import { AutoConfetti } from '../motion/Confetti';
+import { AutoFireworks } from '../motion/Confetti';
 import { successVariants, fadeInUp } from '@/lib/motion';
 
 interface SuccessMessageProps {
@@ -39,7 +39,7 @@ export function SuccessMessage({
 
   return (
     <>
-      <AutoConfetti />
+      <AutoFireworks />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
