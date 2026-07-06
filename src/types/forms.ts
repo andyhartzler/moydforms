@@ -23,6 +23,7 @@ export type FieldType =
   | 'date_range_picker'
   // Numeric
   | 'slider'
+  | 'value_slider' // branded single-value slider (percent / currency / number)
   | 'range_slider'
   | 'touch_spin'
   | 'touchSpin' // alias
@@ -127,6 +128,12 @@ export interface FormFieldConfig {
   initialValue?: number;
   step?: number;
   divisions?: number;
+  // Slider display (value_slider): how to format the live value + ticks, and
+  // whether the max is open-ended (renders the top value with a trailing "+").
+  sliderFormat?: 'percent' | 'currency' | 'number';
+  openEnded?: boolean;
+  // checkbox_group: cap how many options can be selected (e.g. "up to 3").
+  maxSelections?: number;
 
   // Date/Time properties
   firstDate?: string;
@@ -366,6 +373,15 @@ export function normalizeFieldType(type: string): FieldType {
     'file_upload': 'file_picker',
     'file': 'file_picker',
     'image_upload': 'image_picker',
+    // Open-ended prose questions. Without these the CRM's 'long_answer' type
+    // fell through to the renderer's default single-line TextInput, so a long
+    // question ("Why are you running?") got a cramped one-line box — the
+    // "awkward space under the question" report. Map them to a real textarea.
+    'long_answer': 'textarea',
+    'long_text': 'textarea',
+    'paragraph': 'textarea',
+    'multiline': 'textarea',
+    'short_answer': 'text',
   };
   return (aliases[type] || type) as FieldType;
 }

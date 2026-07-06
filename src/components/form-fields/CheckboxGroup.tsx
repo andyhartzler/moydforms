@@ -17,8 +17,13 @@ interface CheckboxGroupProps {
 export default function CheckboxGroup({ field, value, onChange, error, onBlur, onFocus }: CheckboxGroupProps) {
   const options = field.options || [];
   const selectedValues: string[] = value || [];
+  const maxSelections = field.maxSelections;
+  const atLimit = typeof maxSelections === 'number' && selectedValues.length >= maxSelections;
 
   const handleChange = (optionValue: string, checked: boolean) => {
+    // Enforce the selection cap: block adding a new option once the limit is
+    // hit (unchecking is always allowed).
+    if (checked && atLimit && !selectedValues.includes(optionValue)) return;
     const newValues = checked
       ? [...selectedValues, optionValue]
       : selectedValues.filter((v: string) => v !== optionValue);
@@ -32,9 +37,18 @@ export default function CheckboxGroup({ field, value, onChange, error, onBlur, o
         {field.required && <span className="text-red-500 ml-1">*</span>}
       </label>
       <FieldHelp html={field.help} className="text-sm text-gray-500 mb-2" />
+      {typeof maxSelections === 'number' && (
+        <p className="text-sm text-gray-500 mb-2">
+          Select up to {maxSelections}
+          <span className="text-gray-400"> ({selectedValues.length}/{maxSelections})</span>
+        </p>
+      )}
       <div className="space-y-2">
         {options.map((option, index) => {
           const isChecked = selectedValues.includes(option.value);
+          // At the cap, unchecked options are locked (checked ones stay
+          // toggleable so the user can swap a choice).
+          const locked = (atLimit && !isChecked) || field.enabled === false;
           return (
             <motion.label
               key={option.value}
@@ -42,16 +56,16 @@ export default function CheckboxGroup({ field, value, onChange, error, onBlur, o
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05, type: 'spring', stiffness: 400, damping: 25 }}
-              whileTap={{ scale: 0.98 }}
+              whileTap={locked ? undefined : { scale: 0.98 }}
               className={`
-                flex items-center p-4 rounded-xl cursor-pointer
+                flex items-center p-4 rounded-xl
                 border-2 transition-colors duration-200
                 min-h-[56px]
                 ${isChecked
                   ? 'border-primary-600 bg-primary-50'
                   : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                 }
-                ${field.enabled === false ? 'opacity-50 cursor-not-allowed' : ''}
+                ${locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
               `}
               style={isChecked ? { boxShadow: '0 0 0 1px rgba(11, 77, 184, 0.2)' } : {}}
             >
@@ -64,7 +78,7 @@ export default function CheckboxGroup({ field, value, onChange, error, onBlur, o
                   onBlur={onBlur}
                   onFocus={onFocus}
                   className="sr-only"
-                  disabled={field.enabled === false}
+                  disabled={locked}
                 />
                 <motion.div
                   className="w-6 h-6 rounded-lg border-2 flex items-center justify-center"

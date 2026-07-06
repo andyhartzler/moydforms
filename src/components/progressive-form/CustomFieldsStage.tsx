@@ -17,6 +17,7 @@ import {
   DatePicker,
   DateRangePicker,
   Slider,
+  ValueSlider,
   RangeSlider,
   NumberStepper,
   StarRating,
@@ -38,6 +39,12 @@ import { pageVariants, pageTransition, staggerContainer, fieldEntrance } from '@
 import { useServerDraft } from '@/hooks/useServerDraft';
 import { ResumeModal } from './ResumeModal';
 import { PolicyAreaBreadcrumb, POLICY_AREA_LABELS } from './PolicyAreaBreadcrumb';
+// Authoritative Missouri ZIP -> dominant county map, built from the MO voter
+// file (public.mo_voter_file, residential_zip5 + county). Kansas City is an
+// election jurisdiction, not a county, so its ZIPs are resolved to the real
+// underlying county (Jackson/Clay/Platte). Used to auto-fill County when the
+// applicant types their address by hand.
+import MO_ZIP_COUNTY from '@/data/mo-zip-county.json';
 
 interface CustomFieldsStageProps {
   schema: FormSchema;
@@ -427,6 +434,15 @@ export function CustomFieldsStage({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageDirection, setPageDirection] = useState(1);
+  // Highest page the respondent has reached. Every page up to here has already
+  // passed validation once, so its step dot is safe to jump straight to (in
+  // either direction) — this is what lets someone who reached the end hop back
+  // to the last page again instead of being stuck.
+  const [maxVisitedPage, setMaxVisitedPage] = useState<number>(1);
+  // Anchor at the very top of the current page's fields, so navigating scrolls
+  // the new QUESTIONS to the top — not the persistent identity card + progress
+  // bar, which otherwise shoved the actual content down to mid-screen.
+  const pageTopRef = useRef<HTMLDivElement>(null);
   const fieldFocusTime = useRef<Record<string, number>>({});
   const [showRestoreBanner, setShowRestoreBanner] = useState<boolean>(false);
 
@@ -529,6 +545,40 @@ export function CustomFieldsStage({
     });
   }, [prefillData, allFields]);
 
+  // Does this form use the home_zip / home_county address convention? Only then
+  // do we run the ZIP -> county autofill below.
+  const hasZipCountyPair = useMemo(
+    () => allFields.some((f) => f.id === 'home_zip') && allFields.some((f) => f.id === 'home_county'),
+    [allFields]
+  );
+
+  // Auto-fill County from a Missouri ZIP the applicant types. Places
+  // autocomplete would normally populate county via places_fill_map, but it's
+  // unavailable while Google Maps billing is down, so most people enter their
+  // address by hand and County was being left blank. When home_zip is a
+  // complete 5-digit MO ZIP we look it up in MO_ZIP_COUNTY and set County.
+  // lastAutoCounty tracks the value we set so we only ever overwrite our own
+  // autofill (or an empty field) and never clobber a county the user typed.
+  const lastAutoCounty = useRef<string | null>(null);
+  useEffect(() => {
+    if (!hasZipCountyPair) return;
+    const raw = formData.home_zip;
+    const zip = typeof raw === 'string' ? raw.trim().slice(0, 5) : '';
+    if (!/^\d{5}$/.test(zip)) return;
+    const county = (MO_ZIP_COUNTY as Record<string, string>)[zip];
+    if (!county) return;
+    const cur = formData.home_county;
+    const curEmpty = cur === undefined || cur === null || cur === '';
+    // Respect a county the applicant typed themselves.
+    if (!curEmpty && cur !== lastAutoCounty.current) return;
+    if (cur === county) {
+      lastAutoCounty.current = county;
+      return;
+    }
+    lastAutoCounty.current = county;
+    handleFieldChange('home_county', county);
+  }, [formData.home_zip, formData.home_county, hasZipCountyPair]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Separate identity fields from custom fields
   const { identityFieldMappings, customFields } = useMemo(() => {
     const mappings: Array<{ field: ExtendedFieldConfig; identityKey: IdentityFieldType }> = [];
@@ -580,6 +630,12 @@ export function CustomFieldsStage({
     if (currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
+  }, [currentPage, totalPages]);
+
+  // Keep the furthest-reached marker in sync however the page changed (Next,
+  // draft restore, age-track jump), clamped to the pages that currently exist.
+  useEffect(() => {
+    setMaxVisitedPage((m) => Math.min(Math.max(m, currentPage), totalPages));
   }, [currentPage, totalPages]);
 
   // Derive a policy-area label for the current page. We take the most common
@@ -1011,9 +1067,19 @@ export function CustomFieldsStage({
       const chosen = formData[exclFrom];
       const chosenSet = new Set(Array.isArray(chosen) ? (chosen as unknown[]).map(String) : []);
       if (chosenSet.size > 0) {
+        // "Other" is a catch-all — a candidate can have a different "other"
+        // endorsement received vs pursuing, so it must stay selectable in both
+        // lists even after it's picked in the excluded-from list.
+        const isOther = (o: string | { value: string; label?: string }) => {
+          const val = String(typeof o === 'string' ? o : o.value).toLowerCase();
+          const lab = String(typeof o === 'string' ? o : (o.label ?? '')).toLowerCase();
+          return val === 'other' || val.startsWith('other') || lab.startsWith('other');
+        };
         effectiveField = {
           ...field,
-          options: field.options.filter((o) => !chosenSet.has(String(typeof o === 'string' ? o : o.value))),
+          options: field.options.filter(
+            (o) => isOther(o) || !chosenSet.has(String(typeof o === 'string' ? o : o.value))
+          ),
         };
       }
     }
@@ -1136,6 +1202,9 @@ export function CustomFieldsStage({
       case 'cupertino_slider':
         return <Slider key={field.id} {...commonProps} />;
 
+      case 'value_slider':
+        return <ValueSlider key={field.id} {...commonProps} />;
+
       case 'range_slider':
         return <RangeSlider key={field.id} {...commonProps} />;
 
@@ -1180,35 +1249,42 @@ export function CustomFieldsStage({
   const progressPercent = isMultiPage ? (currentPage / totalPages) * 100 : 100;
 
   // Override nav functions to track direction
+  // Scroll so the NEW page's first question sits near the top of the viewport
+  // (just under the site header), instead of scrolling to the whole form top
+  // which re-shows the identity card + progress and pushes questions to
+  // mid-screen. Runs after the page-transition animation has swapped content.
+  const scrollToPageTop = () => {
+    setTimeout(() => {
+      const el = pageTopRef.current;
+      if (!el) return;
+      const y = window.scrollY + el.getBoundingClientRect().top - 88;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }, 120);
+  };
+
+  const scrollToFirstError = () => {
+    const firstErrorEl = document.querySelector('[class*="text-red-600"]');
+    firstErrorEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
   const goToNextPageAnimated = () => {
     if (validateCurrentPage()) {
       setPageDirection(1);
-      setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-
-      // Bring the form into view on page change, but ONLY if its top has
-      // scrolled out above the viewport (i.e. the user was reading deep down a
-      // long page). block:'nearest' is a no-op when the form top is already
-      // visible, so a short page that barely scrolled doesn't yank the user's
-      // view back to the top.
-      setTimeout(() => {
-        const formEl = document.querySelector('.custom-fields-form');
-        if (!formEl) return;
-        const top = formEl.getBoundingClientRect().top;
-        // Only scroll when the form top is meaningfully above the viewport.
-        if (top < -40) {
-          formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
+      setCurrentPage((prev) => {
+        const next = Math.min(prev + 1, totalPages);
+        setMaxVisitedPage((m) => Math.max(m, next));
+        return next;
+      });
+      scrollToPageTop();
     } else {
-      // Auto-scroll to first error
-      const firstErrorEl = document.querySelector('[class*="text-red-600"]');
-      firstErrorEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      scrollToFirstError();
     }
   };
 
   const goToPrevPageAnimated = () => {
     setPageDirection(-1);
     setCurrentPage((prev) => Math.max(prev - 1, 1));
+    scrollToPageTop();
   };
 
   // Aria-live error summary — screen readers announce when a new validation
@@ -1292,14 +1368,26 @@ export function CustomFieldsStage({
             <PageDots
               total={totalPages}
               current={currentPage - 1}
+              maxReached={maxVisitedPage - 1}
               onDotClick={(i) => {
-                // Let the user jump straight BACK to any earlier step by tapping
-                // its indicator. Forward jumps are ignored so required fields on
-                // skipped pages can't be bypassed.
                 const target = i + 1;
+                if (target === currentPage) return;
                 if (target < currentPage) {
+                  // Jumping BACK is always free.
                   setPageDirection(-1);
                   setCurrentPage(target);
+                  scrollToPageTop();
+                } else if (target <= maxVisitedPage) {
+                  // Jumping FORWARD is allowed only to pages already completed
+                  // (reached before), and only if the current page still
+                  // validates so an error isn't carried past.
+                  if (validateCurrentPage()) {
+                    setPageDirection(1);
+                    setCurrentPage(target);
+                    scrollToPageTop();
+                  } else {
+                    scrollToFirstError();
+                  }
                 }
               }}
             />
@@ -1398,7 +1486,7 @@ export function CustomFieldsStage({
 
       {/* Custom fields with page transitions */}
       {hasVisibleFields && (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div ref={pageTopRef} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden scroll-mt-24">
           <AnimatePresence mode="wait" custom={pageDirection}>
             <motion.div
               key={currentPage}
@@ -1488,6 +1576,26 @@ export function CustomFieldsStage({
                 </motion.button>
               )}
             </div>
+
+            {/* Inline hint under the action button when the page has errors, so
+                it's obvious WHY Next/Submit didn't advance. */}
+            <AnimatePresence>
+              {errorCount > 0 && (
+                <motion.p
+                  key="page-error-hint"
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  role="alert"
+                  className="mt-3 flex items-center justify-center gap-1.5 text-sm font-medium text-red-600"
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  Please fix the errors above.
+                </motion.p>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       )}

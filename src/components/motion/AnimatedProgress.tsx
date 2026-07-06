@@ -28,39 +28,46 @@ export function AnimatedProgressBar({ percent, className = '' }: AnimatedProgres
 interface PageDotsProps {
   total: number;
   current: number;
+  /** Highest step index the user has reached (0-based). Any step up to here has
+   *  been completed, so its dot is tappable in either direction. Defaults to
+   *  `current` (back-only) when not provided. */
+  maxReached?: number;
   onDotClick?: (index: number) => void;
 }
 
-export function PageDots({ total, current, onDotClick }: PageDotsProps) {
+export function PageDots({ total, current, maxReached, onDotClick }: PageDotsProps) {
   if (total <= 1) return null;
+  const reached = maxReached ?? current;
 
   return (
     <div className="flex items-center justify-center gap-2 py-3">
       {Array.from({ length: total }).map((_, i) => {
-        // Only completed (earlier) steps are tappable — you can jump back, not
-        // skip ahead past required fields.
-        const canGoBack = !!onDotClick && i < current;
+        // A dot is tappable if it's a completed step (index <= furthest reached)
+        // and isn't the current one — so you can jump BACK to any earlier step
+        // or FORWARD to any step you already finished (e.g. back to the end).
+        const isCompleted = i < current || i <= reached;
+        const canNavigate = !!onDotClick && i !== current && i <= reached;
         return (
           <motion.button
             key={i}
             type="button"
-            onClick={() => canGoBack && onDotClick?.(i)}
-            disabled={!canGoBack}
-            className={`rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 ${canGoBack ? 'cursor-pointer' : 'cursor-default'}`}
+            onClick={() => canNavigate && onDotClick?.(i)}
+            disabled={!canNavigate}
+            className={`rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 ${canNavigate ? 'cursor-pointer' : 'cursor-default'}`}
             animate={{
               width: i === current ? 24 : 8,
               height: 8,
               backgroundColor: i === current
                 ? '#0b4db8'
-                : i < current
+                : isCompleted
                   ? '#4ade80'
                   : '#d1d5db',
             }}
-            whileHover={canGoBack ? { scale: 1.35 } : undefined}
-            whileTap={canGoBack ? { scale: 0.9 } : undefined}
+            whileHover={canNavigate ? { scale: 1.35 } : undefined}
+            whileTap={canNavigate ? { scale: 0.9 } : undefined}
             transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-            aria-label={canGoBack ? `Go back to step ${i + 1}` : `Step ${i + 1}`}
-            title={canGoBack ? `Go back to step ${i + 1}` : undefined}
+            aria-label={canNavigate ? `Go to step ${i + 1}` : `Step ${i + 1}`}
+            title={canNavigate ? `Go to step ${i + 1}` : undefined}
           />
         );
       })}

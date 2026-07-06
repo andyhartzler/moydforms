@@ -16,6 +16,7 @@ export { default as DateRangePicker } from './DateRangePicker';
 
 // Numeric
 export { default as Slider } from './Slider';
+export { default as ValueSlider } from './ValueSlider';
 export { default as RangeSlider } from './RangeSlider';
 export { default as NumberStepper } from './NumberStepper';
 export { default as StarRating } from './StarRating';

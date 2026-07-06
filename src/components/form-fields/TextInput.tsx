@@ -47,11 +47,30 @@ export default function TextInput({ field, value, onChange, error, onBlur, onFoc
   };
 
   const hasValue = value && value.length > 0;
+  // Locally decide whether the current value actually PASSES format validation,
+  // mirroring the rules the page validator applies on Next/Submit. Without this
+  // the green check only knew "non-empty and no error yet" — so typing a single
+  // letter into an email field and blurring flashed a green check, then Next
+  // said "Invalid email address". The check must not claim valid until the value
+  // would really pass.
+  const formatValid = (() => {
+    if (!hasValue) return false;
+    const v = String(value);
+    if (field.type === 'email') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    if (field.type === 'url') return /^(https?:\/\/|www\.).+\..+/i.test(v);
+    if (field.type === 'phone' || field.type === 'tel') return /^[\d\s\-+()]{7,}$/.test(v);
+    const pattern = field.validation?.pattern;
+    if (pattern) {
+      try { if (!new RegExp(pattern).test(v)) return false; } catch { /* ignore bad regex */ }
+    }
+    const minLen = field.validation?.minLength;
+    if (minLen != null && v.length < minLen) return false;
+    return true;
+  })();
   // Only show the "valid" green check once the field has been committed
-  // (blurred at least once) AND is not currently being edited AND passes
-  // validation. Without the !isFocused guard the check popped in mid-typing
-  // after a couple characters, which read as a glitch.
-  const isValid = hasBeenTouched && !isFocused && hasValue && !error;
+  // (blurred at least once), is not currently being edited, has no error, AND
+  // actually passes format validation.
+  const isValid = hasBeenTouched && !isFocused && hasValue && !error && formatValid;
   const showFloatingLabel = isFocused || hasValue;
 
   return (

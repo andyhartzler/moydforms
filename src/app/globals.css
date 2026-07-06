@@ -289,3 +289,56 @@
     padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   }
 }
+
+/* Branded range slider (ValueSlider / field type value_slider).
+   The track fill is set inline as a navy->gold gradient; here we style the
+   thumb and base track height cross-browser. */
+.moyd-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 10px;
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+}
+.moyd-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 3px solid #263351;
+  box-shadow: 0 4px 12px rgba(38, 51, 81, 0.35);
+  cursor: grab;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.moyd-range::-webkit-slider-thumb:hover { transform: scale(1.08); }
+.moyd-range:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  transform: scale(1.15);
+  box-shadow: 0 6px 18px rgba(38, 51, 81, 0.45);
+}
+.moyd-range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(212, 160, 57, 0.5);
+}
+/* Firefox */
+.moyd-range::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 3px solid #263351;
+  box-shadow: 0 4px 12px rgba(38, 51, 81, 0.35);
+  cursor: grab;
+}
+.moyd-range::-moz-range-track {
+  height: 10px;
+  border-radius: 9999px;
+  background: transparent;
+}
+.moyd-range::-moz-range-progress {
+  height: 10px;
+  border-radius: 9999px;
+  background: #d4a039;
+}
