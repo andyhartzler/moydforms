@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect, useId } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormFieldConfig, FormSchema, normalizeFieldType, FieldType, FileUploadResult } from '@/types/forms';
 import { FileUploadInfo } from '@/lib/edgeFunction';
@@ -444,6 +445,16 @@ export function CustomFieldsStage({
   // bar, which otherwise shoved the actual content down to mid-screen.
   const pageTopRef = useRef<HTMLDivElement>(null);
   const fieldFocusTime = useRef<Record<string, number>>({});
+  // Stable id linking the <form> to the mobile action bar, which we portal to
+  // <body> (see below) so it can pin to the viewport.
+  const formDomId = useId();
+  // The mobile action bar is portaled to document.body so `position: fixed`
+  // resolves against the viewport, not the transformed page-transition wrapper
+  // (framer-motion leaves a `transform` on the ancestor, which was making the
+  // "fixed" bar sit at the bottom of the form content — only visible after
+  // scrolling). Portal only after mount (document exists).
+  const [portalMounted, setPortalMounted] = useState(false);
+  useEffect(() => { setPortalMounted(true); }, []);
   const [showRestoreBanner, setShowRestoreBanner] = useState<boolean>(false);
 
   // Server-side draft, keyed by the respondent's phone + form slug. Persists to
@@ -1296,8 +1307,99 @@ export function CustomFieldsStage({
       : `${errorCount} answers need attention before you can continue.`
     : '';
 
+  // The action row (Prev + Next/Submit + error hint). Rendered twice: in-flow
+  // inside the card on desktop, and in a body-portaled fixed bar on mobile. The
+  // submit button carries `form={formDomId}` so it still submits the form even
+  // when it lives outside the <form> (in the portal).
+  const navButtons = (
+    <>
+      <div className="flex gap-3">
+        {!isFirstPage ? (
+          <motion.button
+            type="button"
+            onClick={goToPrevPageAnimated}
+            disabled={isLoading}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 min-h-[48px]"
+          >
+            <ChevronLeft className="h-5 w-5" />
+            <span className="hidden sm:inline">Previous</span>
+          </motion.button>
+        ) : onBack ? (
+          <motion.button
+            type="button"
+            onClick={onBack}
+            disabled={isLoading}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 min-h-[48px]"
+          >
+            <ChevronLeft className="h-5 w-5" />
+            <span className="hidden sm:inline">Back</span>
+          </motion.button>
+        ) : null}
+
+        {!isLastPage ? (
+          <motion.button
+            type="button"
+            onClick={goToNextPageAnimated}
+            disabled={isLoading}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl text-white font-semibold hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-md hover:shadow-lg min-h-[48px]"
+          >
+            Next
+            <ChevronRight className="h-5 w-5" />
+          </motion.button>
+        ) : (
+          <motion.button
+            type="submit"
+            form={formDomId}
+            disabled={isLoading}
+            whileHover={!isLoading ? { scale: 1.02 } : {}}
+            whileTap={!isLoading ? { scale: 0.97 } : {}}
+            className="flex-1 flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white font-semibold text-base hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-md hover:shadow-lg min-h-[48px]"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                <Send className="h-5 w-5" />
+                {submitLabel}
+              </>
+            )}
+          </motion.button>
+        )}
+      </div>
+
+      {/* Inline hint under the action button when the page has errors, so it's
+          obvious WHY Next/Submit didn't advance. */}
+      <AnimatePresence>
+        {errorCount > 0 && (
+          <motion.p
+            key="page-error-hint"
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            role="alert"
+            className="mt-3 flex items-center justify-center gap-1.5 text-sm font-medium text-red-600"
+          >
+            <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            Please fix the errors above.
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </>
+  );
+
   return (
-    <form onSubmit={handleSubmit} className="custom-fields-form" noValidate>
+    <form id={formDomId} onSubmit={handleSubmit} className="custom-fields-form" noValidate>
       {/* Invisible aria-live region — announces validation changes to AT users
           without disturbing the visual layout. */}
       <div className="sr-only" aria-live="polite" role="status">
@@ -1513,90 +1615,13 @@ export function CustomFieldsStage({
             </motion.div>
           </AnimatePresence>
 
-          {/* Navigation and submit buttons — sticky on mobile */}
-          <div className="px-6 sm:px-8 pb-6 sm:pb-8 pt-4 border-t border-gray-100 bg-gray-50/50 md:relative sticky-bottom-nav md:static md:bg-gray-50/50">
-            <div className="flex gap-3">
-              {!isFirstPage ? (
-                <motion.button
-                  type="button"
-                  onClick={goToPrevPageAnimated}
-                  disabled={isLoading}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 min-h-[48px]"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                  <span className="hidden sm:inline">Previous</span>
-                </motion.button>
-              ) : onBack ? (
-                <motion.button
-                  type="button"
-                  onClick={onBack}
-                  disabled={isLoading}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 min-h-[48px]"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                  <span className="hidden sm:inline">Back</span>
-                </motion.button>
-              ) : null}
-
-              {!isLastPage ? (
-                <motion.button
-                  type="button"
-                  onClick={goToNextPageAnimated}
-                  disabled={isLoading}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl text-white font-semibold hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-md hover:shadow-lg min-h-[48px]"
-                >
-                  Next
-                  <ChevronRight className="h-5 w-5" />
-                </motion.button>
-              ) : (
-                <motion.button
-                  type="submit"
-                  disabled={isLoading}
-                  whileHover={!isLoading ? { scale: 1.02 } : {}}
-                  whileTap={!isLoading ? { scale: 0.97 } : {}}
-                  className="flex-1 flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white font-semibold text-base hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-md hover:shadow-lg min-h-[48px]"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-5 w-5" />
-                      {submitLabel}
-                    </>
-                  )}
-                </motion.button>
-              )}
-            </div>
-
-            {/* Inline hint under the action button when the page has errors, so
-                it's obvious WHY Next/Submit didn't advance. */}
-            <AnimatePresence>
-              {errorCount > 0 && (
-                <motion.p
-                  key="page-error-hint"
-                  initial={{ opacity: 0, y: -6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  role="alert"
-                  className="mt-3 flex items-center justify-center gap-1.5 text-sm font-medium text-red-600"
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  Please fix the errors above.
-                </motion.p>
-              )}
-            </AnimatePresence>
+          {/* Desktop: nav sits in-flow at the bottom of the card. */}
+          <div className="hidden md:block px-6 sm:px-8 pb-6 sm:pb-8 pt-4 border-t border-gray-100 bg-gray-50/50">
+            {navButtons}
           </div>
+          {/* Mobile: spacer so the fixed action bar (below) never covers the
+              last field. */}
+          <div className="h-28 md:hidden" aria-hidden />
         </div>
       )}
 
@@ -1668,6 +1693,19 @@ export function CustomFieldsStage({
             )}
           </div>
         </div>
+      )}
+
+      {/* Mobile action bar — portaled to <body> so `position: fixed` pins to the
+          viewport (not the transformed page-transition wrapper). Always visible
+          at the bottom on mobile; hidden on desktop where the in-card nav shows. */}
+      {portalMounted && hasVisibleFields && createPortal(
+        <div
+          className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur-md px-4 pt-3 shadow-[0_-4px_24px_-8px_rgba(38,51,81,0.25)]"
+          style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
+        >
+          {navButtons}
+        </div>,
+        document.body,
       )}
     </form>
   );
