@@ -135,13 +135,41 @@ export async function POST(
     (typeof (formData as Record<string, unknown>).candidate_id === 'string'
       ? ((formData as Record<string, unknown>).candidate_id as string)
       : null);
-  if (slug.startsWith('endorsement-questionnaire') && rawCandidateId && uuidRegex.test(rawCandidateId)) {
-    const { error: linkErr } = await supabase
-      .from('form_submissions')
-      .update({ candidate_id: rawCandidateId })
-      .eq('id', submission.id);
-    if (linkErr) {
-      console.warn('[endorsement] failed to link candidate_id:', linkErr);
+  if (slug.startsWith('endorsement-questionnaire')) {
+    let linkCandidateId: string | null =
+      rawCandidateId && uuidRegex.test(rawCandidateId) ? rawCandidateId : null;
+
+    // Fallback for public-URL submissions with no personalized token: match the
+    // applicant to a candidate record by campaign email, then by full name.
+    // Only a UNIQUE match links — an ambiguous match is left for manual linking
+    // in the CRM so we never attach a submission to the wrong candidate.
+    if (!linkCandidateId) {
+      if (submitter?.email) {
+        const { data: byEmail } = await supabase
+          .from('candidates')
+          .select('id')
+          .ilike('campaign_email', submitter.email)
+          .limit(2);
+        if (byEmail && byEmail.length === 1) linkCandidateId = byEmail[0].id;
+      }
+      if (!linkCandidateId && submitter?.name) {
+        const { data: byName } = await supabase
+          .from('candidates')
+          .select('id')
+          .ilike('name', submitter.name.trim())
+          .limit(2);
+        if (byName && byName.length === 1) linkCandidateId = byName[0].id;
+      }
+    }
+
+    if (linkCandidateId) {
+      const { error: linkErr } = await supabase
+        .from('form_submissions')
+        .update({ candidate_id: linkCandidateId })
+        .eq('id', submission.id);
+      if (linkErr) {
+        console.warn('[endorsement] failed to link candidate_id:', linkErr);
+      }
     }
   }
 
