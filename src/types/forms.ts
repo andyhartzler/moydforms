@@ -132,6 +132,10 @@ export interface FormFieldConfig {
   // whether the max is open-ended (renders the top value with a trailing "+").
   sliderFormat?: 'percent' | 'currency' | 'number';
   openEnded?: boolean;
+  /** Unit appended to a number-format slider's live value (e.g. "years", "hrs/week"). */
+  sliderUnit?: string;
+  /** Field id whose numeric value a percent slider multiplies to show "≈ $X". */
+  derivedFromField?: string;
   // checkbox_group: cap how many options can be selected (e.g. "up to 3").
   maxSelections?: number;
 

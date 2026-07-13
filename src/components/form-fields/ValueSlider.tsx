@@ -33,6 +33,7 @@ export default function ValueSlider({ field, value, onChange, error, onBlur, onF
   const step = field.step ?? (field.divisions ? (max - min) / field.divisions : 1);
   const format = field.sliderFormat ?? 'number';
   const openEnded = !!field.openEnded;
+  const unit = field.sliderUnit ? ` ${field.sliderUnit}` : '';
 
   const [dragging, setDragging] = useState(false);
 
@@ -64,7 +65,9 @@ export default function ValueSlider({ field, value, onChange, error, onBlur, onF
       return `$${Math.round(v).toLocaleString('en-US')}${atMax ? '+' : ''}`;
     }
     const atMax = openEnded && v >= max;
-    return `${Math.round(v).toLocaleString('en-US')}${atMax ? '+' : ''}`;
+    // number format: append the unit on the live value (bubble), keep the end
+    // labels compact.
+    return `${Math.round(v).toLocaleString('en-US')}${atMax ? '+' : ''}${compact ? '' : unit}`;
   };
 
   return (
