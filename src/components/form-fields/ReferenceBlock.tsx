@@ -63,13 +63,13 @@ export default function ReferenceBlock({ field, formData, setField }: ReferenceB
               <div className="text-sm font-bold uppercase tracking-wide text-primary-700 mb-3">
                 Reference {n}
               </div>
-              <div className="pl-3 border-l-2 border-gray-100 space-y-3">
+              <div className="pl-3 border-l-2 border-gray-100 space-y-2.5">
                 {PARTS.map((p) => {
                   const id = `ref_${n}_${p.key}`;
                   const val = typeof formData[id] === 'string' ? (formData[id] as string) : '';
                   return (
                     <div key={id}>
-                      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-0.5 leading-tight">
                         {p.label}
                       </label>
                       <input

@@ -132,6 +132,10 @@ const ZIP_PATTERNS = ['zip', 'zipcode', 'zip_code', 'postal', 'postal_code', 'po
 const THIRD_PARTY_FIELD_EXCLUSIONS = [
   'ref_', 'reference', 'treasurer', 'incumbent', 'opponent', 'manager',
   'consultant', 'committee', 'witness', 'preferred',
+  // The "Other endorsement(s), please name" fields matched the NAME identity
+  // pattern (via "name" in the label) and got swallowed into the identity
+  // stage, so the reveal-on-Other textbox never rendered.
+  'endorsement',
   // 'home_' address-page fields (home_zip especially) are their own answerable
   // questions on the "Where you live" page — home_zip matches the ZIP identity
   // pattern and was being absorbed into the identity stage, so it never rendered
