@@ -11,6 +11,9 @@ interface ValueSliderProps {
   error?: string;
   onBlur?: () => void;
   onFocus?: () => void;
+  /** For a percent slider: the dollar base to apply the percentage to (e.g. the
+   *  total raised). When set, a live "≈ $X" amount renders beneath the slider. */
+  derivedBase?: number;
 }
 
 /**
@@ -24,7 +27,7 @@ interface ValueSliderProps {
  *  - sliderFormat: 'percent' | 'currency' | 'number'
  *  - openEnded: render the max value with a trailing "+" (e.g. "$250,000+")
  */
-export default function ValueSlider({ field, value, onChange, error, onBlur, onFocus }: ValueSliderProps) {
+export default function ValueSlider({ field, value, onChange, error, onBlur, onFocus, derivedBase }: ValueSliderProps) {
   const min = field.minValue ?? 0;
   const max = field.maxValue ?? 100;
   const step = field.step ?? (field.divisions ? (max - min) / field.divisions : 1);
@@ -123,6 +126,21 @@ export default function ValueSlider({ field, value, onChange, error, onBlur, onF
           <span>{fmt(max, true)}</span>
         </div>
       </div>
+
+      {/* Live derived dollar amount for a percent slider (e.g. self-funded % of
+          the total raised). Recomputes as the thumb moves. */}
+      {format === 'percent' && typeof derivedBase === 'number' && derivedBase > 0 && (
+        <div className="mt-4 flex justify-center">
+          <div className="rounded-xl border border-primary-100 bg-primary-50 px-5 py-3 text-center">
+            <div className="text-xl font-bold tabular-nums text-moyd-unity">
+              ≈ ${Math.round((current / 100) * derivedBase).toLocaleString('en-US')}
+            </div>
+            <div className="mt-0.5 text-xs text-gray-500">
+              self-funded, of ${Math.round(derivedBase).toLocaleString('en-US')} raised
+            </div>
+          </div>
+        </div>
+      )}
 
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </div>

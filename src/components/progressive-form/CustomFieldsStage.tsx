@@ -1258,8 +1258,19 @@ export function CustomFieldsStage({
       case 'cupertino_slider':
         return <Slider key={field.id} {...commonProps} />;
 
-      case 'value_slider':
-        return <ValueSlider key={field.id} {...commonProps} />;
+      case 'value_slider': {
+        // A percent slider can show a live dollar amount derived from another
+        // field (e.g. self-funded % applied to the total raised above).
+        const derivedFrom = (field as ExtendedFieldConfig & { derivedFromField?: string }).derivedFromField;
+        const derivedBase = derivedFrom ? Number(formData[derivedFrom]) : undefined;
+        return (
+          <ValueSlider
+            key={field.id}
+            {...commonProps}
+            derivedBase={Number.isFinite(derivedBase) ? derivedBase : undefined}
+          />
+        );
+      }
 
       case 'range_slider':
         return <RangeSlider key={field.id} {...commonProps} />;
