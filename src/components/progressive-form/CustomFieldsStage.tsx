@@ -77,6 +77,44 @@ interface CustomFieldsStageProps {
   prefillData?: Record<string, PrefillPayload> | null;
 }
 
+// Missouri statewide election calendar (most-recent-first): partisan primaries
+// + general elections. Used to build the "which elections have you voted in?"
+// checklist dynamically — a respondent only sees elections they were old enough
+// (18 on election day) to vote in. Note MO held presidential preference
+// primaries in 2016 and 2020 only (the state primary was repealed for 2024).
+interface ElectionOption { value: string; label: string; date: string }
+const MO_ELECTIONS: ElectionOption[] = [
+  { value: '2024_general', label: '2024 General Election (November)', date: '2024-11-05' },
+  { value: '2024_aug', label: '2024 August Primary', date: '2024-08-06' },
+  { value: '2022_general', label: '2022 General Election (November)', date: '2022-11-08' },
+  { value: '2022_aug', label: '2022 August Primary', date: '2022-08-02' },
+  { value: '2020_general', label: '2020 General Election (November)', date: '2020-11-03' },
+  { value: '2020_aug', label: '2020 August Primary', date: '2020-08-04' },
+  { value: '2020_pres', label: '2020 Presidential Primary (March)', date: '2020-03-10' },
+  { value: '2018_general', label: '2018 General Election (November)', date: '2018-11-06' },
+  { value: '2018_aug', label: '2018 August Primary', date: '2018-08-07' },
+  { value: '2016_general', label: '2016 General Election (November)', date: '2016-11-08' },
+  { value: '2016_aug', label: '2016 August Primary', date: '2016-08-02' },
+  { value: '2016_pres', label: '2016 Presidential Primary (March)', date: '2016-03-15' },
+];
+
+// Build the election checklist for a given date of birth: only elections the
+// person was at least 18 for on election day, plus a trailing "None of these".
+// When the DOB isn't a complete ISO date yet, show the full list (the field
+// lives after the DOB step, so this is just a safe fallback).
+function eligibleElectionOptions(dob: unknown): Array<{ value: string; label: string }> {
+  let list = MO_ELECTIONS;
+  if (typeof dob === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dob.trim())) {
+    const born = new Date(dob.trim());
+    if (!Number.isNaN(born.getTime())) {
+      const eighteenth = new Date(born);
+      eighteenth.setFullYear(eighteenth.getFullYear() + 18);
+      list = MO_ELECTIONS.filter((e) => new Date(e.date) >= eighteenth);
+    }
+  }
+  return [...list.map((e) => ({ value: e.value, label: e.label })), { value: 'none', label: 'None of these' }];
+}
+
 // Patterns to detect identity fields by ID or label
 const PHONE_PATTERNS = ['phone', 'mobile', 'cell', 'telephone', 'tel'];
 const NAME_PATTERNS = ['name', 'full_name', 'fullname', 'your_name', 'yourname'];
@@ -1073,6 +1111,13 @@ export function CustomFieldsStage({
     // (e.g. the "actively pursuing" list hides endorsements you've already marked
     // as received), so the two lists never overlap.
     let effectiveField = field;
+
+    // Elections-from-DOB: replace this field's options with the primaries and
+    // general elections the respondent was 18+ for (based on date_of_birth).
+    if ((field as ExtendedFieldConfig & { optionsFromElections?: boolean }).optionsFromElections) {
+      effectiveField = { ...effectiveField, options: eligibleElectionOptions(formData.date_of_birth) };
+    }
+
     const exclFrom = (field as ExtendedFieldConfig & { excludeSelectedFrom?: string }).excludeSelectedFrom;
     if (exclFrom && Array.isArray(field.options)) {
       const chosen = formData[exclFrom];
