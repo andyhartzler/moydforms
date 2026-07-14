@@ -353,101 +353,26 @@ export async function POST(request: NextRequest) {
         .eq('id', submission_id);
     }
 
-    // ── Fire n8n webhook (comprehensive payload for all automations) ──
+    // ── Kick off the onboarding cascade (welcome email + Slack + follow-ups) ──
+    // Replaces the retired n8n webhook (n8n.moydchat.org/webhook/membership-
+    // form-submitted, which nothing listened on) with the Supabase
+    // `member-onboard` edge function. Fire-and-forget: the cascade must never
+    // block or fail the submission. The cascade itself is gated by
+    // ONBOARDING_MODE (defaults to dry_run — sends nothing — until it's flipped
+    // to `live`), so this is safe to call on every real signup right now.
     try {
-      await fetch('https://n8n.moydchat.org/webhook/membership-form-submitted', {
+      await fetch('https://faajpcarasilbfndzkmd.functions.supabase.co/member-onboard', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          // Core identity
-          member_id: memberId,
-          first_name: firstName,
-          last_name: lastName,
-          name: fullName,
-          email: email,
-          phone: phone,
-          date_of_birth: dob || null,
-
-          // Location
-          street_address: street,
-          city: city,
-          state: state,
-          zip_code: zip,
-          address: fullAddress,
-
-          // Identity
-          preferred_pronouns: arrayToString(form_data['3a456eeb']) || null,
-          registered_voter: registeredVoter,
-
-          // Social
-          instagram: form_data['596e8a46'] || null,
-          tiktok: form_data['6428fdf1'] || null,
-          x: form_data['417477cd'] || null,
-          bluesky: form_data['011b2200'] || null,
-
-          // Education & Employment
-          in_school: form_data['69d07773'] || null,
-          school_name: form_data['4a9c0213'] || null,
-          graduation_year: form_data['706b4e0b'] || null,
-          education_level: form_data['51cff5db'] || null,
-          employed: form_data['6fa4f34c'] || null,
-          industry: form_data['2585235b'] || null,
-
-          // Leadership & Committees
-          desire_to_lead: form_data['17d3907b'] || 'No',
-          committees: committeeChoices,
-          committee_1st_choice: form_data['60d8b355'] || null,
-          committee_2nd_choice: form_data['57b7ccec'] || null,
-          committee_3rd_choice: form_data['65eafa86'] || null,
-          leadership_hours: form_data['11648ea3'] || null,
-          goals_and_ambitions: form_data['54016ebb'] || null,
-          qualified_experience: form_data['67b2a620'] || null,
-          leadership_experience: form_data['13f36d81'] || null,
-
-          // Involvement
-          hours_per_week: arrayToString(form_data['226743e3']) || null,
-          passionate_issues: arrayToString(form_data['51e12843']) || null,
-          why_issues_matter: form_data['why_issues_matter'] || form_data['5d3b6dcf'] || null,
-          current_chapter_member: form_data['016ae30f'] || null,
-          chapter_name: form_data['3b88c54f'] || null,
-          current_involvement: form_data['3f84c11f'] || null,
-          political_experience: form_data['2f1adc8c'] || null,
-          areas_of_interest: arrayToString(form_data['7e3d564c']) || null,
-
-          // Demographics
-          gender_identity: arrayToString(form_data['60686161']) || null,
-          sexual_orientation: arrayToString(form_data['3c7a8a3d']) || null,
-          hispanic_latino: hispanicLatino,
-          race: arrayToString(form_data['4a6d1b7f']) || null,
-          disability: form_data['66a5f51e'] || null,
-          accommodations: form_data['331915b2'] || null,
-          community_type: form_data['32bfab74'] || null,
-          religion: arrayToString(form_data['442d6c18']) || null,
-          languages: form_data['40602e67'] || null,
-
-          // Final
-          why_join: form_data['280f5f06'] || null,
-          referral_source: arrayToString(form_data['6c6d967c']) || null,
-          additional_info: form_data['6cf26feb'] || null,
-          zodiac_sign: zodiacSign,
-
-          // Scheduling
-          meeting_days: form_data['1de09937'] || null,
-          meeting_times: form_data['1af21ffa'] || null,
-
-          // Meta
-          was_existing: wasExisting,
-          submission_id: submission_id,
-          submitted_at: new Date().toISOString(),
-
-          // Pass full form_data for any automation that needs raw access
-          form_data: form_data,
-        }),
-        signal: AbortSignal.timeout(5000),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-onboard-secret': process.env.ONBOARDING_TRIGGER_SECRET || '',
+        },
+        body: JSON.stringify({ member_id: memberId }),
+        signal: AbortSignal.timeout(8000),
       });
-    } catch (webhookErr) {
-      // Don't fail the submission if webhook fails
-      console.error('n8n webhook error (non-fatal):', webhookErr);
+    } catch (onboardErr) {
+      // Non-fatal: a member is already saved even if onboarding kickoff fails.
+      console.error('member-onboard trigger error (non-fatal):', onboardErr);
     }
 
     return NextResponse.json({
