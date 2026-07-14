@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Field ID to members table column mapping
@@ -123,7 +123,11 @@ function calculateZodiacSign(dateStr: string): string | null {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = createClient();
+  // Service-role client: `members` is RLS-locked with no anon policy, so the
+  // public form's anon key cannot write it (this was the source of the 500 that
+  // broke membership signups since the April RLS overhaul). This route runs
+  // server-side only, so the service key is never exposed to the browser.
+  const supabase = createServiceClient();
 
   let body;
   try {
@@ -293,11 +297,14 @@ export async function POST(request: NextRequest) {
     };
 
     // ── Upsert member ────────────────────────────────────────
+    // Match on the already-lowercased email. `.maybeSingle()` returns null
+    // (not an error) when there's no existing member, and `.eq` avoids ilike
+    // treating % / _ in an address as wildcards.
     const { data: existingMember } = await supabase
       .from('members')
       .select('id')
-      .ilike('email', email)
-      .single();
+      .eq('email', email)
+      .maybeSingle();
 
     let memberId: string;
     let wasExisting = false;

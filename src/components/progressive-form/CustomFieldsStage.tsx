@@ -182,9 +182,23 @@ const QUESTION_TYPE_MAP: Record<string, FieldType> = {
 };
 
 // Condition type from schema
+type ConditionOperator =
+  | 'equals'
+  | 'notEquals'
+  | 'contains'
+  | 'notContains'
+  | 'greaterThan'
+  | 'lessThan'
+  | 'greaterThanOrEqual'
+  | 'lessThanOrEqual';
+
 interface SimpleCondition {
   field: string;
   value: string;
+  /** Comparison operator; defaults to 'equals' when omitted. Lets a schema
+   *  express "show unless the answer is No" (notEquals) etc. Applies inside
+   *  and/or arrays too. */
+  operator?: ConditionOperator;
 }
 
 // Show the field once another field has any non-empty answer (e.g. reveal the
@@ -330,9 +344,11 @@ function normalizeSchemaToFields(schema: ExtendedSchema): ExtendedFieldConfig[] 
       // conditional uses showWhenConditionMet=true so we only implement
       // the forward case for now.
       if (f.conditionalFieldId && !translated.condition) {
+        const op = (f as { conditionalOperator?: ConditionOperator }).conditionalOperator;
         translated.condition = {
           field: f.conditionalFieldId,
           value: String(f.conditionalValue ?? ''),
+          ...(op ? { operator: op } : {}),
         };
       }
       return translated;
@@ -447,20 +463,52 @@ function getIdentityFieldType(field: ExtendedFieldConfig): IdentityFieldType {
 }
 
 // Evaluate a condition against the current form data
+// Evaluate a single field=value leaf, honoring an optional operator (default
+// 'equals'). For a multiselect controlling field (array value) the base test is
+// membership ("value is among the selected"), and notEquals/notContains invert
+// it — so an "Other, please name" text field shows when "Other" is checked, and
+// a field gated notEquals hides once the excluded option is chosen.
+function matchesLeaf(c: SimpleCondition, formData: Record<string, unknown>): boolean {
+  const fv = formData[c.field];
+  const op = c.operator ?? 'equals';
+
+  if (Array.isArray(fv)) {
+    const has = fv.includes(c.value);
+    return op === 'notEquals' || op === 'notContains' ? !has : has;
+  }
+
+  switch (op) {
+    case 'notEquals':
+      return fv !== c.value;
+    case 'contains':
+      return String(fv ?? '').includes(c.value);
+    case 'notContains':
+      return !String(fv ?? '').includes(c.value);
+    case 'greaterThan':
+      return Number(fv) > Number(c.value);
+    case 'lessThan':
+      return Number(fv) < Number(c.value);
+    case 'greaterThanOrEqual':
+      return Number(fv) >= Number(c.value);
+    case 'lessThanOrEqual':
+      return Number(fv) <= Number(c.value);
+    case 'equals':
+    default:
+      return fv === c.value;
+  }
+}
+
 function evaluateCondition(condition: Condition | undefined, formData: Record<string, unknown>): boolean {
   if (!condition) return true; // No condition means always show
 
-  // Handle AND condition
+  // Handle AND condition (every leaf must match, operators honored)
   if ('and' in condition && Array.isArray(condition.and)) {
-    return condition.and.every((c) => formData[c.field] === c.value);
+    return condition.and.every((c) => matchesLeaf(c, formData));
   }
 
-  // Handle OR condition (any match shows the field)
+  // Handle OR condition (any leaf match shows the field, operators honored)
   if ('or' in condition && Array.isArray(condition.or)) {
-    return condition.or.some((c) => {
-      const fv = formData[c.field];
-      return Array.isArray(fv) ? fv.includes(c.value) : fv === c.value;
-    });
+    return condition.or.some((c) => matchesLeaf(c, formData));
   }
 
   // Handle "reveal once another field is non-empty"
@@ -470,13 +518,9 @@ function evaluateCondition(condition: Condition | undefined, formData: Record<st
     return v !== undefined && v !== null && String(v).trim() !== '';
   }
 
-  // Handle simple condition. For a multiselect controlling field (array value),
-  // treat the condition as "value is among the selected" so e.g. an "Other,
-  // please name" text field shows when "Other" is one of the checked options.
+  // Handle simple condition (equals by default; operator honored).
   if ('field' in condition && 'value' in condition) {
-    const fv = formData[condition.field];
-    if (Array.isArray(fv)) return fv.includes(condition.value);
-    return fv === condition.value;
+    return matchesLeaf(condition, formData);
   }
 
   return true; // Unknown condition format, show by default
