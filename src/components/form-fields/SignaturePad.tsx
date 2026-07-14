@@ -33,6 +33,8 @@ export default function SignaturePad({
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const padRef = useRef<SignaturePadLib | null>(null);
+  const saveRef = useRef<() => void>(() => {});
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [hasInk, setHasInk] = useState<boolean>(!!value);
   const [saved, setSaved] = useState<boolean>(!!value);
   const [uploading, setUploading] = useState(false);
@@ -75,16 +77,24 @@ export default function SignaturePad({
     pad.addEventListener('endStroke', () => {
       setHasInk(!pad.isEmpty());
       setSaved(false);
+      // Auto-commit shortly after the pen lifts so a candidate who draws their
+      // signature and hits Submit isn't told "signature required" with their
+      // signature visibly on the canvas (the #1 rage-quit point). The Save
+      // button remains as an explicit affordance.
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+      autoSaveTimer.current = setTimeout(() => { saveRef.current(); }, 650);
     });
     return () => {
       window.removeEventListener('resize', onResize);
       window.removeEventListener('orientationchange', onResize);
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
       pad.off();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const clear = () => {
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     padRef.current?.clear();
     setHasInk(false);
     setSaved(false);
@@ -114,6 +124,9 @@ export default function SignaturePad({
     setSaved(true);
     onBlur?.();
   };
+  // Keep the latest save closure reachable from the (mount-only) endStroke
+  // auto-commit handler.
+  saveRef.current = save;
 
   return (
     <div className="mb-6">

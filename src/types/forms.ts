@@ -138,6 +138,10 @@ export interface FormFieldConfig {
   derivedFromField?: string;
   // checkbox_group: cap how many options can be selected (e.g. "up to 3").
   maxSelections?: number;
+  // checkbox_group: option values that are mutually exclusive with everything
+  // else (e.g. "None of these", "Prefer not to say") — checking one clears the
+  // rest, and checking any other clears these.
+  exclusiveValues?: string[];
 
   // Date/Time properties
   firstDate?: string;

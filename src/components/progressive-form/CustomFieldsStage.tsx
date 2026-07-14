@@ -295,6 +295,21 @@ function normalizeSchemaToFields(schema: ExtendedSchema): ExtendedFieldConfig[] 
         prefillSource: f.prefillSource ?? f.prefill_source,
         prefillFormat: f.prefillFormat ?? f.prefill_format,
         fallbackQuestionType: f.fallbackQuestionType ?? f.fallback_question_type,
+        // The fields[] schema shape stores validation snake_case
+        // ({min_length, max_length}) but validateField + the TextArea counter
+        // read validation.minLength/maxLength (camelCase). Without this promote,
+        // every min/max-length rule on the form is silently dead: no character
+        // counter, no "aim for N characters" guidance, and one-word essays pass.
+        validation: (() => {
+          const v = f.validation as (Record<string, unknown> | undefined);
+          if (!v) return f.validation;
+          return {
+            ...v,
+            ...(v.min_length != null && v.minLength == null ? { minLength: v.min_length } : {}),
+            ...(v.max_length != null && v.maxLength == null ? { maxLength: v.max_length } : {}),
+          } as typeof f.validation;
+        })(),
+        maxLength: f.maxLength ?? (f.validation as { max_length?: number } | undefined)?.max_length,
       };
       // The FormBuilder writes conditional rules as flat properties on the
       // field itself — `conditionalFieldId` / `conditionalValue` /

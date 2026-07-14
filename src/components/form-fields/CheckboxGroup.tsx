@@ -18,16 +18,25 @@ export default function CheckboxGroup({ field, value, onChange, error, onBlur, o
   const options = field.options || [];
   const selectedValues: string[] = value || [];
   const maxSelections = field.maxSelections;
+  const exclusive = field.exclusiveValues ?? [];
   const atLimit = typeof maxSelections === 'number' && selectedValues.length >= maxSelections;
 
   const handleChange = (optionValue: string, checked: boolean) => {
-    // Enforce the selection cap: block adding a new option once the limit is
-    // hit (unchecking is always allowed).
-    if (checked && atLimit && !selectedValues.includes(optionValue)) return;
-    const newValues = checked
-      ? [...selectedValues, optionValue]
-      : selectedValues.filter((v: string) => v !== optionValue);
-    onChange(newValues);
+    if (checked) {
+      // Mutually-exclusive options ("None of these", "Prefer not to say"):
+      // checking one clears everything else; checking a normal option clears
+      // any exclusive ones.
+      if (exclusive.includes(optionValue)) {
+        onChange([optionValue]);
+        return;
+      }
+      const base = selectedValues.filter((v: string) => !exclusive.includes(v));
+      // Enforce the selection cap (unchecking is always allowed).
+      if (typeof maxSelections === 'number' && base.length >= maxSelections) return;
+      onChange([...base, optionValue]);
+      return;
+    }
+    onChange(selectedValues.filter((v: string) => v !== optionValue));
   };
 
   return (
