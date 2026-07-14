@@ -80,25 +80,30 @@ export default function ValueSlider({ field, value, onChange, error, onBlur, onF
 
       <div className="pt-9">
         <div className="relative">
-          {/* Live value bubble tracking the thumb */}
+          {/* Live value bubble tracking the thumb. It hugs the track edges
+              (translateX scales from 0 at the far left to -100% at the far
+              right) so it never clips off either side; the pointer stays over
+              the thumb. */}
           <div
-            className="pointer-events-none absolute -top-9 z-10 -translate-x-1/2 transition-[left] duration-75"
-            style={{ left: `calc(${pct}% + ${(50 - pct) * 0.02}rem)` }}
+            className="pointer-events-none absolute -top-9 z-10 transition-[left,transform] duration-75"
+            style={{ left: `${pct}%`, transform: `translateX(-${pct}%)` }}
             aria-hidden
           >
-            <div
-              className={
-                'rounded-lg px-2.5 py-1 text-sm font-bold text-white shadow-md transition-transform ' +
-                (dragging ? 'scale-110' : 'scale-100')
-              }
-              style={{ background: 'linear-gradient(135deg, #263351 0%, #33507f 100%)' }}
-            >
-              {fmt(current)}
+            <div className="relative">
+              <div
+                className={
+                  'rounded-lg px-2.5 py-1 text-sm font-bold text-white shadow-md transition-transform ' +
+                  (dragging ? 'scale-110' : 'scale-100')
+                }
+                style={{ background: 'linear-gradient(135deg, #263351 0%, #33507f 100%)' }}
+              >
+                {fmt(current)}
+              </div>
+              <div
+                className="absolute -bottom-1 h-2 w-2"
+                style={{ left: `${pct}%`, transform: 'translateX(-50%) rotate(45deg)', background: '#33507f' }}
+              />
             </div>
-            <div
-              className="mx-auto h-2 w-2 -mt-1 rotate-45"
-              style={{ background: '#33507f' }}
-            />
           </div>
 
           <input
