@@ -1511,6 +1511,71 @@ export function CustomFieldsStage({
   // inside the card on desktop, and in a body-portaled fixed bar on mobile. The
   // submit button carries `form={formDomId}` so it still submits the form even
   // when it lives outside the <form> (in the portal).
+  // The Young Dem / Partner track banner. Rendered inline right after the date
+  // of birth on the DOB page (so it's noticed on mobile the moment it appears),
+  // and at the top under the progress bar on every later page.
+  const renderTrackBanner = () => {
+    const known = formData.dob_is_young_dem === 'true' || formData.dob_is_young_dem === 'false';
+    if (!showTrackBanner || !known) return null;
+    return (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={formData.dob_is_young_dem === 'true' ? 'yd' : 'partner'}
+          initial={{ opacity: 0, y: -8, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -8, scale: 0.98 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+          className={
+            'mb-6 relative overflow-hidden rounded-2xl p-5 border-2 shadow-lg ' +
+            (formData.dob_is_young_dem === 'true'
+              ? 'bg-gradient-to-br from-primary-600 to-primary-800 border-gold-400/60'
+              : 'bg-gradient-to-br from-gold-500 to-gold-700 border-primary-600/60')
+          }
+        >
+          <motion.div
+            aria-hidden
+            className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-30"
+            style={{ background: 'radial-gradient(circle, #ffffff 0%, transparent 70%)' }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
+          />
+          <div className="relative flex items-center gap-4">
+            <motion.div
+              initial={{ rotate: -15, scale: 0 }}
+              animate={{ rotate: 0, scale: 1 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.15 }}
+              className="flex-shrink-0 w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-2xl"
+            >
+              {formData.dob_is_young_dem === 'true' ? '⚡' : '🤝'}
+            </motion.div>
+            <div className="flex-1 min-w-0">
+              <div
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70 mb-0.5"
+                style={{ fontFamily: 'Montserrat, sans-serif' }}
+              >
+                You&apos;re on the
+              </div>
+              <div
+                className="text-white text-lg sm:text-xl font-extrabold leading-tight"
+                style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-0.02em' }}
+              >
+                {formData.dob_is_young_dem === 'true' ? 'Young Democrat track' : 'Partner Candidate track'}
+              </div>
+              <div className="text-white/80 text-sm mt-0.5">
+                {formData.dob_is_young_dem === 'true'
+                  ? "As someone under the age of 36, you qualify as a Young Democrat, so we'll ask you relevant questions."
+                  : "As someone over the age of 35, you qualify as a partner candidate, so we'll ask a few questions about your alliance with MOYD."}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+    );
+  };
+
+  const dobOnCurrentPage = currentPageFields.some((f) => f.id === 'date_of_birth');
+
   const navButtons = (
     <>
       <div className="flex gap-3">
@@ -1717,74 +1782,10 @@ export function CustomFieldsStage({
         </motion.div>
       )}
 
-      {/* Track reveal banner — appears once DOB is answered and animates the
-          Young Dem vs Partner Candidate badge in. Only rendered when the
-          caller opts in (showTrackBanner) so we don't touch unrelated forms. */}
-      {showTrackBanner &&
-        (formData.dob_is_young_dem === 'true' ||
-          formData.dob_is_young_dem === 'false') && (
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={formData.dob_is_young_dem === 'true' ? 'yd' : 'partner'}
-            initial={{ opacity: 0, y: -8, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-            className={
-              'mb-6 relative overflow-hidden rounded-2xl p-5 border-2 shadow-lg ' +
-              (formData.dob_is_young_dem === 'true'
-                ? 'bg-gradient-to-br from-primary-600 to-primary-800 border-gold-400/60'
-                : 'bg-gradient-to-br from-gold-500 to-gold-700 border-primary-600/60')
-            }
-          >
-            {/* Animated sparkle */}
-            <motion.div
-              aria-hidden
-              className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-30"
-              style={{ background: 'radial-gradient(circle, #ffffff 0%, transparent 70%)' }}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
-            />
-            <div className="relative flex items-center gap-4">
-              <motion.div
-                initial={{ rotate: -15, scale: 0 }}
-                animate={{ rotate: 0, scale: 1 }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 260,
-                  damping: 18,
-                  delay: 0.15,
-                }}
-                className="flex-shrink-0 w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-2xl"
-              >
-                {formData.dob_is_young_dem === 'true' ? '⚡' : '🤝'}
-              </motion.div>
-              <div className="flex-1 min-w-0">
-                <div
-                  className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70 mb-0.5"
-                  style={{ fontFamily: 'Montserrat, sans-serif' }}
-                >
-                  You're on the
-                </div>
-                <div
-                  className="text-white text-lg sm:text-xl font-extrabold leading-tight"
-                  style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-0.02em' }}
-                >
-                  {formData.dob_is_young_dem === 'true'
-                    ? 'Young Democrat track'
-                    : 'Partner Candidate track'}
-                </div>
-                <div className="text-white/80 text-sm mt-0.5">
-                  {formData.dob_is_young_dem === 'true'
-                    ? "As someone under the age of 36, you qualify as a Young Democrat, so we'll ask you relevant questions."
-                    : "As someone over the age of 35, you qualify as a partner candidate, so we'll ask a few questions about your alliance with MOYD."}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      )}
+      {/* Track banner at the top on every page EXCEPT the DOB page (where it
+          renders inline right under the date of birth instead, so mobile users
+          actually see it appear). */}
+      {!dobOnCurrentPage && renderTrackBanner()}
 
       {/* Custom fields with page transitions */}
       {hasVisibleFields && (
@@ -1810,6 +1811,9 @@ export function CustomFieldsStage({
                 {currentPageFields.map((field) => (
                   <motion.div key={field.id} variants={fieldEntrance}>
                     {renderField(field)}
+                    {/* On the DOB page, drop the track banner right under the
+                        date of birth so it's noticed the moment it appears. */}
+                    {field.id === 'date_of_birth' && renderTrackBanner()}
                   </motion.div>
                 ))}
               </motion.div>
