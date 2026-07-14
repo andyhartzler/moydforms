@@ -80,11 +80,15 @@ export default function RadioGroup({ field, value, onChange, error, onBlur, onFo
                   </AnimatePresence>
                 </motion.div>
               </div>
-              <span className={`
-                ml-3 text-sm font-medium
-                ${isSelected ? 'text-primary-900' : 'text-gray-700'}
-              `}>
-                {option.label}
+              <span className="ml-3 flex-1">
+                <span className={`block text-sm font-medium ${isSelected ? 'text-primary-900' : 'text-gray-700'}`}>
+                  {option.label}
+                </span>
+                {(option as { description?: string }).description && (
+                  <span className={`mt-0.5 block text-xs leading-snug ${isSelected ? 'text-primary-700' : 'text-gray-500'}`}>
+                    {(option as { description?: string }).description}
+                  </span>
+                )}
               </span>
             </motion.label>
           );

@@ -1382,6 +1382,93 @@ export function CustomFieldsStage({
       : `${errorCount} answers need attention before you can continue.`
     : '';
 
+  // Format a field's answer for the pre-submit review summary.
+  const formatReviewValue = (field: ExtendedFieldConfig, value: unknown): string => {
+    if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) return '';
+    const t = normalizeFieldType(field.type);
+    if (t === 'value_slider') {
+      const n = Number(value);
+      if (field.sliderFormat === 'percent') return `${Math.round(n)}%`;
+      if (field.sliderFormat === 'currency') {
+        const atMax = field.openEnded && field.maxValue != null && n >= field.maxValue;
+        return `$${Math.round(n).toLocaleString('en-US')}${atMax ? '+' : ''}`;
+      }
+      return `${Math.round(n).toLocaleString('en-US')}${field.sliderUnit ? ' ' + field.sliderUnit : ''}`;
+    }
+    if (t === 'signature_pad') return 'Signature provided';
+    if (t === 'file_picker' || t === 'image_picker') return 'File uploaded';
+    if (t === 'reference_block') {
+      const n = [1, 2, 3].filter((i) => formData[`ref_${i}_name`]).length;
+      return n ? `${n} reference${n > 1 ? 's' : ''}` : '';
+    }
+    const opts = field.options as Array<string | { value: string; label: string }> | undefined;
+    const labelFor = (v: unknown) => {
+      const o = opts?.find((o) => (typeof o === 'string' ? o : o.value) === v);
+      return o ? (typeof o === 'string' ? o : o.label) : String(v);
+    };
+    if (Array.isArray(value)) return value.map(labelFor).join(', ');
+    if (opts) return labelFor(value);
+    const s = String(value);
+    return s.length > 140 ? s.slice(0, 140) + '…' : s;
+  };
+
+  const jumpToField = (field: ExtendedFieldConfig) => {
+    const pageIdx = field.pageNumber != null ? pageNumbers.indexOf(field.pageNumber) : -1;
+    if (pageIdx >= 0) {
+      setPageDirection(-1);
+      setCurrentPage(pageIdx + 1);
+      scrollToPageTop();
+    }
+  };
+
+  // Pre-submit "review your answers" summary, shown on the final page above the
+  // certification + signature so the candidate can see everything they're
+  // attesting to (and fix it) without paging back through 13 screens.
+  const renderReviewSummary = () => {
+    const groups: Array<{ title: string; rows: Array<{ field: ExtendedFieldConfig; label: string; val: string }> }> = [];
+    let cur: (typeof groups)[number] | null = null;
+    customFields.forEach((f) => {
+      if (f.isSectionHeader) { cur = { title: f.label || '', rows: [] }; groups.push(cur); return; }
+      if (!cur) { cur = { title: 'Your answers', rows: [] }; groups.push(cur); }
+      if (!shouldShowField(f)) return;
+      if (['certify', 'signature', 'anything_else', 'headshot'].includes(f.id)) return;
+      const val = formatReviewValue(f, formData[f.id]);
+      if (!val) return;
+      cur.rows.push({ field: f, label: f.label || f.id, val });
+    });
+    const filled = groups.filter((g) => g.rows.length);
+    return (
+      <div className="mb-6 rounded-2xl border-2 border-primary-100 bg-primary-50/40 p-5 sm:p-6">
+        <h3 className="font-display text-xl font-semibold text-moyd-unity mb-1">Review your answers</h3>
+        <p className="text-sm text-gray-600 mb-4">Take a quick look before you certify and sign. Tap Edit to fix anything.</p>
+        <div className="space-y-5">
+          {filled.map((g, gi) => (
+            <div key={gi}>
+              <div className="text-xs font-bold uppercase tracking-wide text-primary-700 mb-2">{g.title}</div>
+              <div className="space-y-1.5">
+                {g.rows.map((r, ri) => (
+                  <div key={ri} className="flex items-start justify-between gap-3 border-b border-primary-100/70 pb-1.5">
+                    <div className="flex-1 text-sm">
+                      <span className="text-gray-600">{r.label}</span>
+                      <div className="font-medium text-gray-900">{r.val}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => jumpToField(r.field)}
+                      className="mt-0.5 shrink-0 text-xs font-semibold text-primary-600 hover:text-primary-800"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   // The action row (Prev + Next/Submit + error hint). Rendered twice: in-flow
   // inside the card on desktop, and in a body-portaled fixed bar on mobile. The
   // submit button carries `form={formDomId}` so it still submits the form even
@@ -1681,6 +1768,7 @@ export function CustomFieldsStage({
                 animate="show"
                 className="space-y-1"
               >
+                {isLastPage && renderReviewSummary()}
                 {currentPageFields.map((field) => (
                   <motion.div key={field.id} variants={fieldEntrance}>
                     {renderField(field)}
