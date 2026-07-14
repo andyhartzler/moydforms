@@ -96,6 +96,15 @@ const MO_ELECTIONS: ElectionOption[] = [
   { value: '2016_general', label: '2016 General Election (November)', date: '2016-11-08' },
   { value: '2016_aug', label: '2016 August Primary', date: '2016-08-02' },
   { value: '2016_pres', label: '2016 Presidential Primary (March)', date: '2016-03-15' },
+  { value: '2014_general', label: '2014 General Election (November)', date: '2014-11-04' },
+  { value: '2014_aug', label: '2014 August Primary', date: '2014-08-05' },
+  { value: '2012_general', label: '2012 General Election (November)', date: '2012-11-06' },
+  { value: '2012_aug', label: '2012 August Primary', date: '2012-08-07' },
+  { value: '2010_general', label: '2010 General Election (November)', date: '2010-11-02' },
+  { value: '2010_aug', label: '2010 August Primary', date: '2010-08-03' },
+  { value: '2008_general', label: '2008 General Election (November)', date: '2008-11-04' },
+  { value: '2008_aug', label: '2008 August Primary', date: '2008-08-05' },
+  { value: '2008_pres', label: '2008 Presidential Primary (February)', date: '2008-02-05' },
 ];
 
 // Build the election checklist for a given date of birth: only elections the
