@@ -412,6 +412,13 @@ function getIdentityFieldType(field: ExtendedFieldConfig): IdentityFieldType {
   // Skip section headers
   if (field.isSectionHeader) return null;
 
+  // A field gated by a condition is a real branch question, never an identity
+  // basic (name/email/phone/zip are always asked up front). Without this, the
+  // membership "Zip Code" in the leadership branch matched ZIP_PATTERNS and got
+  // hoisted into the identity card, so it never rendered in the branch and was
+  // submitted even for people who answered "No" to leadership.
+  if (field.condition) return null;
+
   const idLower = field.id.toLowerCase().replace(/[-\s]/g, '_');
   const labelLower = field.label.toLowerCase().replace(/[-\s]/g, '_');
   const fieldType = field.type.toLowerCase();
