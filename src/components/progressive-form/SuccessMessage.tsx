@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { CheckCircle, Link2, Copy, Check } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SubmissionResult } from '@/hooks/useFormSession';
 import { AutoFireworks } from '../motion/Confetti';
 import { successVariants, fadeInUp } from '@/lib/motion';
@@ -21,6 +21,12 @@ export function SuccessMessage({
   submissionResult,
 }: SuccessMessageProps) {
   const [copied, setCopied] = useState(false);
+
+  // After submit the page was left scrolled down at the submit button, so the
+  // thank-you (and its fireworks) went off below the fold. Glide back up to it.
+  useEffect(() => {
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  }, []);
 
   const displayMessage = submissionResult?.message || message;
   const membershipFormUrl = submissionResult?.membershipFormUrl;
