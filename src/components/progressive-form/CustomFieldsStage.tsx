@@ -647,6 +647,28 @@ export function CustomFieldsStage({
     handleFieldChange('home_county', county);
   }, [formData.home_zip, formData.home_county, hasZipCountyPair]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Keep excludeSelectedFrom multiselects honest: if an option was picked in a
+  // field, and it's now also chosen in the field that excludes it, prune it from
+  // the excluding field's stored value (not just its rendered options) so a
+  // stale, un-un-checkable selection can't submit a contradiction (e.g. an org
+  // marked both received AND pursuing). "Other" is shared, so it's kept.
+  useEffect(() => {
+    allFields.forEach((f) => {
+      const exclFrom = (f as ExtendedFieldConfig & { excludeSelectedFrom?: string }).excludeSelectedFrom;
+      if (!exclFrom) return;
+      const val = formData[f.id];
+      const chosen = formData[exclFrom];
+      if (!Array.isArray(val) || !Array.isArray(chosen)) return;
+      const chosenSet = new Set((chosen as unknown[]).map(String));
+      const pruned = (val as unknown[]).filter((v) => {
+        const s = String(v);
+        return s.toLowerCase() === 'other' || s.toLowerCase().startsWith('other') || !chosenSet.has(s);
+      });
+      if (pruned.length !== val.length) handleFieldChange(f.id, pruned);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData]);
+
   // Separate identity fields from custom fields
   const { identityFieldMappings, customFields } = useMemo(() => {
     const mappings: Array<{ field: ExtendedFieldConfig; identityKey: IdentityFieldType }> = [];
@@ -808,14 +830,20 @@ export function CustomFieldsStage({
       }
     }
 
+    // Length checks only apply to free-text inputs. A radio/dropdown value is
+    // also a string (e.g. "supply"), so without this type gate a stray
+    // min_length on a non-text field would fail every choice and brick the page.
+    const lengthType = normalizeFieldType(field.type);
+    const isTextInput = ['text', 'textarea', 'email', 'url', 'phone', 'tel'].includes(lengthType);
+
     // Min length
-    if (validation.minLength != null && typeof value === 'string' && value.length < validation.minLength) {
+    if (isTextInput && validation.minLength != null && typeof value === 'string' && value.length < validation.minLength) {
       return `Minimum length is ${validation.minLength} characters`;
     }
 
     // Max length
     const maxLength = validation.maxLength ?? field.maxLength;
-    if (maxLength != null && typeof value === 'string' && value.length > maxLength) {
+    if (isTextInput && maxLength != null && typeof value === 'string' && value.length > maxLength) {
       return `Maximum length is ${maxLength} characters`;
     }
 
@@ -942,6 +970,16 @@ export function CustomFieldsStage({
       if (identityKey && identityValues[identityKey] !== undefined) {
         finalData[field.id] = identityValues[identityKey];
       }
+    });
+
+    // Drop answers to fields that are no longer visible: wrong-track answers
+    // (partner questions after the DOB was corrected to Young Dem), or an
+    // orphaned "Other"/"explain" value left behind after its controlling answer
+    // changed. Otherwise the committee sees contradictory data. Reference block
+    // sub-keys (ref_1_*) aren't schema fields, so they're untouched.
+    customFields.forEach((field) => {
+      if (field.isSectionHeader) return;
+      if (!shouldShowField(field)) delete finalData[field.id];
     });
 
     // Extract file upload info from form data for Edge Function processing
