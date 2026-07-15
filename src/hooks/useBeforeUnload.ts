@@ -28,18 +28,17 @@ export function useBeforeUnload({ enabled, onUnload, message }: UseBeforeUnloadO
       }
     };
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        onUnloadRef.current();
-      }
-    };
-
+    // NOTE: we deliberately do NOT listen for `visibilitychange`/`hidden`.
+    // On mobile that event fires on every app-switch, lock, notification,
+    // and keyboard/contact-picker popup, so treating it as abandonment marks
+    // actively-filling sessions abandoned mid-form (the 2026-07 premature-
+    // submit incident). Abandonment is only inferred from a true page unload
+    // (below); durability of in-progress answers is handled by the
+    // form_drafts autosave, not by an abandon beacon.
     window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [enabled, message]);
 }
