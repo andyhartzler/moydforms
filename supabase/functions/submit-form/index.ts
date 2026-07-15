@@ -346,20 +346,30 @@ function hasRealAnswers(data) {
 /**
  * Find or create a form submission for this session
  */ async function findOrCreateSubmission(formId, subscriberId, memberId, phoneE164, sessionToken, ipAddress, userAgent) {
-  // Reclaim any non-terminal row for this phone+form so a returning respondent
-  // continues the SAME submission instead of forking a new one. We consider
-  // in_progress rows AND abandoned rows that still hold real answers (an
-  // abandoned-but-populated row means a prior false-abandon; resume it and
-  // flip it back to in_progress rather than stranding those answers).
+  // Reclaim any non-final row for this phone+form so a returning respondent
+  // continues the SAME submission instead of forking a new one. We consider:
+  //  - in_progress rows;
+  //  - abandoned rows that still hold real answers (a prior false-abandon);
+  //  - 'submitted' rows that are NOT actually finished (missing the last-page
+  //    certify/signature) — those were frozen mid-fill by the 2026-07 incident
+  //    and their owner must be able to come back and truly submit. A genuinely
+  //    finished submission (certify + signature present) is never reclaimed.
   const { data: candidates } = await supabase.from('form_submissions').select('id, status, data').eq('form_id', formId).eq('submitter_phone', phoneE164).in('status', [
     'in_progress',
-    'abandoned'
+    'abandoned',
+    'submitted'
   ]).order('created_at', {
     ascending: false
   });
+  const isTrulyFinished = (d)=>!!(d && typeof d === 'object' && d['certify'] && d['signature']);
   let existing = null;
   if (candidates && candidates.length > 0) {
-    existing = candidates.find((c)=>c.status === 'in_progress') || candidates.find((c)=>c.status === 'abandoned' && hasRealAnswers(c.data)) || null;
+    // A genuinely finished submission for this phone means: do NOT reclaim
+    // anything — the person is done (handleSubmit stays idempotent for them).
+    const finished = candidates.find((c)=>c.status === 'submitted' && isTrulyFinished(c.data));
+    if (!finished) {
+      existing = candidates.find((c)=>c.status === 'in_progress') || candidates.find((c)=>c.status === 'abandoned' && hasRealAnswers(c.data)) || candidates.find((c)=>c.status === 'submitted' && !isTrulyFinished(c.data)) || null;
+    }
   }
   if (existing) {
     // Resume it under the new session; restore in_progress if it was abandoned.
