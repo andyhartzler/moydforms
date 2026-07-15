@@ -836,8 +836,10 @@ function hasRealAnswers(data) {
   }
   const phoneE164 = formatPhoneE164(phone);
   const normalizedPhone = normalizePhone(phone);
-  // Search without creating
-  const { data: subscriber } = await supabase.from('subscribers').select('*').or(`phone.eq.${phone},phone.eq.${phoneE164},phone_e164.eq.${phoneE164}`).not('email', 'ilike', '%@pending.moyd.org') // Exclude placeholders
+  // Search without creating. Only digit-derived values (normalizedPhone,
+  // phoneE164) are interpolated into the PostgREST filter; the raw request
+  // string is never used here, so it cannot inject filter syntax.
+  const { data: subscriber } = await supabase.from('subscribers').select('*').or(`phone.eq.${normalizedPhone},phone.eq.${phoneE164},phone_e164.eq.${phoneE164}`).not('email', 'ilike', '%@pending.moyd.org') // Exclude placeholders
   .limit(1).maybeSingle();
   if (subscriber) {
     return {
@@ -857,8 +859,8 @@ function hasRealAnswers(data) {
       source: 'subscriber'
     };
   }
-  // Check other tables
-  const { data: member } = await supabase.from('members').select('*').or(`phone.eq.${phone},phone.eq.${phoneE164},phone.eq.${normalizedPhone}`).limit(1).maybeSingle();
+  // Check other tables (digit-derived filter values only; no raw request string)
+  const { data: member } = await supabase.from('members').select('*').or(`phone.eq.${phoneE164},phone.eq.${normalizedPhone}`).limit(1).maybeSingle();
   if (member) {
     return {
       found: true,
