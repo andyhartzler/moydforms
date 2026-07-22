@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { dualWriteToDriveFolder } from '@/lib/googleDrive';
+import * as Sentry from '@sentry/nextjs';
 
 // Supabase storage allows up to 5GB per object on paid plans; we cap at
 // 250MB to align with the chartering form's max_size_mb setting.
@@ -86,6 +87,20 @@ export async function POST(
 
   if (uploadError) {
     console.error('Upload error:', uploadError);
+    // The 2026-07-22 headshot outage (missing storage RLS policy on
+    // form-uploads) failed exactly here for two days with no visibility.
+    Sentry.captureException(
+      new Error(`form upload to storage failed: ${uploadError.message}`),
+      {
+        extra: {
+          slug,
+          fieldId,
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+        },
+      }
+    );
     return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
   }
 
@@ -135,6 +150,10 @@ export async function POST(
 
   if (recordError) {
     console.error('File record error:', recordError);
+    Sentry.captureException(
+      new Error(`form_files record failed: ${recordError.message}`),
+      { extra: { slug, fieldId, fileName: file.name } }
+    );
     // Still return success since file is uploaded, just not recorded
   }
 
